@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "strict": true,
     "jsxImportSource": "preact",
     "jsx": "react-jsx",
     "baseUrl": "./",

@@ -1,0 +1,91 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "parserOptions": {
+        "project": "tsconfig.json",
+        "ecmaVersion": 2020,
+        "sourceType": "module"
+      }
+    }
+  ],
+  "settings": {
+    "ecmascript": 7
+  },
+  "env": {
+    "browser": true
+  },
+  "plugins": ["@typescript-eslint", "eslint-plugin-jsdoc", "react"],
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 2021,
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "rules": {
+    "quotes": ["warn", "double"],
+    "comma-style": ["warn", "last"],
+    "brace-style": ["warn", "1tbs"],
+    "func-call-spacing": ["warn", "never"],
+    "comma-dangle": ["warn", "always-multiline"],
+    "comma-spacing": [
+      "warn",
+      {
+        "before": false,
+        "after": true
+      }
+    ],
+    "spaced-comment": [
+      "warn",
+      "always",
+      {
+        "markers": ["/"]
+      }
+    ],
+    "semi-spacing": [
+      "warn",
+      {
+        "before": false,
+        "after": true
+      }
+    ],
+    "multiline-comment-style": ["warn", "separate-lines"],
+    "no-label-var": "warn",
+    "no-useless-rename": "warn",
+    "new-cap": "warn",
+    "camelcase": [
+      "warn",
+      {
+        "ignoreImports": true
+      }
+    ],
+    "no-unused-vars": "off",
+    "react/jsx-uses-vars": "warn",
+    "object-property-newline": "off",
+    "eqeqeq": ["error", "always"],
+    "semi": ["error", "always"],
+    "no-var": "error",
+    "strict": ["error", "global"],
+    "no-confusing-arrow": "error",
+    "no-shadow": [
+      "error",
+      {
+        "builtinGlobals": true,
+        "hoist": "all",
+        "allow": []
+      }
+    ],
+    "@typescript-eslint/strict-boolean-expressions": "error",
+    "@typescript-eslint/no-empty-function": "off",
+    "jsdoc/require-param-type": "off",
+    "jsdoc/require-returns-type": "off"
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:jsdoc/recommended"
+  ]
+}

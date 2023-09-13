@@ -2,19 +2,22 @@
   "name": "infiniscouter",
   "module": "src/index.tsx",
   "type": "module",
-  "devDependencies": {
-    "bun-types": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
   "dependencies": {
     "preact": "^10.17.1",
     "preact-iso": "^2.3.1",
     "preact-render-to-string": "^6.2.1"
   },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "esbuild": "^0.19.2",
+    "eslint": "^8.49.0",
+    "eslint-plugin-jsdoc": "^46.6.0",
+    "eslint-plugin-react": "^7.33.2",
+    "typescript": "^5.2.2"
+  },
   "scripts": {
-    "dev": "bun build --watch src/index.tsx --outdir=dist",
-    "build": "bun build --minify src/index.tsx --outdir=dist"
+    "dev": "esbuild --bundle --watch --sourcemap --outdir=dist --format=esm src/index.tsx",
+    "build": "esbuild --bundle --sourcemap --splitting --minify --target=es2017 --outdir=dist --format=esm source/main.tsx",
+    "lint": "tsc --noEmit --pretty && eslint src/*.tsx"
   }
 }
