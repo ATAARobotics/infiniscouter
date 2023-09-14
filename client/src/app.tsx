@@ -1,21 +1,8 @@
 import { render } from "preact";
 import { LocationProvider, Router, Route } from "preact-iso";
-
-/**
- *	Component for the "404 not found" page.
- * @returns The component
- */
-function NotFound() {
-	return (<p>:(</p>);
-}
-
-/**
- *	Component for the home page.
- * @returns The component
- */
-function Home() {
-	return (<p>Home</p>);
-}
+import {Navbar} from "./components/navbar";
+import {Home} from "./pages/home";
+import {NotFound} from "./pages/not_found";
 
 /**
  *	Main app component.
@@ -24,7 +11,7 @@ function Home() {
 function App() {
 	return (
 		<LocationProvider>
-			<h1>Hello</h1>
+			<Navbar />
 			<main>
 				<Router>
 					<Route path="/" component={Home} />

@@ -1,6 +1,6 @@
 {
   "name": "infiniscouter",
-  "module": "src/index.tsx",
+  "module": "src/app.tsx",
   "type": "module",
   "dependencies": {
     "preact": "^10.17.1",
@@ -16,8 +16,8 @@
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "dev": "esbuild --bundle --watch --sourcemap --outdir=dist --format=esm src/index.tsx",
-    "build": "esbuild --bundle --sourcemap --splitting --minify --target=es2017 --outdir=dist --format=esm source/main.tsx",
+    "dev": "esbuild --bundle --watch --sourcemap --outdir=dist --format=esm src/app.tsx",
+    "build": "esbuild --bundle --sourcemap --splitting --minify --target=es2017 --outdir=dist --format=esm source/app.tsx",
     "lint": "tsc --noEmit --pretty && eslint src/*.tsx"
   }
 }
