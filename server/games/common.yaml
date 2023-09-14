@@ -1,0 +1,93 @@
+name: _
+year: 0
+categories:
+  auto:
+    name: Auto
+    metrics:
+      auto-points:
+        name: Points
+        description: Points scored in auto
+        metric:
+          type: statbotics_team
+          prop: auto_epa_end
+  teleop:
+    name: Teleop
+    metrics:
+      teleop-points:
+        name: Points
+        description: Points scored in teleop
+        metric:
+          type: statbotics_team
+          prop: auto_epa_end
+  impressions:
+      name: Impressions
+      metrics:
+        speed:
+          name: Speed
+          description: Overall speed of the robot
+          collect: match_only
+          metric:
+            type: enum
+            options:
+              - Slow
+              - Normal
+              - Fast
+        stability:
+          name: Stability
+          description: How stable the robot is
+          collect: match_only
+          metric:
+            type: enum
+            options:
+              - Solid
+              - Average
+              - Wobbly
+              - Fell Over
+        broken:
+          name: Broken
+          description: Did the robot break
+          collect: match_only
+          metric:
+            type: enum
+            options:
+              - "No"
+              - Yes (drivetrain)
+              - Yes (scoring mechanism)
+              - Yes (other/both)
+        stopped:
+          name: Stopped
+          description: Robot stopped for any reason (disabled, disconnected, etc..)
+          collect: match_only
+          metric:
+            type: bool
+  data:
+    name: Data
+    metrics:
+      total-points:
+        name: Total Points
+        description: Total average points scored
+        metric:
+          type: statbotics_team
+          prop: total_epa_end
+ranking_points:
+display:
+  team_row:
+    - source: team_name
+    - source: single
+      metric: total-points
+    - source: single
+      metric: auto-points
+    - source: single
+      metric: teleop-points
+    - source: single
+      metric: endgame-points
+    - source: _YEAR_SPECIFIC
+    - source: single
+      metric: speed
+    - source: single
+      metric: stability
+    - source: single
+      metric: broken
+    - source: single
+      metric: stopped
+  pre_match:

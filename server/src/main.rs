@@ -1,21 +1,19 @@
-use color_eyre::Result;
-use poem::{get, handler, listener::TcpListener, web::Path, IntoResponse, Route, Server};
-use simplelog::{Config, LevelFilter, SimpleLogger};
+mod api;
+mod config;
+mod database;
+mod server;
 
-#[handler]
-fn hello(Path(name): Path<String>) -> String {
-	format!("hello: {}", name)
-}
+use crate::config::ConfigManager;
+use crate::database::Database;
+use crate::server::ScoutingServer;
+use color_eyre::Result;
+use simplelog::{Config, LevelFilter, SimpleLogger};
 
 #[tokio::main]
 async fn main() -> Result<()> {
 	color_eyre::install()?;
 	SimpleLogger::init(LevelFilter::Info, Config::default())?;
 
-	let app = Route::new().at("/hello/:name", get(hello));
-	Server::new(TcpListener::bind("127.0.0.1:3000"))
-		.run(app)
-		.await?;
-
-	Ok(())
+	let server = ScoutingServer::new(ConfigManager::new()?, Database::open("data"));
+	server.serve("0.0.0.0:4421").await
 }
