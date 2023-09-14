@@ -1,5 +1,5 @@
 use crate::api::Api;
-use crate::config::ConfigManager;
+use crate::config::{ConfigManager, GameConfig};
 use crate::database::Database;
 use color_eyre::Result;
 use poem::endpoint::StaticFilesEndpoint;
