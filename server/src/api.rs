@@ -1,7 +1,9 @@
 pub mod data;
 
-use crate::api::data::{MatchEntry, MatchEntryData, MatchEntryFields, MatchEntryPage};
+use crate::api::data::MatchEntryData;
+use crate::config::match_entry::MatchEntryFields;
 use crate::config::{ConfigManager, GameConfig, TeamConfig};
+use crate::data_validation::validate_match;
 use crate::database::Database;
 use poem_openapi::param::Path;
 use poem_openapi::payload::Json;
@@ -29,53 +31,19 @@ impl Api {
 	/// Get the currently selected game
 	#[oai(path = "/config/game", method = "get")]
 	pub async fn current_game_config(&self) -> Json<&GameConfig> {
-		Json(self.config.get_current_game_config())
+		Json(&self.config.get_current_game_config().game_config)
 	}
 	/// Get the configuration for a certain game
 	#[oai(path = "/config/game/:year", method = "get")]
 	pub async fn game_config(&self, year: Path<u32>) -> Json<Option<&GameConfig>> {
-		Json(self.config.get_game_config(*year))
+		Json(self.config.get_game_config(*year).map(|gc| &gc.game_config))
 	}
+	/// Get the fields to gather per match
 	#[oai(path = "/match_entry/fields", method = "get")]
-	pub async fn match_entry_fields(&self) -> Json<MatchEntryFields> {
-		let game_config = self.config.get_current_game_config();
-		Json(MatchEntryFields {
-			entries: game_config
-				.categories
-				.values()
-				.flat_map(|category| {
-					category
-						.metrics
-						.iter()
-						.filter(|(_, metric)| metric.collect.collect_in_match())
-						.map(|(metric_id, metric)| {
-							(
-								metric_id.clone(),
-								MatchEntry {
-									title: metric.name.clone(),
-									description: metric.description.clone(),
-									entry: (&metric.metric).into(),
-								},
-							)
-						})
-				})
-				.collect(),
-			pages: ["auto", "teleop", "endgame", "impressions"]
-				.into_iter()
-				.filter_map(|page| game_config.categories.get(page))
-				.map(|cat| MatchEntryPage {
-					title: cat.name.clone(),
-					description: None,
-					layout: cat
-						.metrics
-						.iter()
-						.filter(|(_, metric)| metric.collect.collect_in_match())
-						.map(|(metric, _)| metric.clone())
-						.collect(),
-				})
-				.collect(),
-		})
+	pub async fn match_entry_fields(&self) -> Json<&MatchEntryFields> {
+		Json(&self.config.get_current_game_config().match_entry_fields)
 	}
+	/// Get data for a particular match
 	#[oai(path = "/match_entry/data/:event/:match/:team", method = "get")]
 	pub async fn match_entry_data(
 		&self,
@@ -83,6 +51,22 @@ impl Api {
 		match_id: Path<String>,
 		team: Path<String>,
 	) -> Json<Option<MatchEntryData>> {
-		Json(self.database.get_match_entry_data(&event, &match_id, &team))
+		let data = self.database.get_match_entry_data(&event, &match_id, &team);
+		let fields = &self.config.get_current_game_config().match_entry_fields;
+		Json(data.map(|data| validate_match(data, fields)))
+	}
+	/// Set data for a particular match
+	#[oai(path = "/match_entry/data/:event/:match/:team", method = "put")]
+	pub async fn match_entry_set_data(
+		&self,
+		event: Path<String>,
+		match_id: Path<String>,
+		team: Path<String>,
+		data: Json<MatchEntryData>,
+	) {
+		let fields = &self.config.get_current_game_config().match_entry_fields;
+		let data = validate_match(data.0, fields);
+		self.database
+			.set_match_entry_data(&event, &match_id, &team, data);
 	}
 }

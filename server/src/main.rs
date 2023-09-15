@@ -1,5 +1,6 @@
 mod api;
 mod config;
+mod data_validation;
 mod database;
 mod server;
 

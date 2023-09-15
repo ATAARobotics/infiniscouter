@@ -1,3 +1,6 @@
+pub mod match_entry;
+
+use crate::config::match_entry::MatchEntryFields;
 use color_eyre::eyre::eyre;
 use color_eyre::Result;
 use poem_openapi::{Enum, Object, Union};
@@ -7,12 +10,6 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::iter;
 use ts_rs::TS;
-
-macro_rules! ts_export_path {
-	() => {
-		"../client/src/generated/"
-	};
-}
 
 /// Global configuration for a "game" e.g. rapid react
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -197,9 +194,27 @@ pub struct TeamConfig {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct GameConfigs {
+	/// The actual game config, all other configs are generated from this
+	pub game_config: GameConfig,
+	/// The fields to gather per match
+	pub match_entry_fields: MatchEntryFields,
+}
+
+impl From<GameConfig> for GameConfigs {
+	fn from(value: GameConfig) -> Self {
+		GameConfigs {
+			match_entry_fields: MatchEntryFields::from_game_config(&value),
+			game_config: value,
+		}
+	}
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct ConfigManager {
 	/// Game configs for each year.
-	games: HashMap<u32, GameConfig>,
+	/// Also preprocesses and caches the
+	games: HashMap<u32, GameConfigs>,
 	/// Configuration that varies per-instance
 	config: TeamConfig,
 }
@@ -252,7 +267,7 @@ impl ConfigManager {
 							}
 						}
 					}
-					games.insert(config.year, config);
+					games.insert(config.year, config.into());
 				}
 				Err(err) => {
 					log::error!("Failed to load game config file '{filename}': {err}");
@@ -270,10 +285,10 @@ impl ConfigManager {
 		})
 	}
 	/// Get the full configuration for a specific year's game
-	pub fn get_game_config(&self, year: u32) -> Option<&GameConfig> {
+	pub fn get_game_config(&self, year: u32) -> Option<&GameConfigs> {
 		self.games.get(&year)
 	}
-	pub fn get_current_game_config(&self) -> &GameConfig {
+	pub fn get_current_game_config(&self) -> &GameConfigs {
 		&self.games[&self.config.current_year]
 	}
 	pub fn get_server_config(&self) -> &TeamConfig {
