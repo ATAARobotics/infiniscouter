@@ -5,6 +5,7 @@ use crate::config::match_entry::MatchEntryFields;
 use crate::config::{ConfigManager, GameConfig, TeamConfig};
 use crate::data_validation::validate_match;
 use crate::database::Database;
+use poem::http::StatusCode;
 use poem_openapi::param::Path;
 use poem_openapi::payload::Json;
 use poem_openapi::OpenApi;
@@ -50,10 +51,13 @@ impl Api {
 		event: Path<String>,
 		match_id: Path<String>,
 		team: Path<String>,
-	) -> Json<Option<MatchEntryData>> {
-		let data = self.database.get_match_entry_data(&event, &match_id, &team);
+	) -> poem::Result<Json<Option<MatchEntryData>>> {
+		let data = self
+			.database
+			.get_match_entry_data(&event, &match_id, &team)
+			.map_err(|e| poem::Error::new(e, StatusCode::INTERNAL_SERVER_ERROR))?;
 		let fields = &self.config.get_current_game_config().match_entry_fields;
-		Json(data.map(|data| validate_match(data, fields)))
+		Ok(Json(data.map(|data| validate_match(data, fields))))
 	}
 	/// Set data for a particular match
 	#[oai(path = "/match_entry/data/:event/:match/:team", method = "put")]
@@ -63,10 +67,12 @@ impl Api {
 		match_id: Path<String>,
 		team: Path<String>,
 		data: Json<MatchEntryData>,
-	) {
+	) -> poem::Result<()> {
 		let fields = &self.config.get_current_game_config().match_entry_fields;
 		let data = validate_match(data.0, fields);
 		self.database
-			.set_match_entry_data(&event, &match_id, &team, data);
+			.set_match_entry_data(&event, &match_id, &team, &data)
+			.map_err(|e| poem::Error::new(e, StatusCode::INTERNAL_SERVER_ERROR))?;
+		Ok(())
 	}
 }
