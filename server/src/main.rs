@@ -1,5 +1,6 @@
 mod api;
 mod config;
+mod data_validation;
 mod database;
 mod server;
 
@@ -14,6 +15,6 @@ async fn main() -> Result<()> {
 	color_eyre::install()?;
 	SimpleLogger::init(LevelFilter::Info, Config::default())?;
 
-	let server = ScoutingServer::new(ConfigManager::new()?, Database::open("data"));
+	let server = ScoutingServer::new(ConfigManager::new()?, Database::open("data")?);
 	server.serve("0.0.0.0:4421").await
 }

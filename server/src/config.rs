@@ -1,52 +1,60 @@
+pub mod match_entry;
+
+use crate::config::match_entry::MatchEntryFields;
 use color_eyre::eyre::eyre;
 use color_eyre::Result;
 use poem_openapi::{Enum, Object, Union};
 use rust_embed::RustEmbed;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fs::File;
 use std::iter;
 use ts_rs::TS;
 
 /// Global configuration for a "game" e.g. rapid react
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct GameConfig {
 	/// The name of this game
-	name: String,
+	pub name: String,
 	/// The year of this game
-	year: u32,
+	pub year: u32,
 	/// Metric categories
-	categories: HashMap<String, MetricCategory>,
+	pub categories: HashMap<String, MetricCategory>,
 	/// Names of the numbered ranking points, usually 2
-	ranking_points: Vec<String>,
+	pub ranking_points: Vec<String>,
 	/// Configuration on how to display collected information
-	display: DisplayConfig,
+	pub display: DisplayConfig,
 }
 
 /// A category for metrics to collect
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct MetricCategory {
 	/// The display name for the category
-	name: String,
+	pub name: String,
 	/// List of metrics to collect in this category
-	metrics: HashMap<String, CollectedMetric>,
+	pub metrics: HashMap<String, CollectedMetric>,
 }
 
 /// A metric to collect
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct CollectedMetric {
 	/// The name of this metric
-	name: String,
+	pub name: String,
 	/// A lengthy description for this metric
-	description: String,
+	pub description: String,
 	/// What data gathering stages to collect from
 	#[serde(default)]
-	collect: CollectionOption,
+	pub collect: CollectionOption,
 	/// Config for what type of data to collect
-	metric: CollectedMetricType,
+	pub metric: CollectedMetricType,
 }
 
 /// Where to get the data from
-#[derive(Debug, Clone, PartialEq, Default, Deserialize, Serialize, Enum, TS)]
+#[derive(Debug, Clone, Copy, PartialEq, Default, Deserialize, Serialize, Enum, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 #[serde(rename_all = "snake_case")]
 #[oai(rename_all = "snake_case")]
 pub enum CollectionOption {
@@ -65,8 +73,18 @@ pub enum CollectionOption {
 	Never,
 }
 
+impl CollectionOption {
+	pub fn collect_in_match(&self) -> bool {
+		matches!(
+			self,
+			CollectionOption::MatchOnly | CollectionOption::MatchPit
+		)
+	}
+}
+
 /// How to collect the metric
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[oai(discriminator_name = "type", rename_all = "snake_case")]
 pub enum CollectedMetricType {
@@ -83,41 +101,48 @@ pub enum CollectedMetricType {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct AbilityMetric {
 	/// If this implies another ability, or set of abilities
 	#[serde(default)]
-	implies: Vec<String>,
+	pub implies: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct EnumMetric {
 	/// Options for the enum
-	options: Vec<String>,
+	pub options: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct BoolMetric {}
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct TimerMetric {}
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct StatboticsTeamMetric {
 	/// The property to extract from the statbotics team object
-	prop: String,
+	pub prop: String,
 }
 
 /// Configure how the data is processed and displayed
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct DisplayConfig {
 	/// Config for the alliance selection team-list table, specifically the data for a single row
-	team_row: Vec<DisplayColumn>,
+	pub team_row: Vec<DisplayColumn>,
 	/// Config for the pre-match display
-	pre_match: PreMatchDisplay,
+	pub pre_match: PreMatchDisplay,
 }
 
 /// A column for the alliance selection team-list table
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 #[serde(tag = "source", rename_all = "snake_case")]
 #[oai(discriminator_name = "source", rename_all = "snake_case")]
 pub enum DisplayColumn {
@@ -129,29 +154,69 @@ pub enum DisplayColumn {
 	#[doc(hidden)]
 	#[serde(rename = "_YEAR_SPECIFIC")]
 	#[oai(mapping = "_YEAR_SPECIFIC")]
+	#[ts(skip)]
 	CommonYearSpecific(CommonYearSpecificMetrics),
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct SingleMetric {
 	/// The id of the metric
-	metric: String,
+	pub metric: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct TeamNameMetric {}
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct CommonYearSpecificMetrics {}
 
 /// Configuration for the pre-match display
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct PreMatchDisplay {}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct TeamConfig {
+	pub team: u32,
+	pub current_year: u32,
+	/// The FRC event code for the current event (technically also includes the year)
+	pub current_event: String,
+	/// TBA auth key, we probably don't want this to be sent to the client ever
+	#[doc(hidden)]
+	#[serde(skip_serializing)]
+	#[oai(skip)]
+	#[ts(skip)]
+	pub tba_auth_key: String,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct GameConfigs {
+	/// The actual game config, all other configs are generated from this
+	pub game_config: GameConfig,
+	/// The fields to gather per match
+	pub match_entry_fields: MatchEntryFields,
+}
+
+impl From<GameConfig> for GameConfigs {
+	fn from(value: GameConfig) -> Self {
+		GameConfigs {
+			match_entry_fields: MatchEntryFields::from_game_config(&value),
+			game_config: value,
+		}
+	}
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConfigManager {
 	/// Game configs for each year.
-	games: HashMap<u32, GameConfig>,
+	/// Also preprocesses and caches the
+	games: HashMap<u32, GameConfigs>,
+	/// Configuration that varies per-instance
+	config: TeamConfig,
 }
 
 #[derive(RustEmbed)]
@@ -202,7 +267,7 @@ impl ConfigManager {
 							}
 						}
 					}
-					games.insert(config.year, config);
+					games.insert(config.year, config.into());
 				}
 				Err(err) => {
 					log::error!("Failed to load game config file '{filename}': {err}");
@@ -210,10 +275,23 @@ impl ConfigManager {
 			}
 		}
 
-		Ok(Self { games })
+		let team_config: TeamConfig = serde_yaml::from_reader(File::open("team_config.yaml")?)?;
+
+		assert!(games.contains_key(&team_config.current_year));
+
+		Ok(Self {
+			games,
+			config: team_config,
+		})
 	}
 	/// Get the full configuration for a specific year's game
-	pub fn get_game_config(&self, year: u32) -> Option<&GameConfig> {
+	pub fn get_game_config(&self, year: u32) -> Option<&GameConfigs> {
 		self.games.get(&year)
+	}
+	pub fn get_current_game_config(&self) -> &GameConfigs {
+		&self.games[&self.config.current_year]
+	}
+	pub fn get_server_config(&self) -> &TeamConfig {
+		&self.config
 	}
 }

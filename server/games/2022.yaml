@@ -21,7 +21,7 @@ categories:
         metric:
           type: ability
           implies: [auto-score]
-  scoring:
+  teleop:
     name: Scoring (Teleop)
     metrics:
       low-goal:
