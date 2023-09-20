@@ -45,7 +45,7 @@ impl Api {
 		Json(&self.config.get_current_game_config().match_entry_fields)
 	}
 	/// Get data for a particular match
-	#[oai(path = "/match_entry/data/:event/:match/:team", method = "get")]
+	#[oai(path = "/match_entry/data/:event/:match_id/:team", method = "get")]
 	pub async fn match_entry_data(
 		&self,
 		event: Path<String>,
@@ -60,7 +60,7 @@ impl Api {
 		Ok(Json(data.map(|data| validate_match(data, fields))))
 	}
 	/// Set data for a particular match
-	#[oai(path = "/match_entry/data/:event/:match/:team", method = "put")]
+	#[oai(path = "/match_entry/data/:event/:match_id/:team", method = "put")]
 	pub async fn match_entry_set_data(
 		&self,
 		event: Path<String>,
