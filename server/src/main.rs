@@ -3,6 +3,7 @@ mod config;
 mod data_validation;
 mod database;
 mod server;
+mod tba;
 
 use crate::config::ConfigManager;
 use crate::database::Database;
