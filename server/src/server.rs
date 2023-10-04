@@ -1,6 +1,7 @@
 use crate::api::Api;
 use crate::config::ConfigManager;
 use crate::database::Database;
+use crate::tba::Tba;
 use color_eyre::Result;
 use poem::endpoint::StaticFilesEndpoint;
 use poem::{listener::TcpListener, Route, Server};
@@ -11,10 +12,11 @@ pub struct ScoutingServer {
 }
 
 impl ScoutingServer {
-	pub fn new(config: ConfigManager, database: Database) -> Self {
-		Self {
-			api: Api::new(config, database),
-		}
+	pub fn new(config: ConfigManager, database: Database) -> Result<Self> {
+		let tba_auth_key = config.get_tba_auth_key().to_string();
+		Ok(Self {
+			api: Api::new(config, database, Tba::new(tba_auth_key)?),
+		})
 	}
 	/// Start serving connections on `addr`
 	pub async fn serve(self, addr: &str) -> Result<()> {

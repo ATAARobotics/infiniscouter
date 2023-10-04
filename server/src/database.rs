@@ -22,13 +22,14 @@ impl Database {}
 impl Database {
 	pub fn get_match_entry_data(
 		&self,
+		year: u32,
 		event: &str,
 		match_id: &str,
 		team: &str,
 	) -> Result<Option<MatchEntryData>, DbError> {
 		let value = self
 			.match_entries
-			.get(Self::match_entry_key(event, match_id, team))?;
+			.get(Self::match_entry_key(year, event, match_id, team))?;
 		Ok(if let Some(val) = value {
 			Some(serde_json::from_slice(&val)?)
 		} else {
@@ -37,6 +38,7 @@ impl Database {
 	}
 	pub fn set_match_entry_data(
 		&self,
+		year: u32,
 		event: &str,
 		match_id: &str,
 		team: &str,
@@ -44,11 +46,13 @@ impl Database {
 	) -> Result<(), DbError> {
 		let data = serde_json::to_vec(data)?;
 		self.match_entries
-			.insert(Self::match_entry_key(event, match_id, team), data)?;
+			.insert(Self::match_entry_key(year, event, match_id, team), data)?;
 		Ok(())
 	}
-	fn match_entry_key(event: &str, match_id: &str, team: &str) -> Vec<u8> {
+	fn match_entry_key(year: u32, event: &str, match_id: &str, team: &str) -> Vec<u8> {
 		let mut bytes = "match_entry".as_bytes().to_vec();
+		bytes.push(255);
+		bytes.extend_from_slice(&year.to_le_bytes());
 		bytes.push(255);
 		bytes.extend_from_slice(event.as_bytes());
 		bytes.push(255);
