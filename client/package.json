@@ -5,7 +5,8 @@
   "dependencies": {
     "preact": "^10.17.1",
     "preact-iso": "^2.3.1",
-    "preact-render-to-string": "^6.2.1"
+    "preact-render-to-string": "^6.2.1",
+    "prettier": "^3.0.3"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.7.0",
@@ -18,6 +19,7 @@
   "scripts": {
     "dev": "esbuild --bundle --watch --sourcemap --outdir=dist --format=esm src/app.tsx",
     "build": "esbuild --bundle --sourcemap --splitting --minify --target=es2017 --outdir=dist --format=esm source/app.tsx",
-    "lint": "tsc --noEmit --pretty && eslint src/*.tsx"
+    "lint": "tsc --noEmit --pretty && eslint src/*.tsx",
+    "format": "prettier -w src/**"
   }
 }
