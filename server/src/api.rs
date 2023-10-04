@@ -1,25 +1,32 @@
 pub mod data;
 
+use std::sync::Arc;
+
 use crate::api::data::MatchEntryData;
 use crate::config::match_entry::MatchEntryFields;
 use crate::config::{ConfigManager, GameConfig, TeamConfig};
 use crate::data_validation::validate_match;
 use crate::database::Database;
-use crate::tba::MatchInfo;
+use crate::tba::{EventInfo, Tba};
 use poem::http::StatusCode;
 use poem_openapi::param::Path;
 use poem_openapi::payload::Json;
 use poem_openapi::OpenApi;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Api {
 	config: ConfigManager,
 	database: Database,
+	tba: Tba,
 }
 
 impl Api {
-	pub fn new(config: ConfigManager, database: Database) -> Self {
-		Self { config, database }
+	pub fn new(config: ConfigManager, database: Database, tba: Tba) -> Self {
+		Self {
+			config,
+			database,
+			tba,
+		}
 	}
 }
 
@@ -55,7 +62,8 @@ impl Api {
 		let data = self
 			.database
 			.get_match_entry_data(
-				&self.config.get_server_config().current_year,
+				self.config.get_server_config().current_year,
+				&self.config.get_server_config().current_event,
 				&match_id,
 				&team,
 			)
@@ -67,7 +75,6 @@ impl Api {
 	#[oai(path = "/match_entry/data/:match_id/:team", method = "put")]
 	pub async fn match_entry_set_data(
 		&self,
-		event: Path<String>,
 		match_id: Path<String>,
 		team: Path<String>,
 		data: Json<MatchEntryData>,
@@ -76,7 +83,8 @@ impl Api {
 		let data = validate_match(data.0, fields);
 		self.database
 			.set_match_entry_data(
-				&self.config.get_server_config().current_year,
+				self.config.get_server_config().current_year,
+				&self.config.get_server_config().current_event,
 				&match_id,
 				&team,
 				&data,
@@ -86,7 +94,11 @@ impl Api {
 	}
 	/// Get a list of all matches for the current event (as well as any teams involved)
 	#[oai(path = "/event/matches", method = "get")]
-	pub async fn event_list_matches(&self) -> poem::Result<Json<Vec<MatchInfo>>> {
-		todo!()
+	pub async fn event_list_matches(&self) -> Json<Option<Arc<EventInfo>>> {
+		Json(
+			self.tba
+				.get_event(&self.config.get_server_config().current_event)
+				.await,
+		)
 	}
 }

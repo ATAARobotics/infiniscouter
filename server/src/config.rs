@@ -294,4 +294,8 @@ impl ConfigManager {
 	pub fn get_server_config(&self) -> &TeamConfig {
 		&self.config
 	}
+
+	pub fn get_tba_auth_key(&self) -> &str {
+		&self.config.tba_auth_key
+	}
 }

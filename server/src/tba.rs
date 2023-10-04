@@ -1,46 +1,70 @@
-use std::collections::{BTreeMap, HashMap};
+use std::{
+	collections::{btree_map::Entry, BTreeMap},
+	sync::Arc,
+};
 
-use color_eyre::Result;
-use poem::http::HeaderMap;
+use color_eyre::{eyre::bail, Result};
+use log::error;
+use poem::http::{HeaderMap, HeaderValue};
 use poem_openapi::{Object, Union};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use tokio::sync::Mutex;
 use ts_rs::TS;
 
 /// A struct to manage and cache information from the blue alliance
+#[derive(Debug)]
 pub struct Tba {
-	event_cache: BTreeMap<String, EventInfo>,
+	event_cache: Mutex<BTreeMap<String, Arc<EventInfo>>>,
 	client: Client,
 }
 
-struct EventInfo {
-	match_infos: Vec<MatchInfo>,
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct EventInfo {
+	pub match_infos: Vec<MatchInfo>,
+}
+
+impl EventInfo {
+	fn from_match_infos(match_infos: Vec<RawTbaMatch>) -> EventInfo {
+		EventInfo {
+			match_infos: match_infos
+				.into_iter()
+				.filter_map(|m| m.to_match().ok())
+				.collect(),
+		}
+	}
 }
 
 impl Tba {
-	pub fn new(key: String) -> Tba {
+	pub fn new(key: String) -> Result<Tba> {
 		let mut headers = HeaderMap::new();
-		headers.insert("X-TBA-Auth-Key", key);
-		Tba {
-			event_cache: BTreeMap::new(),
+		headers.insert("X-TBA-Auth-Key", HeaderValue::from_str(&key)?);
+		Ok(Tba {
+			event_cache: Mutex::new(BTreeMap::new()),
 			client: Client::builder()
 				.user_agent(env!("CARGO_PKG_NAME"))
 				.default_headers(headers)
-				.build(),
-		}
+				.build()?,
+		})
 	}
-	pub async fn get_event(&mut self, event: &str) -> EventInfo {
-		self.event_cache
-			.entry(event.to_string())
-			.or_insert_with(|| {
-				let raw_matches: Vec<RawTbaMatch> = self
-					.client
-					.get("https://www.thebluealliance.com/api/v3/event/2022bcvi/matches")
-					.send()
-					.await
-					.json()
-					.unwrap();
-			})
+	pub async fn get_event(&self, event: &str) -> Option<Arc<EventInfo>> {
+		Some(
+			match self.event_cache.lock().await.entry(event.to_string()) {
+				Entry::Occupied(entry) => entry.into_mut(),
+				Entry::Vacant(entry) => entry.insert(Arc::new(EventInfo::from_match_infos(
+					self.client
+						.get("https://www.thebluealliance.com/api/v3/event/2022bcvi/matches")
+						.send()
+						.await
+						.ok()?
+						.json::<Vec<RawTbaMatch>>()
+						.await
+						.ok()?,
+				))),
+			}
+			.to_owned(),
+		)
 	}
 }
 
@@ -55,19 +79,47 @@ struct RawTbaMatch {
 }
 
 impl RawTbaMatch {
-	fn to_match(&self) -> Result<MatchInfo> {
-		MatchInfo {
-			id: match &self.comp_level {
-				"q" => MatchId::Qualification(self.match_number),
-				"qf" => MatchId::Qualification(self.match_number),
-				"sf" => MatchId::Qualification(self.match_number),
-				"f" => MatchId::Qualification(self.match_number),
+	fn to_match(self) -> Result<MatchInfo> {
+		Ok(MatchInfo {
+			id: match self.comp_level.as_str() {
+				"q" | "qm" => MatchId::Qualification(SetMatch {
+					set: self.set_number,
+					num: self.match_number,
+				}),
+				"qf" => MatchId::Quarterfinal(SetMatch {
+					set: self.set_number,
+					num: self.match_number,
+				}),
+				"sf" => MatchId::Semifinal(SetMatch {
+					set: self.set_number,
+					num: self.match_number,
+				}),
+				"f" => MatchId::Final(SetMatch {
+					set: self.set_number,
+					num: self.match_number,
+				}),
+				lvl => {
+					error!("Unkown comp level: '{lvl}'");
+					bail!("Unknown comp level: '{lvl}'")
+				}
 			},
 			start_time: self.actual_time.unwrap_or(self.predicted_time),
-			teams_blue: self.alliances.blue.team_keys,
-			teams_red: self.alliances.red.team_keys,
+			teams_blue: self
+				.alliances
+				.blue
+				.team_keys
+				.into_iter()
+				.map(|t| t.trim_start_matches("frc").parse().unwrap())
+				.collect(),
+			teams_red: self
+				.alliances
+				.red
+				.team_keys
+				.into_iter()
+				.map(|t| t.trim_start_matches("frc").parse().unwrap())
+				.collect(),
 			completed: false,
-		}
+		})
 	}
 }
 
@@ -82,25 +134,23 @@ struct RawTbaAlliance {
 	team_keys: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
-pub enum MatchId {
-	Practice(u32),
-	Qualification(u32),
-	Quarterfinal(u32, u32),
-	Semifinal(u32, u32),
-	Final(u32),
+pub struct SetMatch {
+	set: u32,
+	num: u32,
 }
 
-impl MatchId {
-	fn to_key(&self) -> String {
-		match self {
-			MatchId::Practice(num) => format!("pm{num}"), // Not on TBA?
-			MatchId::Qualification(num) => format!("qm{num}"),
-			MatchId::Semifinal(round, num) => format!("sf{round}m{num}"),
-			MatchId::Final(num) => format!("f1m{num}"),
-		}
-	}
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+#[serde(tag = "match_type", rename_all = "snake_case")]
+#[oai(discriminator_name = "match_type", rename_all = "snake_case")]
+pub enum MatchId {
+	Practice(SetMatch),
+	Qualification(SetMatch),
+	Quarterfinal(SetMatch),
+	Semifinal(SetMatch),
+	Final(SetMatch),
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -109,7 +159,9 @@ pub struct MatchInfo {
 	pub id: MatchId,
 	/// Start time in milliseconds since the unix epoch.
 	pub start_time: u64,
-	pub teams_blue: [u32; 3],
-	pub teams_red: [u32; 3],
+	// Sometimes there are actually more or less than 3 teams for various
+	// gross real-world "practical" reasons (ew)
+	pub teams_blue: Vec<u32>,
+	pub teams_red: Vec<u32>,
 	pub completed: bool,
 }
