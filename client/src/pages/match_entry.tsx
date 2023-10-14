@@ -184,7 +184,7 @@ function TimerEntry(props: TimerEntryProps) {
   ) : state.type === "running" ? (
     <>
       <p>
-        running, {(state.currentTime - state.startTime) / 1000} seconds elapsed
+        Running! {(state.currentTime - state.startTime) / 1000} seconds elapsed.
       </p>
       <button
         onClick={() => {
@@ -196,13 +196,24 @@ function TimerEntry(props: TimerEntryProps) {
     </>
   ) : (
     <>
-      <p>stopped, {state.totalTime / 1000} seconds elapsed</p>
+      <p>Stopped. {state.totalTime / 1000} seconds elapsed.</p>
+      <button
+        onClick={() => {
+          setState({ 
+            type: "running", 
+            startTime: Date.now() - state.totalTime,
+            currentTime: Date.now(),
+          });
+        }}
+      >
+        Continue timer?
+      </button>
       <button
         onClick={() => {
           setState({ type: "null" });
         }}
       >
-        Reset timer
+        Reset timer?
       </button>
     </>
   );

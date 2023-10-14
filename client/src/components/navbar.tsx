@@ -1,9 +1,11 @@
 export function Navbar() {
   return (
-    <div className="header">
+    <nav className="header">
       <span>
-        <h1>Hello! I'm a navbar.</h1>
+        <div className="navbar">
+          <a href={"/"}>Home</a> / <a href={"/match_entry"}>Match Entry</a> / <a href={"/api/docs"}>Documentation</a>
+        </div>
       </span>
-    </div>
+    </nav>
   );
 }

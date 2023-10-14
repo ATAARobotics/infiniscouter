@@ -17,14 +17,28 @@ body {
 	width: 100vw;
 }
 
+.item-container {
+	display: flex;
+	flex-direction: column;
+	margin-right: 1rem;
+	margin-top: 0.5rem;
+	margin-bottom: 0.5rem;
+	align-items: left;
+}
+
 .header {
 	display: flex;
 	flex-direction: row;
 	height: 4rem;
 	background-color: var(--bg-colour-3);
 	overflow-x: auto;
-	overflow-y: hidden;
-	scrollbar-width: none;
+	overflow-y: visible;
+	scrollbar-width: auto;
+}
+
+.navbar {
+	font-size: 24px;
+	justify-content: center;
 }
 
 .buttons {
@@ -60,13 +74,13 @@ button {
 }
 
 .border-right {
-	border-top-right-radius: 0.25rem;
-	border-bottom-right-radius: 0.25rem;
+	border-top-right-radius: 0.5rem;
+	border-bottom-right-radius: 0.5rem;
 }
 
 .border-left {
-	border-top-left-radius: 0.25rem;
-	border-bottom-left-radius: 0.25rem;
+	border-top-left-radius: 0.5rem;
+	border-bottom-left-radius: 0.5rem;
 }
 
 .inc-button, .dec-button {
