@@ -6,6 +6,12 @@ import { AbilityMetric } from "../generated/AbilityMetric";
 import { EnumMetric } from "../generated/EnumMetric";
 import { BoolMetric } from "../generated/BoolMetric";
 import { TimerMetric } from "../generated/TimerMetric";
+import Button from "@mui/joy/Button";
+import IconButton from "@mui/joy/IconButton";
+import ToggleButtonGroup from "@mui/joy/ToggleButtonGroup";
+import Box from "@mui/joy/Box";
+import { MatchEntryData } from "src/generated/MatchEntryData";
+import { MatchEntryValue } from "src/generated/MatchEntryValue";
 
 // Match Entry Page Component
 export function MatchEntry() {
@@ -18,30 +24,46 @@ export function MatchEntry() {
         setFields(data);
       });
   }, []);
+
+  const [data, setData] = useState<MatchEntryData>({ entries: {} });
+
   return (
-    <div>
+    <Box>
       <h1>Match Entry Page</h1>
       {fields ? (
         fields.pages.map((page) => (
-          <MatchPage page={page} entries={fields.entries}></MatchPage>
+          <MatchPage
+            page={page}
+            entries={fields.entries}
+            setEntry={(id, value) =>
+              setData({ entries: { ...data.entries, [id]: value } })
+            }
+            allEntries={data.entries}
+          ></MatchPage>
         ))
       ) : (
         <p>Loading...</p>
       )}
-    </div>
+    </Box>
   );
 }
 
 interface MatchPageProps {
   page: MatchEntryPage;
   entries: Record<string, MatchEntry>;
+  allEntries: Record<string, MatchEntryValue>;
+  setEntry: (id: string, value: MatchEntryValue) => void;
 }
 function MatchPage(props: MatchPageProps) {
   return (
     <>
       <h2>{props.page.title}</h2>
       {props.page.layout.map((entryName) => (
-        <MatchDetail entry={props.entries[entryName]}></MatchDetail>
+        <MatchDetail
+          entry={props.entries[entryName]}
+          setValue={(value) => props.setEntry(entryName, value)}
+          value={props.allEntries[entryName]}
+        ></MatchDetail>
       ))}
     </>
   );
@@ -49,24 +71,40 @@ function MatchPage(props: MatchPageProps) {
 
 interface MatchDetailProps {
   entry: MatchEntry;
+  value: MatchEntryValue;
+  setValue: (value: MatchEntryValue) => void;
 }
 function MatchDetail(props: MatchDetailProps) {
   return (
     <>
       <h3>{props.entry.title}</h3>
       {props.entry.entry.type === "ability" ? (
-        <AbilityEntry entry={props.entry.entry}></AbilityEntry>
+        <AbilityEntry
+          entry={props.entry.entry}
+          value={props.value}
+          setValue={props.setValue}
+        ></AbilityEntry>
       ) : props.entry.entry.type === "enum" ? (
         <EnumEntry
           options={props.entry.entry.options.map((item) => ({
             id: item,
             display: item,
           }))}
+          value={props.value}
+          setValue={props.setValue}
         ></EnumEntry>
       ) : props.entry.entry.type === "bool" ? (
-        <BoolEntry entry={props.entry.entry}></BoolEntry>
+        <BoolEntry
+          entry={props.entry.entry}
+          value={props.value}
+          setValue={props.setValue}
+        ></BoolEntry>
       ) : props.entry.entry.type === "timer" ? (
-        <TimerEntry entry={props.entry.entry}></TimerEntry>
+        <TimerEntry
+          entry={props.entry.entry}
+          value={props.value}
+          setValue={props.setValue}
+        ></TimerEntry>
       ) : (
         <p> Error </p>
       )}
@@ -75,15 +113,23 @@ function MatchDetail(props: MatchDetailProps) {
 }
 
 interface AbilityEntryProps {
+  value: MatchEntryValue;
+  setValue: (value: MatchEntryValue) => void;
   entry: AbilityMetric;
 }
 interface EnumEntryProps {
+  value: MatchEntryValue;
+  setValue: (value: MatchEntryValue) => void;
   options: Array<{ id: string; display: string }>;
 }
 interface BoolEntryProps {
+  value: MatchEntryValue;
+  setValue: (value: MatchEntryValue) => void;
   entry: BoolMetric;
 }
 interface TimerEntryProps {
+  value: MatchEntryValue;
+  setValue: (value: MatchEntryValue) => void;
   entry: TimerMetric;
 }
 
@@ -95,39 +141,26 @@ function AbilityEntry(props: AbilityEntryProps) {
         { id: "attempted", display: "Attempted" },
         { id: "succeeded", display: "Succeeded" },
       ]}
+      value={props.value}
+      setValue={props.setValue}
     ></EnumEntry>
   );
 }
 function EnumEntry(props: EnumEntryProps) {
-  const [choice, setChoice] = useState<string>();
+  const [value, setValue] = useState<string | null>();
   return (
-    <div className="item-container">
-      {/* <p className="label">{props.label}</p> */}
-      <div className="buttons">
-        {props.options.map((options, index) => (
-          <button
-            key={index}
-            className={`${
-              options.id === choice ? "button-press" : "button-unpress"
-            } ${
-              index === 0
-                ? "border-left"
-                : index === props.options.length - 1
-                ? "border-right"
-                : ""
-            }`}
-            onClick={() => {
-              /*	if (props.setState !== undefined) {
-                                    props.setState(index);
-                                } */
-              setChoice(options.id);
-            }}
-          >
-            <p className="button-text">{options.display}</p>
-          </button>
-        ))}
-      </div>
-    </div>
+    <ToggleButtonGroup
+      value={value}
+      onChange={(event, newValue) => {
+        setValue(newValue);
+      }}
+    >
+      {props.options.map((options, index) => (
+        <Button value={options.id}>
+          <p className="button-text">{options.display}</p>
+        </Button>
+      ))}
+    </ToggleButtonGroup>
   );
 }
 
@@ -138,6 +171,8 @@ function BoolEntry(props: BoolEntryProps) {
         { id: "no", display: "No" },
         { id: "yes", display: "Yes" },
       ]}
+      value={props.value}
+      setValue={props.setValue}
     ></EnumEntry>
   );
 }
@@ -170,7 +205,7 @@ function TimerEntry(props: TimerEntryProps) {
   }, [state]);
 
   return state.type === "null" ? (
-    <button
+    <Button
       onClick={() => {
         setState({
           type: "running",
@@ -180,41 +215,43 @@ function TimerEntry(props: TimerEntryProps) {
       }}
     >
       Start
-    </button>
+    </Button>
   ) : state.type === "running" ? (
     <>
       <p>
         Running! {(state.currentTime - state.startTime) / 1000} seconds elapsed.
       </p>
-      <button
+      <Button
         onClick={() => {
-          setState({ type: "value", totalTime: Date.now() - state.startTime });
+          const time = Date.now() - state.startTime;
+          setState({ type: "value", totalTime: time });
+          props.setValue({ type: "timer", time_seconds: time / 1000 });
         }}
       >
         Stop
-      </button>
+      </Button>
     </>
   ) : (
     <>
       <p>Stopped. {state.totalTime / 1000} seconds elapsed.</p>
-      <button
+      <Button
         onClick={() => {
-          setState({ 
-            type: "running", 
+          setState({
+            type: "running",
             startTime: Date.now() - state.totalTime,
             currentTime: Date.now(),
           });
         }}
       >
         Continue timer?
-      </button>
-      <button
+      </Button>
+      <Button
         onClick={() => {
           setState({ type: "null" });
         }}
       >
         Reset timer?
-      </button>
+      </Button>
     </>
   );
 }

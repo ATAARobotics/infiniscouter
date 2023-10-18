@@ -4,6 +4,8 @@ import { Navbar } from "./components/navbar";
 import { Home } from "./pages/home";
 import { MatchEntry } from "./pages/match_entry";
 import { NotFound } from "./pages/not_found";
+import { CssVarsProvider } from "@mui/joy/styles";
+import CssBaseline from "@mui/joy/CssBaseline";
 
 /**
  *	Main app component.
@@ -11,16 +13,19 @@ import { NotFound } from "./pages/not_found";
  */
 function App() {
   return (
-    <LocationProvider>
-      <Navbar />
-      <main>
-        <Router>
-          <Route path="/" component={Home} />
-          <Route path="/match_entry" component={MatchEntry} />
-          <Route default component={NotFound} />
-        </Router>
-      </main>
-    </LocationProvider>
+    <CssVarsProvider defaultMode="dark">
+      <CssBaseline />
+      <LocationProvider>
+        <Navbar />
+        <main>
+          <Router>
+            <Route path="/" component={Home} />
+            <Route path="/match_entry" component={MatchEntry} />
+            <Route default component={NotFound} />
+          </Router>
+        </main>
+      </LocationProvider>
+    </CssVarsProvider>
   );
 }
 
