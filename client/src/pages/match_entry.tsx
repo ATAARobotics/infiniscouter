@@ -12,6 +12,7 @@ import ToggleButtonGroup from "@mui/joy/ToggleButtonGroup";
 import Box from "@mui/joy/Box";
 import { MatchEntryData } from "src/generated/MatchEntryData";
 import { MatchEntryValue } from "src/generated/MatchEntryValue";
+import { CircularProgress } from "@mui/joy";
 
 // Match Entry Page Component
 export function MatchEntry() {
@@ -42,7 +43,17 @@ export function MatchEntry() {
           ></MatchPage>
         ))
       ) : (
-        <p>Loading...</p>
+        <div>
+          <CircularProgress
+            color="danger"
+            determinate={false}
+            size="sm"
+            value={25}
+            variant="solid"
+            thickness={7}
+          />
+          {"  "}Loading...
+        </div>
       )}
     </Box>
   );

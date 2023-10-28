@@ -12,6 +12,7 @@
     "prettier": "^3.0.3"
   },
   "devDependencies": {
+    "@types/react": "^18.2.33",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "esbuild": "^0.19.2",
     "eslint": "^8.49.0",
