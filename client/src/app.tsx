@@ -3,6 +3,7 @@ import { LocationProvider, Router, Route } from "preact-iso";
 import { Navbar } from "./components/navbar";
 import { Home } from "./pages/home";
 import { MatchEntry } from "./pages/match_entry";
+import { PitEntry } from "./pages/pit_entry";
 import { NotFound } from "./pages/not_found";
 import { CssVarsProvider } from "@mui/joy/styles";
 import CssBaseline from "@mui/joy/CssBaseline";
@@ -21,6 +22,7 @@ function App() {
           <Router>
             <Route path="/" component={Home} />
             <Route path="/match_entry" component={MatchEntry} />
+            <Route path="/pit_entry" component={PitEntry} />
             <Route default component={NotFound} />
           </Router>
         </main>

@@ -26,9 +26,17 @@ export function Navbar() {
           onKeyDown={toggleDrawer(false)}
         >
           <List>
+            {[<a href={"/"}>Home</a>].map((text) => (
+              <ListItem key={text}>
+                <ListItemButton>{text}</ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+          <Divider />
+          <List>
             {[
-              <a href={"/"}>Home</a>,
               <a href={"/match_entry"}>Match Entry</a>,
+              <a href={"/pit_entry"}>Pit Entry</a>,
             ].map((text) => (
               <ListItem key={text}>
                 <ListItemButton>{text}</ListItemButton>
