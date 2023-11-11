@@ -37,8 +37,16 @@ export function MatchEntry() {
             page={page}
             entries={fields.entries}
             setEntry={(id, value) => {
-              console.log("setdata");
-              setData({ entries: { ...data.entries, [id]: value } });
+
+              console.log(id, value);
+
+              if (value === undefined){
+                const tmp = { entries: { ...data.entries} };
+                delete tmp.entries[id];
+                setData(tmp);
+              } else {
+                setData({ entries: { ...data.entries, [id]: value } });
+              }
             }}
             allEntries={data.entries}
           ></MatchPage>
@@ -64,7 +72,7 @@ interface MatchPageProps {
   page: MatchEntryPage;
   entries: Record<string, MatchEntry>;
   allEntries: Record<string, MatchEntryValue>;
-  setEntry: (id: string, value: MatchEntryValue) => void;
+  setEntry: (id: string, value: MatchEntryValue | undefined) => void;
 }
 function MatchPage(props: MatchPageProps) {
   return (
@@ -83,8 +91,8 @@ function MatchPage(props: MatchPageProps) {
 
 interface MatchDetailProps {
   entry: MatchEntry;
-  value: MatchEntryValue;
-  setValue: (value: MatchEntryValue) => void;
+  value: MatchEntryValue | undefined;
+  setValue: (value: MatchEntryValue | undefined) => void;
 }
 function MatchDetail(props: MatchDetailProps) {
   return (
@@ -104,6 +112,7 @@ function MatchDetail(props: MatchDetailProps) {
           }))}
           value={props.value}
           setValue={props.setValue}
+          entryType="enum"
         ></EnumEntry>
       ) : props.entry.entry.type === "bool" ? (
         <BoolEntry
@@ -125,22 +134,23 @@ function MatchDetail(props: MatchDetailProps) {
 }
 
 interface AbilityEntryProps {
-  value: MatchEntryValue;
-  setValue: (value: MatchEntryValue) => void;
+  value: MatchEntryValue | undefined;
+  setValue: (value: MatchEntryValue | undefined) => void;
   entry: AbilityMetric;
 }
 interface EnumEntryProps {
-  value: MatchEntryValue;
-  setValue: (value: MatchEntryValue) => void;
+  value: MatchEntryValue | undefined;
+  setValue: (value: MatchEntryValue | undefined) => void;
   options: Array<{ id: string | boolean; display: string }>;
+  entryType: "ability" | "bool" | "enum";
 }
 interface BoolEntryProps {
-  value: MatchEntryValue;
-  setValue: (value: MatchEntryValue) => void;
+  value: MatchEntryValue | undefined;
+  setValue: (value: MatchEntryValue | undefined) => void;
   entry: BoolMetric;
 }
 interface TimerEntryProps {
-  value: MatchEntryValue;
+  value: MatchEntryValue | undefined;
   setValue: (value: MatchEntryValue) => void;
   entry: TimerMetric;
 }
@@ -155,6 +165,7 @@ function AbilityEntry(props: AbilityEntryProps) {
       ]}
       value={props.value}
       setValue={props.setValue}
+      entryType="ability"
     ></EnumEntry>
   );
 }
@@ -162,11 +173,17 @@ function EnumEntry(props: EnumEntryProps) {
   //const [value, setValue] = useState<string | null>();
   return (
     <ToggleButtonGroup
-      value={props.value}
+      
+      value={(props.value as any)?.value as string}
       onChange={(event, newValue) => {
-        props.setValue(newValue);
+        if (newValue === null) {
+          props.setValue(undefined);
+        } else {
+          props.setValue({value:newValue, type:props.entryType} as MatchEntryValue);
+        }
       }}
     >
+      
       {props.options.map((options, index) => (
         <Button value={options.id}>
           <p className="button-text">{options.display}</p>
@@ -185,6 +202,7 @@ function BoolEntry(props: BoolEntryProps) {
       ]}
       value={props.value}
       setValue={props.setValue}
+      entryType="bool"
     ></EnumEntry>
   );
 }
