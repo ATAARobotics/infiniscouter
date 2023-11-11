@@ -6,6 +6,7 @@ import List from "@mui/joy/List";
 import Divider from "@mui/joy/Divider";
 import ListItem from "@mui/joy/ListItem";
 import ListItemButton from "@mui/joy/ListItemButton";
+import { SyncButton } from "./sync_button";
 
 export function Navbar() {
   const [open, setOpen] = React.useState(false);
@@ -53,6 +54,7 @@ export function Navbar() {
           </List>
         </Box>
       </Drawer>
+      <SyncButton></SyncButton>
     </Box>
   );
 }

@@ -16,6 +16,8 @@ import { CircularProgress } from "@mui/joy";
 
 // Match Entry Page Component
 export function MatchEntry() {
+
+  
   const [fields, setFields] = useState<MatchEntryFields>();
   useEffect(() => {
     fetch("/api/match_entry/fields")
