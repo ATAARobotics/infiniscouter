@@ -8,15 +8,19 @@ import ListItem from "@mui/joy/ListItem";
 import ListItemButton from "@mui/joy/ListItemButton";
 
 export function SyncButton() {
-    const [loadingState, setLoadingState] = React.useState<"saved" | "saving">("saved");
-    async function doSync(){
-        setLoadingState("saving");
-        const response = await fetch("/api/event/matches");
-        localStorage.setItem("matchList", await response.text());
-        setLoadingState("saved");
-    }
-    
+  const [loadingState, setLoadingState] = React.useState<"saved" | "saving">(
+    "saved",
+  );
+  async function doSync() {
+    setLoadingState("saving");
+    const response = await fetch("/api/event/matches");
+    localStorage.setItem("matchList", await response.text());
+    setLoadingState("saved");
+  }
+
   return (
-    <Button loading={loadingState === "saving"} onClick={doSync}>Save Data</Button>
+    <Button loading={loadingState === "saving"} onClick={doSync}>
+      Save Data
+    </Button>
   );
 }

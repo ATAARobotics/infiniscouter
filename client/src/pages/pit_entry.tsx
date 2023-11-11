@@ -21,21 +21,10 @@ export function PitEntry() {
       <h1>Pit entry checklist</h1>
       <div>
         {" "}
-        Last years list: 
-        Confidence 
-        Amount of people in pit X 
-        Chaos level X
-        Bumper type 
-        Vision type X 
-        Human player pickup range G 
-        Stacking type and Range G 
-        Preferred Offence or Defence 
-        Amount of batteries 
-        Amount of Motors X 
-        Balance time G 
-        Drive Train 
-        Auto settngs 
-        Other comments
+        Last years list: Confidence Amount of people in pit X Chaos level X
+        Bumper type Vision type X Human player pickup range G Stacking type and
+        Range G Preferred Offence or Defence Amount of batteries Amount of
+        Motors X Balance time G Drive Train Auto settngs Other comments
       </div>
     </Box>
   );

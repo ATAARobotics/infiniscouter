@@ -13,18 +13,50 @@ import Box from "@mui/joy/Box";
 import { MatchEntryData } from "src/generated/MatchEntryData";
 import { MatchEntryValue } from "src/generated/MatchEntryValue";
 import { CircularProgress } from "@mui/joy";
+import Input from "@mui/joy/Input";
+import { EventInfo } from "src/generated/EventInfo";
 
 // Match Entry Page Component
 export function MatchEntry() {
+  const [matchId, setMatchId] = useState<string>();
+  const [teamId, setTeamId] = useState<string>();
 
-  
+  const [matchList, setMatchList] = useState<EventInfo>({ match_infos: [] });
+  useEffect(() => {
+    const matchListJson = localStorage.getItem("matchList");
+    setMatchList(
+      JSON.parse(
+        matchListJson === null ? '{"match_infos": []}' : matchListJson,
+      ),
+    );
+  }, []);
+
+  if (matchId === undefined || teamId === undefined) {
+    return (
+      <Box>
+        <h1>Match Entry Page</h1>
+        <AutocompleteListbox
+          options={
+            ["a", "b", "c"]
+            //matchList.match_infos
+            //	.filter(mi => mi.id.match_type === "qualification")
+            //	.map(mi => { return { label: `Qualification ${mi.id.num}`, id: `qm${mi.id.num}` }; })
+          }
+          onChange={(_ev, newValue) => {
+            //setMatchId(newValue?.id);
+          }}
+          sx={{ width: 300 }}
+        />
+      </Box>
+    );
+  }
+
   const [fields, setFields] = useState<MatchEntryFields>();
   useEffect(() => {
     fetch("/api/match_entry/fields")
       .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        setFields(data);
+      .then((data2) => {
+        setFields(data2);
       });
   }, []);
 
@@ -39,11 +71,10 @@ export function MatchEntry() {
             page={page}
             entries={fields.entries}
             setEntry={(id, value) => {
-
               console.log(id, value);
 
-              if (value === undefined){
-                const tmp = { entries: { ...data.entries} };
+              if (value === undefined) {
+                const tmp = { entries: { ...data.entries } };
                 delete tmp.entries[id];
                 setData(tmp);
               } else {
@@ -175,17 +206,18 @@ function EnumEntry(props: EnumEntryProps) {
   //const [value, setValue] = useState<string | null>();
   return (
     <ToggleButtonGroup
-      
       value={(props.value as any)?.value as string}
       onChange={(event, newValue) => {
         if (newValue === null) {
           props.setValue(undefined);
         } else {
-          props.setValue({value:newValue, type:props.entryType} as MatchEntryValue);
+          props.setValue({
+            value: newValue,
+            type: props.entryType,
+          } as MatchEntryValue);
         }
       }}
     >
-      
       {props.options.map((options, index) => (
         <Button value={options.id}>
           <p className="button-text">{options.display}</p>
