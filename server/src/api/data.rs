@@ -5,6 +5,14 @@ use ts_rs::TS;
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
+pub struct MatchEntryIdData {
+    pub match_id: String,
+    pub team_id: String,
+    pub data: MatchEntryData,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct MatchEntryData {
 	/// The mapping from entry ids to entry values.
 	pub entries: HashMap<String, MatchEntryValue>,
@@ -49,7 +57,7 @@ pub enum MatchAbilityValue {
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct MatchEnumEntry {
 	/// The value
-	pub value: u32,
+	pub value: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]

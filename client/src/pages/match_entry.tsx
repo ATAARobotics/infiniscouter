@@ -36,9 +36,10 @@ export function MatchEntry() {
           <MatchPage
             page={page}
             entries={fields.entries}
-            setEntry={(id, value) =>
-              setData({ entries: { ...data.entries, [id]: value } })
-            }
+            setEntry={(id, value) => {
+              console.log("setdata");
+              setData({ entries: { ...data.entries, [id]: value } });
+            }}
             allEntries={data.entries}
           ></MatchPage>
         ))
@@ -131,7 +132,7 @@ interface AbilityEntryProps {
 interface EnumEntryProps {
   value: MatchEntryValue;
   setValue: (value: MatchEntryValue) => void;
-  options: Array<{ id: string; display: string }>;
+  options: Array<{ id: string | boolean; display: string }>;
 }
 interface BoolEntryProps {
   value: MatchEntryValue;
@@ -158,12 +159,12 @@ function AbilityEntry(props: AbilityEntryProps) {
   );
 }
 function EnumEntry(props: EnumEntryProps) {
-  const [value, setValue] = useState<string | null>();
+  //const [value, setValue] = useState<string | null>();
   return (
     <ToggleButtonGroup
-      value={value}
+      value={props.value}
       onChange={(event, newValue) => {
-        setValue(newValue);
+        props.setValue(newValue);
       }}
     >
       {props.options.map((options, index) => (
@@ -179,8 +180,8 @@ function BoolEntry(props: BoolEntryProps) {
   return (
     <EnumEntry
       options={[
-        { id: "no", display: "No" },
-        { id: "yes", display: "Yes" },
+        { id: false, display: "No" },
+        { id: true, display: "Yes" },
       ]}
       value={props.value}
       setValue={props.setValue}

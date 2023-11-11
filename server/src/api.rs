@@ -13,6 +13,8 @@ use poem_openapi::param::Path;
 use poem_openapi::payload::Json;
 use poem_openapi::OpenApi;
 
+use self::data::MatchEntryIdData;
+
 #[derive(Debug)]
 pub struct Api {
 	config: ConfigManager,
@@ -71,16 +73,9 @@ impl Api {
 		let fields = &self.config.get_current_game_config().match_entry_fields;
 		Ok(Json(data.map(|data| validate_match(data, fields))))
 	}
-	/// Set data for a particular match
-	#[oai(path = "/match_entry/data/:match_id/:team", method = "put")]
-	pub async fn match_entry_set_data(
-		&self,
-		match_id: Path<String>,
-		team: Path<String>,
-		data: Json<MatchEntryData>,
-	) -> poem::Result<()> {
+    fn match_entry_set_data_inner(&self, match_id: &str, team: &str, data: MatchEntryData) -> poem::Result<()> {
 		let fields = &self.config.get_current_game_config().match_entry_fields;
-		let data = validate_match(data.0, fields);
+		let data = validate_match(data, fields);
 		self.database
 			.set_match_entry_data(
 				self.config.get_server_config().current_year,
@@ -91,7 +86,28 @@ impl Api {
 			)
 			.map_err(|e| poem::Error::new(e, StatusCode::INTERNAL_SERVER_ERROR))?;
 		Ok(())
+    }
+	/// Set data for a particular match
+	#[oai(path = "/match_entry/data/:match_id/:team", method = "put")]
+	pub async fn match_entry_set_data(
+		&self,
+		match_id: Path<String>,
+		team: Path<String>,
+		data: Json<MatchEntryData>,
+	) -> poem::Result<()> {
+        self.match_entry_set_data_inner(&match_id, &team, data.0)
 	}
+    /// Set data for multiple matches
+	#[oai(path = "/match_entry/data/all", method = "put")]
+    pub async fn match_entry_set_multiple(
+        &self,
+        data: Json<Vec<MatchEntryIdData>>
+    ) -> poem::Result<()> {
+        for match_entry in data.0 {
+            self.match_entry_set_data_inner(&match_entry.match_id, &match_entry.team_id, match_entry.data)?;
+        }
+        Ok(())
+    }
 	/// Get a list of all matches for the current event (as well as any teams involved)
 	#[oai(path = "/event/matches", method = "get")]
 	pub async fn event_list_matches(&self) -> Json<Option<Arc<EventInfo>>> {
