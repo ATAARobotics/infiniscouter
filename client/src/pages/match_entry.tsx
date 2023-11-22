@@ -12,39 +12,22 @@ import ToggleButtonGroup from "@mui/joy/ToggleButtonGroup";
 import Box from "@mui/joy/Box";
 import { MatchEntryData } from "src/generated/MatchEntryData";
 import { MatchEntryValue } from "src/generated/MatchEntryValue";
-import { CircularProgress } from "@mui/joy";
+import { Autocomplete, AutocompleteListbox, CircularProgress } from "@mui/joy";
 import Input from "@mui/joy/Input";
-import { EventInfo } from "src/generated/EventInfo";
 
 // Match Entry Page Component
 export function MatchEntry() {
   const [matchId, setMatchId] = useState<string>();
   const [teamId, setTeamId] = useState<string>();
 
-  const [matchList, setMatchList] = useState<EventInfo>({ match_infos: [] });
-  useEffect(() => {
-    const matchListJson = localStorage.getItem("matchList");
-    setMatchList(
-      JSON.parse(
-        matchListJson === null ? '{"match_infos": []}' : matchListJson,
-      ),
-    );
-  }, []);
 
   if (matchId === undefined || teamId === undefined) {
     return (
       <Box>
         <h1>Match Entry Page</h1>
-        <AutocompleteListbox
-          options={
-            ["a", "b", "c"]
-            //matchList.match_infos
-            //	.filter(mi => mi.id.match_type === "qualification")
-            //	.map(mi => { return { label: `Qualification ${mi.id.num}`, id: `qm${mi.id.num}` }; })
-          }
-          onChange={(_ev, newValue) => {
-            //setMatchId(newValue?.id);
-          }}
+        <Autocomplete
+          placeholder="Match"
+          options={["a", "b"]}
           sx={{ width: 300 }}
         />
       </Box>
