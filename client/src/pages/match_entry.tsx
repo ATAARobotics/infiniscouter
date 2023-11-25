@@ -10,23 +10,42 @@ import ToggleButtonGroup from "@mui/joy/ToggleButtonGroup";
 import Box from "@mui/joy/Box";
 import { MatchEntryData } from "src/generated/MatchEntryData";
 import { MatchEntryValue } from "src/generated/MatchEntryValue";
-import { Autocomplete, AutocompleteListbox, CircularProgress } from "@mui/joy";
+import {
+  Input,
+  Option,
+  CircularProgress,
+  Select,
+  Slider,
+  RadioGroup,
+  Radio,
+  Stack,
+} from "@mui/joy";
 
 // Match Entry Page Component
 export function MatchEntry() {
   const [matchId, setMatchId] = useState<string>();
   const [teamId, setTeamId] = useState<string>();
 
-
   if (matchId === undefined || teamId === undefined) {
     return (
       <Box>
         <h1>Match Entry Page</h1>
-        <Autocomplete
-          placeholder="Match"
-          options={["a", "b"]}
-          sx={{ width: 300 }}
-        />
+        <RadioGroup>
+          <Stack direction="row">
+            <Stack direction="column">
+              <Text>RED</Text>
+              <Radio value="4421" label="FORGE" />
+              <Radio value="254" label="CHEESE" />
+              <Radio value="4627" label="MANNING" />
+            </Stack>
+            <Stack direction="column">
+              <Text>BLUE</Text>
+              <Radio value="4334" label="SERIAL ATA" />
+              <Radio value="5015" label="SWATTY" />
+              <Radio value="1678" label="LEMON" />
+            </Stack>
+          </Stack>
+        </RadioGroup>
       </Box>
     );
   }

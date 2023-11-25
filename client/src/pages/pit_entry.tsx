@@ -12,9 +12,7 @@ export function PitEntry() {
           <Typography level="body-sm">Amount of Breaks: 0</Typography>
         </div>
         <AspectRatio minHeight="120px" maxHeight="200px">
-          <img
-            src="https://i.ytimg.com/vi/pXpfVwNjV7Q/maxresdefault.jpg"
-          />
+          <img src="https://i.ytimg.com/vi/pXpfVwNjV7Q/maxresdefault.jpg" />
         </AspectRatio>
         <CardContent orientation="horizontal">
           <div>
@@ -28,7 +26,7 @@ export function PitEntry() {
             size="md"
             color="primary"
             aria-label="View team"
-            sx={{ ml: 'auto', alignSelf: 'center', fontWeight: 600 }}
+            sx={{ ml: "auto", alignSelf: "center", fontWeight: 600 }}
           >
             View
           </Button>
@@ -41,9 +39,7 @@ export function PitEntry() {
           <Typography level="body-sm">Amount of Breaks: 0</Typography>
         </div>
         <AspectRatio minHeight="120px" maxHeight="200px">
-          <img
-            src="https://hagadone.media.clients.ellingtoncms.com/ARTICLE_170429960_AR_0_WAMEMDNNOVJB_t1170.jpg?5cc718665ab672dba93d511ab4c682bb370e5f86"
-          />
+          <img src="https://hagadone.media.clients.ellingtoncms.com/ARTICLE_170429960_AR_0_WAMEMDNNOVJB_t1170.jpg?5cc718665ab672dba93d511ab4c682bb370e5f86" />
         </AspectRatio>
         <CardContent orientation="horizontal">
           <div>
@@ -57,7 +53,7 @@ export function PitEntry() {
             size="md"
             color="primary"
             aria-label="View team"
-            sx={{ ml: 'auto', alignSelf: 'center', fontWeight: 600 }}
+            sx={{ ml: "auto", alignSelf: "center", fontWeight: 600 }}
           >
             View
           </Button>
