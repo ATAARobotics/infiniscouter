@@ -3,17 +3,14 @@ import { MatchEntryFields } from "../generated/MatchEntryFields";
 import { MatchEntryPage } from "../generated/MatchEntryPage";
 import { MatchEntry } from "../generated/MatchEntry";
 import { AbilityMetric } from "../generated/AbilityMetric";
-import { EnumMetric } from "../generated/EnumMetric";
 import { BoolMetric } from "../generated/BoolMetric";
 import { TimerMetric } from "../generated/TimerMetric";
 import Button from "@mui/joy/Button";
-import IconButton from "@mui/joy/IconButton";
 import ToggleButtonGroup from "@mui/joy/ToggleButtonGroup";
 import Box from "@mui/joy/Box";
 import { MatchEntryData } from "src/generated/MatchEntryData";
 import { MatchEntryValue } from "src/generated/MatchEntryValue";
 import { Autocomplete, AutocompleteListbox, CircularProgress } from "@mui/joy";
-import Input from "@mui/joy/Input";
 
 // Match Entry Page Component
 export function MatchEntry() {
