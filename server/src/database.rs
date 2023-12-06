@@ -1,4 +1,4 @@
-use crate::api::data::MatchEntryData;
+use crate::api::data::{MatchEntryData, MatchEntryIdData};
 use sled::{Db, Tree};
 use std::path::Path;
 use thiserror::Error;
@@ -17,7 +17,20 @@ pub struct Database {
 	match_entries: Tree,
 }
 
-impl Database {}
+impl Database {
+    pub fn get_all_match_entries(&self, year: u32, event: &str) -> Vec<MatchEntryIdData> {
+        self.match_entries.scan_prefix(Self::match_entry_prefix(year, event)).flatten().map(|(k, v)| {
+            let mut key_parts = k.split(|n| *n == 255).skip(3);
+            let match_id = String::from_utf8_lossy(key_parts.next().unwrap());
+            let team_id = String::from_utf8_lossy(key_parts.next().unwrap());
+            MatchEntryIdData {
+                match_id: match_id.to_string(),
+                team_id: team_id.to_string(),
+                data: serde_json::from_slice(&v).unwrap(),
+            }
+        }).collect()
+    }
+}
 
 impl Database {
 	pub fn get_match_entry_data(
@@ -49,13 +62,17 @@ impl Database {
 			.insert(Self::match_entry_key(year, event, match_id, team), data)?;
 		Ok(())
 	}
-	fn match_entry_key(year: u32, event: &str, match_id: &str, team: &str) -> Vec<u8> {
+    fn match_entry_prefix(year: u32, event: &str) -> Vec<u8> {
 		let mut bytes = "match_entry".as_bytes().to_vec();
 		bytes.push(255);
 		bytes.extend_from_slice(&year.to_le_bytes());
 		bytes.push(255);
 		bytes.extend_from_slice(event.as_bytes());
 		bytes.push(255);
+		bytes
+    }
+	fn match_entry_key(year: u32, event: &str, match_id: &str, team: &str) -> Vec<u8> {
+		let mut bytes = Self::match_entry_prefix(year, event);
 		bytes.extend_from_slice(match_id.as_bytes());
 		bytes.push(255);
 		bytes.extend_from_slice(team.as_bytes());

@@ -1,4 +1,5 @@
 mod api;
+mod analysis;
 mod config;
 mod data_validation;
 mod database;
