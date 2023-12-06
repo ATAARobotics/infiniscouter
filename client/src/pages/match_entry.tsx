@@ -127,11 +127,11 @@ export function MatchEntry() {
 								console.log(id, value);
 
 								if (value === undefined) {
-									const tmp = { entries: { ...data.entries } };
+									const tmp = { entries: { ...data.entries }, timestamp_ms: Date.now() };
 									delete tmp.entries[id];
 									setData(tmp);
 								} else {
-									setData({ entries: { ...data.entries, [id]: value } });
+									setData({ entries: { ...data.entries, [id]: value }, timestamp_ms: Date.now() });
 								}
 							}}
 							allEntries={data.entries}
