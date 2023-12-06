@@ -5,50 +5,27 @@ import { MatchEntry } from "../generated/MatchEntry";
 import { AbilityMetric } from "../generated/AbilityMetric";
 import { BoolMetric } from "../generated/BoolMetric";
 import { TimerMetric } from "../generated/TimerMetric";
-import Button from "@mui/joy/Button";
-import ToggleButtonGroup from "@mui/joy/ToggleButtonGroup";
-import Box from "@mui/joy/Box";
 import { MatchEntryData } from "src/generated/MatchEntryData";
 import { MatchEntryValue } from "src/generated/MatchEntryValue";
 import {
-  Input,
-  Option,
+  Button,
+  ToggleButtonGroup,
+  Box,
   CircularProgress,
-  Select,
-  Slider,
   RadioGroup,
   Radio,
   Stack,
+  Typography,
+  Input,
 } from "@mui/joy";
+import { EventInfo } from "src/generated/EventInfo";
+import { MatchInfo } from "src/generated/MatchInfo";
+import { ChangeEvent } from "preact/compat";
 
 // Match Entry Page Component
 export function MatchEntry() {
-  const [matchId, setMatchId] = useState<string>();
-  const [teamId, setTeamId] = useState<string>();
-
-  if (matchId === undefined || teamId === undefined) {
-    return (
-      <Box>
-        <h1>Match Entry Page</h1>
-        <RadioGroup>
-          <Stack direction="row">
-            <Stack direction="column">
-              <Text>RED</Text>
-              <Radio value="4421" label="FORGE" />
-              <Radio value="254" label="CHEESE" />
-              <Radio value="4627" label="MANNING" />
-            </Stack>
-            <Stack direction="column">
-              <Text>BLUE</Text>
-              <Radio value="4334" label="SERIAL ATA" />
-              <Radio value="5015" label="SWATTY" />
-              <Radio value="1678" label="LEMON" />
-            </Stack>
-          </Stack>
-        </RadioGroup>
-      </Box>
-    );
-  }
+  const [matchId, setMatchId] = useState<number>();
+  const [teamId, setTeamId] = useState<number>();
 
   const [fields, setFields] = useState<MatchEntryFields>();
   useEffect(() => {
@@ -58,44 +35,98 @@ export function MatchEntry() {
         setFields(data2);
       });
   }, []);
-
   const [data, setData] = useState<MatchEntryData>({ entries: {} });
+
+  const matchTeams: EventInfo | null = JSON.parse(
+    localStorage.getItem("matchList") ?? "null",
+  );
+  if (!matchTeams) {
+    return (
+      <Box>
+        <Typography>Click "Save Data" to get list of matches...</Typography>
+      </Box>
+    );
+  }
+  const teamsForMatch: MatchInfo | undefined | 0 =
+    matchId !== undefined
+      ? matchTeams.match_infos.filter(
+          (match) =>
+            match.id.match_type === "qualification" && match.id.num === matchId,
+        )[0]
+      : undefined;
 
   return (
     <Box>
       <h1>Match Entry Page</h1>
-      {fields ? (
-        fields.pages.map((page) => (
-          <MatchPage
-            page={page}
-            entries={fields.entries}
-            setEntry={(id, value) => {
-              console.log(id, value);
-
-              if (value === undefined) {
-                const tmp = { entries: { ...data.entries } };
-                delete tmp.entries[id];
-                setData(tmp);
-              } else {
-                setData({ entries: { ...data.entries, [id]: value } });
-              }
-            }}
-            allEntries={data.entries}
-          ></MatchPage>
-        ))
-      ) : (
-        <div>
-          <CircularProgress
-            color="danger"
-            determinate={false}
-            size="sm"
-            value={25}
-            variant="solid"
-            thickness={7}
-          />
-          {"  "}Loading...
-        </div>
+      <Box>
+        <Typography>Qualification Match Number</Typography>
+        <Input
+          type="number"
+          placeholder={"Qualification Match Number"}
+          onChange={(ev: InputEvent) => {
+            setMatchId(parseInt((ev.target as HTMLInputElement).value));
+            setTeamId(undefined);
+          }}
+        />
+      </Box>
+      {teamsForMatch && (
+        <Box>
+          <RadioGroup
+            onChange={(ev: ChangeEvent) =>
+              setTeamId(parseInt((ev.target as HTMLInputElement).value))
+            }
+          >
+            <Stack direction="row">
+              <Stack direction="column">
+                <Typography>RED</Typography>
+                {teamsForMatch?.teams_red.map((team) => (
+                  <Radio value={team} label={team.toString()} />
+                ))}
+              </Stack>
+              <Stack direction="column">
+                <Typography>BLUE</Typography>
+                {teamsForMatch?.teams_blue.map((team) => (
+                  <Radio value={team} label={team.toString()} />
+                ))}
+              </Stack>
+            </Stack>
+          </RadioGroup>
+        </Box>
       )}
+      {teamsForMatch &&
+        teamId &&
+        (fields ? (
+          fields.pages.map((page) => (
+            <MatchPage
+              page={page}
+              entries={fields.entries}
+              setEntry={(id, value) => {
+                console.log(id, value);
+
+                if (value === undefined) {
+                  const tmp = { entries: { ...data.entries } };
+                  delete tmp.entries[id];
+                  setData(tmp);
+                } else {
+                  setData({ entries: { ...data.entries, [id]: value } });
+                }
+              }}
+              allEntries={data.entries}
+            ></MatchPage>
+          ))
+        ) : (
+          <div>
+            <CircularProgress
+              color="danger"
+              determinate={false}
+              size="sm"
+              value={25}
+              variant="solid"
+              thickness={7}
+            />
+            {"  "}Loading...
+          </div>
+        ))}
     </Box>
   );
 }
