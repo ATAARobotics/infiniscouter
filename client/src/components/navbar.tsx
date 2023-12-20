@@ -38,6 +38,7 @@ export function Navbar() {
             {[
               <a href={"/match_entry"}>Match Entry</a>,
               <a href={"/pit_entry"}>Pit Entry</a>,
+              <a href={"/analysis"}>Analysis</a>,
             ].map((text) => (
               <ListItem key={text}>
                 <ListItemButton>{text}</ListItemButton>

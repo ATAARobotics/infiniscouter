@@ -7,6 +7,7 @@ import { PitEntry } from "./pages/pit_entry";
 import { NotFound } from "./pages/not_found";
 import { CssVarsProvider } from "@mui/joy/styles";
 import CssBaseline from "@mui/joy/CssBaseline";
+import { Analysis } from "./pages/analysis";
 
 /**
  *	Main app component.
@@ -23,6 +24,7 @@ function App() {
             <Route path="/" component={Home} />
             <Route path="/match_entry" component={MatchEntry} />
             <Route path="/pit_entry" component={PitEntry} />
+            <Route path="/analysis" component={Analysis} />
             <Route default component={NotFound} />
           </Router>
         </main>
