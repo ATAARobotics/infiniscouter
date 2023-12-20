@@ -79,21 +79,13 @@ ranking_points:
 display:
   team_row:
     - source: single
-      metric: total-points
-    - source: single
-      metric: auto-points
-    - source: single
-      metric: teleop-points
-    - source: single
-      metric: endgame-points
-    - source: single
       metric: taxi
     - source: single
       metric: auto-score
     - source: single
       metric: auto-collect
     - source: single
-      metric: field-pickup
+      metric: field-pickups
     - source: single
       metric: low-goal
     - source: single
@@ -101,6 +93,6 @@ display:
     - source: single
       metric: climb-height
     - source: single
-      metric: climb-timing
+      metric: climb-time
   pre_match:
     # TODO

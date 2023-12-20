@@ -1,3 +1,5 @@
+#![feature(slice_group_by)]
+
 mod api;
 mod analysis;
 mod config;

@@ -2,7 +2,7 @@ pub mod data;
 
 use std::sync::Arc;
 
-use crate::analysis::{TeamInfoDisplay, self};
+use crate::analysis::{self, TeamInfoList};
 use crate::api::data::MatchEntryData;
 use crate::config::match_entry::MatchEntryFields;
 use crate::config::{ConfigManager, GameConfig, TeamConfig};
@@ -119,7 +119,7 @@ impl Api {
 		)
 	}
     #[oai(path = "/analysis/list", method = "get")]
-    pub async fn analysis_list(&self) -> Json<Vec<TeamInfoDisplay>> {
+    pub async fn analysis_list(&self) -> Json<TeamInfoList> {
         Json(analysis::list(&self.tba, &self.database, self.config.get_server_config(), self.config.get_current_game_config()).await)
     }
 }
