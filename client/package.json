@@ -14,7 +14,7 @@
   "devDependencies": {
     "@types/react": "^18.2.33",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
-    "esbuild": "^0.19.2",
+    "esbuild": "0.19.11",
     "eslint": "^8.49.0",
     "eslint-plugin-jsdoc": "^46.6.0",
     "eslint-plugin-react": "^7.33.2",
