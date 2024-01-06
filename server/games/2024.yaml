@@ -1,0 +1,98 @@
+name: Crescendo
+year: 2024
+categories:
+  auto:
+    name: Auto
+    metrics:
+      leave:
+        name: Leave
+        description: Moved from the starting line in the auto period
+        metric:
+          type: ability
+      auto-amp:
+        name: Scoring
+        description: Scored in Amp
+        metric:
+          type: ability
+          implies: [leave]
+      auto-speaker:
+        name: Collecting
+        description: Scored in Speaker
+        metric:
+          type: ability
+          implies: [leave]
+  teleop:
+    name: Scoring (Teleop)
+    metrics:
+      low-goal:
+        name: Low Goal
+        description: Scored in the low goal
+        metric:
+          type: ability
+      high-goal:
+        name: High Goal
+        description: Scored in the high goal
+        metric:
+          type: ability
+      field-pickups:
+        name: Field Pickups
+        description: Picked up a ball from the ground
+        metric:
+          type: ability
+  endgame:
+    name: Endgame
+    metrics:
+      climb-height:
+        name: Climb Height
+        description: How high the robot climbed
+        metric:
+          type: enum
+          options:
+            - None
+            - Low
+            - Mid
+            - High
+            - Traversal
+      climb-time:
+        name: Climb Timer
+        description: How long the robot took to climb
+        metric:
+          type: timer
+  team:
+    name: Team
+    metrics:
+      friendly:
+        name: Friendly
+        description: Was the team friendly
+        collect: pit_drive
+        metric:
+          type: bool
+      professionalism:
+        name: Professionalism
+        description: Did the team seem professional / well-coordinated
+        collect: pit_drive
+        metric:
+          type: bool
+ranking_points:
+  - Ball Threshold
+  - Climb Threshold
+display:
+  team_row:
+    - source: single
+      metric: taxi
+    - source: single
+      metric: auto-score
+    - source: single
+      metric: auto-collect
+    - source: single
+      metric: field-pickups
+    - source: single
+      metric: low-goal
+    - source: single
+      metric: high-goal
+    - source: single
+      metric: climb-height
+    - source: single
+      metric: climb-time
+  pre_match:
+    # TODO
