@@ -17,6 +17,7 @@ import {
   Stack,
   Typography,
   Input,
+  Autocomplete,
 } from "@mui/joy";
 import { EventInfo } from "src/generated/EventInfo";
 import { MatchInfo } from "src/generated/MatchInfo";

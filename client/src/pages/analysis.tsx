@@ -3,6 +3,7 @@ import Box from "@mui/joy/Box";
 import { TeamInfoList } from "../generated/TeamInfoList";
 import { useEffect, useState } from "preact/compat";
 import { Table } from "@mui/joy";
+import { DataValue } from "src/components/data_value";
 
 // Analysis Page Component
 export function Analysis() {
@@ -26,15 +27,15 @@ export function Analysis() {
       <Table stripe="even">
         <caption>Data Output</caption>
         <thead>
-          {table.names.map((name) => (
-            <th>{name}</th>
+          {table.names.map(title => (
+            <th style={{width: "250px"}}>{title}</th>
           ))}
         </thead>
         <tbody>
           {table.list.map((row) => (
-            <tr>
+            <tr style={{height: "250px"}}>
               {row.info.map((val) => (
-                <td>{JSON.stringify(val)}</td>
+                <DataValue value={val} />
               ))}
             </tr>
           ))}

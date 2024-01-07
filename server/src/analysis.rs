@@ -21,6 +21,8 @@ pub struct TeamInfoDisplay {
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
+#[serde(tag = "type", rename_all = "snake_case")]
+#[oai(discriminator_name = "type", rename_all = "snake_case")]
 pub enum TeamInfoEntry {
 	Text(TeamInfoTextEntry),
 	PieChart(PieChartEntry),
