@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "lib": ["es2022"],
     "strict": true,
     "jsxImportSource": "preact",
     "jsx": "react-jsx",

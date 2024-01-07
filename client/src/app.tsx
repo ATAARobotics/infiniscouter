@@ -8,6 +8,7 @@ import { NotFound } from "./pages/not_found";
 import { CssVarsProvider } from "@mui/joy/styles";
 import CssBaseline from "@mui/joy/CssBaseline";
 import { Analysis } from "./pages/analysis";
+import { TeamInfo } from "./pages/team_info";
 
 /**
  *	Main app component.
@@ -25,6 +26,7 @@ function App() {
             <Route path="/match_entry" component={MatchEntry} />
             <Route path="/pit_entry" component={PitEntry} />
             <Route path="/analysis" component={Analysis} />
+            <Route path="/team/:team" component={TeamInfo} />
             <Route default component={NotFound} />
           </Router>
         </main>
