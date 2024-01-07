@@ -28,12 +28,12 @@ export function Analysis() {
         <caption>Data Output</caption>
         <thead>
           {table.names.map(title => (
-            <th style={{width: "250px"}}>{title}</th>
+            <th style={{width: "50px"}}>{title}</th>
           ))}
         </thead>
         <tbody>
           {table.list.map((row) => (
-            <tr style={{height: "250px"}}>
+            <tr style={{height: "50px"}}>
               {row.info.map((val) => (
                 <DataValue value={val} />
               ))}

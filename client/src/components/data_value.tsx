@@ -13,7 +13,7 @@ const colorSchemes = [
 	["#fff433", "#9b59d0", "#2d2d2d", "#ffffff"],
 	["#ff218c", "#ffd800", "#0094ff"],
 	["#d60270", "#9b4f97", "#0038a7"],
-	["#000000", "#b9b9b9", "#b8f483", "#ffffff"],
+	["#b9b9b9", "#b8f483", "#ffffff", "#000000"],
 	["#e28d00", "#eccd00", "#65ace2", "#223756", "#ffffff"],
 	["#3da542", "#a7d379", "#a9a9a9", "#ffffff", "#000000"],
 	["#800080", "#808080", "#ffffff", "#000000"],
@@ -32,16 +32,17 @@ export function DataValue(props: DataValueProps) {
 		case "text":
 			return <td><p>{props.value.display_text}</p></td>;
 		case "pie_chart": {
+			console.log(props.value.options);
 			return <td><Doughnut data={{
-				labels: ["Red", "Orange", "Yellow", "Green", "Blue"],
+				labels: props.value.options.reverse().map(op => op.label),
 				datasets: [
 					{
-						label: "Dataset 1",
-						data: [1, 2, 3, 4, 5],
+						label: "Data",
+						data: props.value.options.reverse().map(op => op.value),
 						backgroundColor: colorSchemes[Math.floor(Math.random() * colorSchemes.length)],
 					},
 				],
-			}} /></td>;
+			}} options={{ plugins: { legend: { display: false, reverse: true } } }} /></td>;
 		}
 	}
 }
