@@ -2,7 +2,7 @@ pub mod data;
 
 use std::sync::Arc;
 
-use crate::analysis::{self, TeamInfoList};
+use crate::analysis::{self, TeamInfoList, SingleTeamInfo};
 use crate::api::data::MatchEntryData;
 use crate::config::match_entry::MatchEntryFields;
 use crate::config::{ConfigManager, GameConfig, TeamConfig};
@@ -121,5 +121,9 @@ impl Api {
     #[oai(path = "/analysis/list", method = "get")]
     pub async fn analysis_list(&self) -> Json<TeamInfoList> {
         Json(analysis::list(&self.tba, &self.database, self.config.get_server_config(), self.config.get_current_game_config()).await)
+    }
+    #[oai(path = "/analysis/team/:team", method = "get")]
+    pub async fn analysis_team(&self, team: Path<u32>) -> Json<SingleTeamInfo> {
+        Json(analysis::single_team(&self.tba, &self.database, self.config.get_server_config(), self.config.get_current_game_config(), team.0).await)
     }
 }

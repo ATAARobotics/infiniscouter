@@ -1,5 +1,5 @@
 use std::{
-	collections::{btree_map::Entry, BTreeMap},
+	collections::{btree_map::Entry, BTreeMap, HashMap},
 	sync::Arc,
 };
 
@@ -23,15 +23,53 @@ pub struct Tba {
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct EventInfo {
 	pub match_infos: Vec<MatchInfo>,
+	pub team_infos: HashMap<u32, TeamInfo>,
 }
 
 impl EventInfo {
-	fn from_match_infos(match_infos: Vec<RawTbaMatch>) -> EventInfo {
+	async fn new(
+		match_infos: Vec<RawTbaMatch>,
+		team_infos: Vec<RawTbaTeam>,
+		client: &Client,
+        year: u32,
+	) -> EventInfo {
+		let mut new_team_infos = HashMap::new();
+		for team_info in team_infos {
+			let image = client // TODO: Use the right event
+				.get(format!(
+					"https://www.thebluealliance.com/api/v3/team/{}/media/{year}",
+					team_info.team_number
+				))
+				.send()
+				.await
+				.unwrap()
+				.json::<Vec<RawTbaImage>>()
+				.await
+				.ok()
+				.and_then(|media| {
+					media
+						.into_iter()
+						.filter(|i| i.ty == "avatar")
+						.find_map(|i| i.details.and_then(|d| d.base64_image))
+				});
+			new_team_infos.insert(
+				team_info.team_number,
+				TeamInfo {
+					num: team_info.team_number,
+					name: team_info
+						.nickname
+						.or(team_info.name)
+						.unwrap_or_else(|| "unknown".to_string()),
+					icon_uri: image,
+				},
+			);
+		}
 		EventInfo {
 			match_infos: match_infos
 				.into_iter()
 				.filter_map(|m| m.to_match().ok())
 				.collect(),
+			team_infos: new_team_infos,
 		}
 	}
 }
@@ -52,16 +90,29 @@ impl Tba {
 		Some(
 			match self.event_cache.lock().await.entry(event.to_string()) {
 				Entry::Occupied(entry) => entry.into_mut(),
-				Entry::Vacant(entry) => entry.insert(Arc::new(EventInfo::from_match_infos(
-					self.client
-						.get("https://www.thebluealliance.com/api/v3/event/2022bcvi/matches")
-						.send()
-						.await
-						.ok()?
-						.json::<Vec<RawTbaMatch>>()
-						.await
-						.ok()?,
-				))),
+				Entry::Vacant(entry) => entry.insert(Arc::new(
+					EventInfo::new(
+						self.client // TODO: Use the right event
+							.get(format!("https://www.thebluealliance.com/api/v3/event/{event}/matches"))
+							.send()
+							.await
+							.ok()?
+							.json::<Vec<RawTbaMatch>>()
+							.await
+							.ok()?,
+						self.client
+							.get(format!("https://www.thebluealliance.com/api/v3/event/{event}/teams"))
+							.send()
+							.await
+							.ok()?
+							.json::<Vec<RawTbaTeam>>()
+							.await
+							.ok()?,
+						&self.client,
+                        event[0..4].parse::<u32>().unwrap(), // TODO: Pass year to this function instead
+					)
+					.await,
+				)),
 			}
 			.to_owned(),
 		)
@@ -132,6 +183,33 @@ struct RawTbaAlliances {
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 struct RawTbaAlliance {
 	team_keys: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+struct RawTbaTeam {
+	team_number: u32,
+	name: Option<String>,
+	nickname: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+struct RawTbaImage {
+	ty: String,
+	details: Option<RawTbaImageDetails>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct RawTbaImageDetails {
+	base64_image: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct TeamInfo {
+	pub num: u32,
+	pub name: String,
+	pub icon_uri: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
