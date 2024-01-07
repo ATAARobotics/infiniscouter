@@ -10,54 +10,78 @@ categories:
         metric:
           type: ability
       auto-amp:
-        name: Scoring
+        name: Auto Amp
         description: Scored in Amp
         metric:
           type: ability
           implies: [leave]
       auto-speaker:
-        name: Collecting
+        name: Auto Speaker
         description: Scored in Speaker
         metric:
           type: ability
           implies: [leave]
+      
   teleop:
     name: Scoring (Teleop)
     metrics:
-      low-goal:
-        name: Low Goal
-        description: Scored in the low goal
+      teleop-amp:
+        name: Teleop Amp
+        description: Scored in Amp
         metric:
           type: ability
-      high-goal:
-        name: High Goal
-        description: Scored in the high goal
+      teleop-speaker:
+        name: Teleop Speaker
+        description: Scored in Speaker
         metric:
           type: ability
-      field-pickups:
-        name: Field Pickups
-        description: Picked up a ball from the ground
+      coopertition:
+        name: Coopertition
+        description: Activated Coopertition
         metric:
           type: ability
-  endgame:
-    name: Endgame
-    metrics:
-      climb-height:
-        name: Climb Height
-        description: How high the robot climbed
+      amplifier:
+        name: Amplifier
+        description: Activated Amplifier
         metric:
           type: enum
           options:
-            - None
-            - Low
-            - Mid
-            - High
-            - Traversal
-      climb-time:
-        name: Climb Timer
-        description: How long the robot took to climb
+            - "No"
+            - Once
+            - Twice
+            - Thrice
+            - Quadrice
+            - Five+
+      climb:
+        name: Climb
+        description: Can they climb
         metric:
-          type: timer
+          type: enum
+          options:
+            - Didnt attempt
+            - Climbed
+            - Fell
+            - Fell on alliance partner
+      trap:
+        name: Trap
+        description: Did Trap
+        metric:
+          type: ability
+      harmony:
+        name: Harmony
+        description: Can they climb with others
+        metric:
+          type: ability
+      spotlit:
+        name: Spotlit
+        description: Human player skill
+        metric:
+          type: enum
+          options:
+            - Failed
+            - One on
+            - Two on
+            - All three on (pro gamer)
   team:
     name: Team
     metrics:
@@ -74,25 +98,31 @@ categories:
         metric:
           type: bool
 ranking_points:
-  - Ball Threshold
-  - Climb Threshold
+  - Melody
+  - Ensemble
 display:
   team_row:
     - source: single
-      metric: taxi
+      metric: leave
     - source: single
-      metric: auto-score
+      metric: auto-amp
     - source: single
-      metric: auto-collect
+      metric: auto-speaker
     - source: single
-      metric: field-pickups
+      metric: teleop-amp
     - source: single
-      metric: low-goal
+      metric: teleop-speaker
     - source: single
-      metric: high-goal
+      metric: coopertition
     - source: single
-      metric: climb-height
+      metric: amplifier
     - source: single
-      metric: climb-time
+      metric: climb
+    - source: single
+      metric: trap
+    - source: single
+      metric: harmony
+    - source: single
+      metric: spotlit
   pre_match:
     # TODO
