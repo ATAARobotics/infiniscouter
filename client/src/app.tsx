@@ -9,6 +9,7 @@ import { CssVarsProvider } from "@mui/joy/styles";
 import CssBaseline from "@mui/joy/CssBaseline";
 import { Analysis } from "./pages/analysis";
 import { TeamInfo } from "./pages/team_info";
+import { Reload } from "./pages/reload";
 
 /**
  *	Main app component.
@@ -23,6 +24,7 @@ function App() {
         <main>
           <Router>
             <Route path="/" component={Home} />
+            <Route path="/api/docs" component={Reload} />
             <Route path="/match_entry" component={MatchEntry} />
             <Route path="/pit_entry" component={PitEntry} />
             <Route path="/analysis" component={Analysis} />
