@@ -773,6 +773,7 @@ name = "infiniscouter-server"
 version = "0.1.0"
 dependencies = [
  "color-eyre",
+ "futures-util",
  "log",
  "poem",
  "poem-openapi",

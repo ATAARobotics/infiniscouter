@@ -4,6 +4,7 @@ use std::{
 };
 
 use color_eyre::{eyre::bail, Result};
+use futures_util::future;
 use log::error;
 use poem::http::{HeaderMap, HeaderValue};
 use poem_openapi::{Object, Union};
@@ -31,45 +32,49 @@ impl EventInfo {
 		match_infos: Vec<RawTbaMatch>,
 		team_infos: Vec<RawTbaTeam>,
 		client: &Client,
-        year: u32,
+		year: u32,
 	) -> EventInfo {
-		let mut new_team_infos = HashMap::new();
-		for team_info in team_infos {
-			let image = client // TODO: Use the right event
-				.get(format!(
-					"https://www.thebluealliance.com/api/v3/team/{}/media/{year}",
-					team_info.team_number
-				))
-				.send()
-				.await
-				.unwrap()
-				.json::<Vec<RawTbaImage>>()
-				.await
-				.ok()
-				.and_then(|media| {
-					media
-						.into_iter()
-						.filter(|i| i.ty == "avatar")
-						.find_map(|i| i.details.and_then(|d| d.base64_image))
-				});
-			new_team_infos.insert(
-				team_info.team_number,
-				TeamInfo {
-					num: team_info.team_number,
-					name: team_info
-						.nickname
-						.or(team_info.name)
-						.unwrap_or_else(|| "unknown".to_string()),
-					icon_uri: image,
-				},
-			);
-		}
+		let team_infos: HashMap<_, _> = future::join_all(team_infos
+            .into_iter()
+			.map(|team_info| async move {
+				let image = client // TODO: Use the right event
+					.get(format!(
+						"https://www.thebluealliance.com/api/v3/team/{}/media/{year}",
+						team_info.team_number
+					))
+					.send()
+					.await
+					.unwrap()
+					.json::<Vec<RawTbaImage>>()
+					.await
+					.ok()
+					.and_then(|media| {
+						media
+							.into_iter()
+							.filter(|i| i.ty == "avatar")
+							.find_map(|i| i.details.and_then(|d| d.base64_image))
+					});
+				(
+					team_info.team_number,
+					TeamInfo {
+						num: team_info.team_number,
+						name: team_info
+							.nickname
+							.or(team_info.name)
+							.unwrap_or_else(|| "unknown".to_string()),
+						icon_uri: image,
+					},
+				)
+			}))
+			.await
+			.into_iter()
+			.collect();
 		EventInfo {
 			match_infos: match_infos
 				.into_iter()
 				.filter_map(|m| m.to_match().ok())
 				.collect(),
-			team_infos: new_team_infos,
+			team_infos,
 		}
 	}
 }
@@ -93,7 +98,9 @@ impl Tba {
 				Entry::Vacant(entry) => entry.insert(Arc::new(
 					EventInfo::new(
 						self.client // TODO: Use the right event
-							.get(format!("https://www.thebluealliance.com/api/v3/event/{event}/matches"))
+							.get(format!(
+								"https://www.thebluealliance.com/api/v3/event/{event}/matches"
+							))
 							.send()
 							.await
 							.ok()?
@@ -101,7 +108,9 @@ impl Tba {
 							.await
 							.ok()?,
 						self.client
-							.get(format!("https://www.thebluealliance.com/api/v3/event/{event}/teams"))
+							.get(format!(
+								"https://www.thebluealliance.com/api/v3/event/{event}/teams"
+							))
 							.send()
 							.await
 							.ok()?
@@ -109,7 +118,7 @@ impl Tba {
 							.await
 							.ok()?,
 						&self.client,
-                        event[0..4].parse::<u32>().unwrap(), // TODO: Pass year to this function instead
+						event[0..4].parse::<u32>().unwrap(), // TODO: Pass year to this function instead
 					)
 					.await,
 				)),

@@ -74,13 +74,13 @@ display:
   team_row:
     - source: team_name
     - source: single
-      metric: total-points
+      metric: statbotics-points
     - source: single
-      metric: auto-points
+      metric: statbotics-auto-points
     - source: single
-      metric: teleop-points
+      metric: statbotics-teleop-points
     - source: single
-      metric: endgame-points
+      metric: statbotics-endgame-points
     - source: _YEAR_SPECIFIC
     - source: single
       metric: speed

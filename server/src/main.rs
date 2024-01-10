@@ -6,6 +6,7 @@ mod config;
 mod data_validation;
 mod database;
 mod server;
+mod statbotics;
 mod tba;
 
 use crate::config::ConfigManager;

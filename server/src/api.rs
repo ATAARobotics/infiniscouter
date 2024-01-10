@@ -2,12 +2,13 @@ pub mod data;
 
 use std::sync::Arc;
 
-use crate::analysis::{self, TeamInfoList, SingleTeamInfo};
+use crate::analysis::{self, SingleTeamInfo, TeamInfoList};
 use crate::api::data::MatchEntryData;
 use crate::config::match_entry::MatchEntryFields;
 use crate::config::{ConfigManager, GameConfig, TeamConfig};
 use crate::data_validation::validate_match;
 use crate::database::Database;
+use crate::statbotics::StatboticsCache;
 use crate::tba::{EventInfo, Tba};
 use poem::http::StatusCode;
 use poem_openapi::param::Path;
@@ -21,14 +22,21 @@ pub struct Api {
 	config: ConfigManager,
 	database: Database,
 	tba: Tba,
+	statbotics: StatboticsCache,
 }
 
 impl Api {
-	pub fn new(config: ConfigManager, database: Database, tba: Tba) -> Self {
+	pub fn new(
+		tba: Tba,
+		statbotics: StatboticsCache,
+		config: ConfigManager,
+		database: Database,
+	) -> Self {
 		Self {
 			config,
 			database,
 			tba,
+			statbotics,
 		}
 	}
 }
@@ -74,7 +82,12 @@ impl Api {
 		let fields = &self.config.get_current_game_config().match_entry_fields;
 		Ok(Json(data.map(|data| validate_match(data, fields))))
 	}
-    fn match_entry_set_data_inner(&self, match_id: &str, team: &str, data: MatchEntryData) -> poem::Result<()> {
+	fn match_entry_set_data_inner(
+		&self,
+		match_id: &str,
+		team: &str,
+		data: MatchEntryData,
+	) -> poem::Result<()> {
 		let fields = &self.config.get_current_game_config().match_entry_fields;
 		let data = validate_match(data, fields);
 		self.database
@@ -87,7 +100,7 @@ impl Api {
 			)
 			.map_err(|e| poem::Error::new(e, StatusCode::INTERNAL_SERVER_ERROR))?;
 		Ok(())
-    }
+	}
 	/// Set data for a particular match
 	#[oai(path = "/match_entry/data/:match_id/:team", method = "put")]
 	pub async fn match_entry_set_data(
@@ -96,19 +109,23 @@ impl Api {
 		team: Path<String>,
 		data: Json<MatchEntryData>,
 	) -> poem::Result<()> {
-        self.match_entry_set_data_inner(&match_id, &team, data.0)
+		self.match_entry_set_data_inner(&match_id, &team, data.0)
 	}
-    /// Set data for multiple matches
+	/// Set data for multiple matches
 	#[oai(path = "/match_entry/data/all", method = "put")]
-    pub async fn match_entry_set_multiple(
-        &self,
-        data: Json<Vec<MatchEntryIdData>>
-    ) -> poem::Result<()> {
-        for match_entry in data.0 {
-            self.match_entry_set_data_inner(&match_entry.match_id, &match_entry.team_id, match_entry.data)?;
-        }
-        Ok(())
-    }
+	pub async fn match_entry_set_multiple(
+		&self,
+		data: Json<Vec<MatchEntryIdData>>,
+	) -> poem::Result<()> {
+		for match_entry in data.0 {
+			self.match_entry_set_data_inner(
+				&match_entry.match_id,
+				&match_entry.team_id,
+				match_entry.data,
+			)?;
+		}
+		Ok(())
+	}
 	/// Get a list of all matches for the current event (as well as any teams involved)
 	#[oai(path = "/event/matches", method = "get")]
 	pub async fn event_list_matches(&self) -> Json<Option<Arc<EventInfo>>> {
@@ -118,12 +135,31 @@ impl Api {
 				.await,
 		)
 	}
-    #[oai(path = "/analysis/list", method = "get")]
-    pub async fn analysis_list(&self) -> Json<TeamInfoList> {
-        Json(analysis::list(&self.tba, &self.database, self.config.get_server_config(), self.config.get_current_game_config()).await)
-    }
-    #[oai(path = "/analysis/team/:team", method = "get")]
-    pub async fn analysis_team(&self, team: Path<u32>) -> Json<SingleTeamInfo> {
-        Json(analysis::single_team(&self.tba, &self.database, self.config.get_server_config(), self.config.get_current_game_config(), team.0).await)
-    }
+	#[oai(path = "/analysis/list", method = "get")]
+	pub async fn analysis_list(&self) -> Json<TeamInfoList> {
+		Json(
+			analysis::list(
+				&self.tba,
+                &self.statbotics,
+				&self.database,
+				self.config.get_server_config(),
+				self.config.get_current_game_config(),
+			)
+			.await,
+		)
+	}
+	#[oai(path = "/analysis/team/:team", method = "get")]
+	pub async fn analysis_team(&self, team: Path<u32>) -> Json<SingleTeamInfo> {
+		Json(
+			analysis::single_team(
+				&self.tba,
+                &self.statbotics,
+				&self.database,
+				self.config.get_server_config(),
+				self.config.get_current_game_config(),
+				team.0,
+			)
+			.await,
+		)
+	}
 }

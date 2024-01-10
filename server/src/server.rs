@@ -1,6 +1,7 @@
 use crate::api::Api;
 use crate::config::ConfigManager;
 use crate::database::Database;
+use crate::statbotics::StatboticsCache;
 use crate::tba::Tba;
 use color_eyre::Result;
 use poem::endpoint::StaticFilesEndpoint;
@@ -15,7 +16,12 @@ impl ScoutingServer {
 	pub fn new(config: ConfigManager, database: Database) -> Result<Self> {
 		let tba_auth_key = config.get_tba_auth_key().to_string();
 		Ok(Self {
-			api: Api::new(config, database, Tba::new(tba_auth_key)?),
+			api: Api::new(
+				Tba::new(tba_auth_key)?,
+				StatboticsCache::new(config.get_server_config().current_year),
+				config,
+				database,
+			),
 		})
 	}
 	/// Start serving connections on `addr`
