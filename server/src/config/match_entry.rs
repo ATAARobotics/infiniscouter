@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use ts_rs::TS;
 
+// TODO: Rename the following types
+
 /// The list of entries to display to the user to collect and then send back to the server
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
@@ -68,7 +70,7 @@ impl From<&CollectedMetricType> for MatchEntryType {
 }
 
 impl MatchEntryFields {
-	pub fn from_game_config(game_config: &GameConfig) -> Self {
+	pub fn from_game_config(game_config: &GameConfig, is_pit: bool) -> Self {
 		Self {
 			entries: game_config
 				.categories
@@ -77,7 +79,7 @@ impl MatchEntryFields {
 					category
 						.metrics
 						.iter()
-						.filter(|(_, metric)| metric.collect.collect_in_match())
+						.filter(|(_, metric)| (is_pit && metric.collect.collect_in_pit()) || (!is_pit && metric.collect.collect_in_match()))
 						.map(|(metric_id, metric)| {
 							(
 								metric_id.clone(),
@@ -99,7 +101,7 @@ impl MatchEntryFields {
 					layout: cat
 						.metrics
 						.iter()
-						.filter(|(_, metric)| metric.collect.collect_in_match())
+						.filter(|(_, metric)| (is_pit && metric.collect.collect_in_pit()) || (!is_pit && metric.collect.collect_in_match()))
 						.map(|(metric, _)| metric.clone())
 						.collect(),
 				})

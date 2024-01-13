@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use crate::{
-	api::data::{MatchEntryIdData, MatchEntryValue},
+	api::data::{MatchEntryIdData, MatchEntryValue, MatchEntryData},
 	config::{match_entry::MatchEntryType, GameConfigs, TeamConfig, SingleMetric, TeamNameMetric},
 	database::Database,
 	statbotics::{StatboticsCache, StatboticsTeam},
@@ -112,6 +112,7 @@ fn get_pie_chart(data_points: &[&MatchEntryValue]) -> TeamInfoEntry {
 fn single_team_impl(
 	config: &GameConfigs,
 	match_entries: &[MatchEntryIdData],
+    pit_entry: Option<&MatchEntryData>,
 	tba_data: &EventInfo,
 	statbotics: Option<&StatboticsTeam>,
 	team: u32,
@@ -192,6 +193,7 @@ fn single_team_impl(
 						.iter()
 						.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team)
 						.filter_map(|match_entry| match_entry.data.entries.get(&metric.metric))
+                        .chain(pit_entry.and_then(|pe| pe.entries.get(&metric.metric)).iter().map(|m| *m))
 						.collect();
 					match config
 						.match_entry_fields
@@ -267,6 +269,8 @@ fn table_labels(config: &GameConfigs) -> Vec<String> {
                     }.to_string()
                 } else if let Some(title) = config.match_entry_fields.entries.get(&metric.metric).as_ref().map(|m| &m.title) {
                     title.clone()
+                } else if let Some(title) = config.pit_entry_fields.entries.get(&metric.metric).as_ref().map(|m| &m.title) {
+                    title.clone()
                 } else {
                     metric.metric.clone()
                 }
@@ -314,6 +318,7 @@ pub async fn single_team(
 				single_team_impl(
 					config,
 					&match_entries,
+                    database.get_pit_entry_data(team_config.current_year, &team_config.current_event, &team.to_string()).unwrap().as_ref(),
 					&tba_data,
 					statbotics.get(team).await.as_deref(),
 					team,
@@ -333,6 +338,8 @@ pub async fn list(
 ) -> TeamInfoList {
 	let match_entries =
 		database.get_all_match_entries(team_config.current_year, &team_config.current_event);
+	let pit_entries =
+		database.get_all_pit_entries(team_config.current_year, &team_config.current_event);
 	let tba_data = tba.get_event(&team_config.current_event).await.unwrap();
 	let tba_teams = future::join_all(
 		tba_data
@@ -346,7 +353,7 @@ pub async fn list(
 		list: tba_teams
 			.into_iter()
 			.map(|(team, sb)| TeamInfoDisplay {
-				info: single_team_impl(config, &match_entries, &tba_data, sb.as_deref(), *team),
+				info: single_team_impl(config, &match_entries, pit_entries.get(&team.to_string()), &tba_data, sb.as_deref(), *team),
 				pin_right_count: 5,
 				pin_left_count: 4,
 			})

@@ -80,6 +80,12 @@ impl CollectionOption {
 			CollectionOption::MatchOnly | CollectionOption::MatchPit
 		)
 	}
+	pub fn collect_in_pit(&self) -> bool {
+		matches!(
+			self,
+			CollectionOption::PitOnly | CollectionOption::MatchPit | CollectionOption::PitDrive
+		)
+	}
 }
 
 /// How to collect the metric
@@ -206,12 +212,15 @@ pub struct GameConfigs {
 	pub game_config: GameConfig,
 	/// The fields to gather per match
 	pub match_entry_fields: MatchEntryFields,
+	/// The fields to gather per match
+	pub pit_entry_fields: MatchEntryFields,
 }
 
 impl From<GameConfig> for GameConfigs {
 	fn from(value: GameConfig) -> Self {
 		GameConfigs {
-			match_entry_fields: MatchEntryFields::from_game_config(&value),
+			match_entry_fields: MatchEntryFields::from_game_config(&value, false),
+            pit_entry_fields: MatchEntryFields::from_game_config(&value, true),
 			game_config: value,
 		}
 	}

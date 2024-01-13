@@ -15,7 +15,7 @@ use poem_openapi::param::Path;
 use poem_openapi::payload::Json;
 use poem_openapi::OpenApi;
 
-use self::data::MatchEntryIdData;
+use self::data::{MatchEntryIdData, PitEntryIdData};
 
 #[derive(Debug)]
 pub struct Api {
@@ -120,6 +120,68 @@ impl Api {
 		for match_entry in data.0 {
 			self.match_entry_set_data_inner(
 				&match_entry.match_id,
+				&match_entry.team_id,
+				match_entry.data,
+			)?;
+		}
+		Ok(())
+	}
+	/// Get the fields to gather per match
+	#[oai(path = "/pit_entry/fields", method = "get")]
+	pub async fn pit_entry_fields(&self) -> Json<&MatchEntryFields> {
+		Json(&self.config.get_current_game_config().pit_entry_fields)
+	}
+	/// Get pit data for a particular team
+	#[oai(path = "/pit_entry/data/:match_id/:team", method = "get")]
+	pub async fn pit_entry_data(
+		&self,
+		team: Path<String>,
+	) -> poem::Result<Json<Option<MatchEntryData>>> {
+		let data = self
+			.database
+			.get_pit_entry_data(
+				self.config.get_server_config().current_year,
+				&self.config.get_server_config().current_event,
+				&team,
+			)
+			.map_err(|e| poem::Error::new(e, StatusCode::INTERNAL_SERVER_ERROR))?;
+		let fields = &self.config.get_current_game_config().pit_entry_fields;
+		Ok(Json(data.map(|data| validate_match(data, fields))))
+	}
+	fn pit_entry_set_data_inner(
+		&self,
+		team: &str,
+		data: MatchEntryData,
+	) -> poem::Result<()> {
+		let fields = &self.config.get_current_game_config().pit_entry_fields;
+		let data = validate_match(data, fields);
+		self.database
+			.set_pit_entry_data(
+				self.config.get_server_config().current_year,
+				&self.config.get_server_config().current_event,
+				&team,
+				&data,
+			)
+			.map_err(|e| poem::Error::new(e, StatusCode::INTERNAL_SERVER_ERROR))?;
+		Ok(())
+	}
+	/// Set data for a particular match
+	#[oai(path = "/pit_entry/data/:match_id/:team", method = "put")]
+	pub async fn pit_entry_set_data(
+		&self,
+		team: Path<String>,
+		data: Json<MatchEntryData>,
+	) -> poem::Result<()> {
+		self.pit_entry_set_data_inner(&team, data.0)
+	}
+	/// Set data for multiple matches
+	#[oai(path = "/pit_entry/data/all", method = "put")]
+	pub async fn pit_entry_set_multiple(
+		&self,
+		data: Json<Vec<PitEntryIdData>>,
+	) -> poem::Result<()> {
+		for match_entry in data.0 {
+			self.pit_entry_set_data_inner(
 				&match_entry.team_id,
 				match_entry.data,
 			)?;

@@ -69,6 +69,73 @@ categories:
         metric:
           type: statbotics_team
           prop: total_epa_end
+  pit-team:
+    name: Team
+    metrics:
+      confidence-level:
+        name: Confidence in Answers
+        description: No Description
+        collect: pit_only
+        metric:
+          type: enum
+          options: ["Honest about issues", "Unsure on a lot", "Generally anxious", "Uncertain on a few things", "Confident"]
+      pit-people:
+        name: Number of People in Pit
+        description: No Description
+        collect: pit_only
+        metric:
+          type: enum
+          options: ["Hard to find", "One or two", "A few", "Very a lot"]
+      chaos:
+        name: Chaos Level
+        description: No Description
+        collect: pit_only
+        metric:
+          type: enum
+          options: ["Boring", "Calm, Cool & Collected", "Average", "Slightly Frantic", "Pure Chaos"]
+  pit-robot:
+    name: Robot
+    metrics:
+      bumper-type:
+        name: Bumper Type
+        description: No Description
+        collect: pit_only
+        metric:
+          type: enum
+          options: ["Swap Manually", "Reversible", "Other"]
+      bumper-type:
+        name: Has Vision
+        description: No Description
+        collect: pit_only
+        metric:
+          type: bool
+      playstyle:
+        name: Preferred Playstyle
+        description: No Description
+        collect: pit_only
+        metric:
+          type: enum
+          options: ["Only Defence", "Prefer Defence", "Prefer Offence", "Only Offence", "Both/Other"]
+      charge-battery:
+        name: Can charge batteries
+        description: No Description
+        collect: pit_only
+        metric:
+          type: bool
+      battery-count:
+        name: Amount of batteries
+        description: No Description
+        collect: pit_only
+        metric:
+          type: enum
+          options: ["Just one", "Two", "At least four", "Six+"]
+      drive-train:
+        name: Drive Train Type
+        description: No Description
+        collect: pit_only
+        metric:
+          type: enum
+          options: ["Tank", "Omni/Mecanum", "Swerve", "Hoverboard/Other"]
 ranking_points:
 display:
   team_row:
