@@ -248,7 +248,7 @@ interface BoolEntryProps {
 }
 interface TimerEntryProps {
   value: MatchEntryValue | undefined;
-  setValue: (value: MatchEntryValue) => void;
+  setValue: (value: MatchEntryValue | undefined) => void;
   entry: TimerMetric;
 }
 
@@ -311,26 +311,25 @@ interface NullTimer {
 interface RunningTimer {
   type: "running";
   startTime: number;
-  currentTime: number;
 }
 interface ValueTimer {
   type: "value";
   totalTime: number;
 }
+
 type TimerState = NullTimer | RunningTimer | ValueTimer;
 
 function TimerEntry(props: TimerEntryProps) {
   const [state, setState] = useState<TimerState>({ type: "null" });
+  const [currentTime, setCurrentTime] = useState<number>(Date.now());
+
   useEffect(() => {
     if (state.type === "running") {
-      const id = setTimeout(
-        () => setState({ ...state, currentTime: Date.now() }),
-        100,
-      );
+      const id = setTimeout(() => setCurrentTime(Date.now()), 100);
 
       return () => clearTimeout(id);
     }
-  }, [state]);
+  }, [currentTime, setCurrentTime, state]);
 
   return state.type === "null" ? (
     <Button
@@ -338,17 +337,15 @@ function TimerEntry(props: TimerEntryProps) {
         setState({
           type: "running",
           startTime: Date.now(),
-          currentTime: Date.now(),
         });
+        setCurrentTime(Date.now());
       }}
     >
       Start
     </Button>
   ) : state.type === "running" ? (
     <>
-      <p>
-        Running! {(state.currentTime - state.startTime) / 1000} seconds elapsed.
-      </p>
+      <p>Running! {(currentTime - state.startTime) / 1000} seconds elapsed.</p>
       <Button
         onClick={() => {
           const time = Date.now() - state.startTime;
@@ -367,8 +364,8 @@ function TimerEntry(props: TimerEntryProps) {
           setState({
             type: "running",
             startTime: Date.now() - state.totalTime,
-            currentTime: Date.now(),
           });
+          setCurrentTime(Date.now());
         }}
       >
         Continue timer?
@@ -376,6 +373,7 @@ function TimerEntry(props: TimerEntryProps) {
       <Button
         onClick={() => {
           setState({ type: "null" });
+          props.setValue(undefined);
         }}
       >
         Reset timer?
