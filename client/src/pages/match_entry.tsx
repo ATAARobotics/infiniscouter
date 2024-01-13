@@ -131,8 +131,6 @@ export function MatchEntry() {
               page={page}
               entries={fields.entries}
               setEntry={(id, value) => {
-                console.log(id, value);
-
                 if (value === undefined) {
                   const tmp = {
                     entries: { ...data.entries },

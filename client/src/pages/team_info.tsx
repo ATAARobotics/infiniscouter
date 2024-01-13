@@ -11,7 +11,6 @@ interface TeamInfoProps {
 
 // Team Info Page Component
 export function TeamInfo(props: TeamInfoProps) {
-  console.log(props);
   const [data, setData] = useState<SingleTeamInfo>();
   useEffect(() => {
     fetch("/api/analysis/team/" + props.team)
@@ -20,7 +19,6 @@ export function TeamInfo(props: TeamInfoProps) {
         setData(data2);
       });
   }, []);
-  console.log(data);
   return (
     <Stack
       direction="row"

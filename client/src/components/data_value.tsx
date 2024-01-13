@@ -36,7 +36,6 @@ export function DataValue(props: DataValueProps) {
         </td>
       );
     case "pie_chart": {
-      console.log(props.value.options);
       return (
         <td>
           <Doughnut
