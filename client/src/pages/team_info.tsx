@@ -28,21 +28,27 @@ export function TeamInfo(props: TeamInfoProps) {
     >
       <Card sx={{ width: 320 }}>
         <Typography level="title-lg">
-          {data?.team_number}<br />{data?.team_name}
+          {data?.team_number}
+          <br />
+          {data?.team_name}
         </Typography>
-        {data?.team_icon_uri !== null && <AspectRatio minHeight="120px" maxHeight="200px">
-          <img src={data?.team_icon_uri} />
-        </AspectRatio>}
+        {data?.team_icon_uri !== null && (
+          <AspectRatio minHeight="120px" maxHeight="200px">
+            <img src={data?.team_icon_uri} />
+          </AspectRatio>
+        )}
       </Card>
       {data !== undefined ? (
-        Object.entries(data.data).filter((entry) => entry[1].type !== "team_name").map((entry) => {
-          return (
-            <Card sx={{ width: 320 }}>
-              <Typography level="title-lg">{entry[0]}</Typography>
-              <DataValue value={entry[1]}></DataValue>
-            </Card>
-          );
-        })
+        Object.entries(data.data)
+          .filter((entry) => entry[1].type !== "team_name")
+          .map((entry) => {
+            return (
+              <Card sx={{ width: 320 }}>
+                <Typography level="title-lg">{entry[0]}</Typography>
+                <DataValue value={entry[1]}></DataValue>
+              </Card>
+            );
+          })
       ) : (
         <></>
       )}

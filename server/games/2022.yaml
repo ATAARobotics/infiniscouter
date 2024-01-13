@@ -82,16 +82,20 @@ display:
       metric: taxi
     - source: single
       metric: auto-score
+      display: true
     - source: single
       metric: auto-collect
     - source: single
       metric: field-pickups
     - source: single
       metric: low-goal
+      display: true
     - source: single
       metric: high-goal
+      display: true
     - source: single
       metric: climb-height
+      display: true
     - source: single
       metric: climb-time
   pre_match:

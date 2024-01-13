@@ -73,8 +73,10 @@ ranking_points:
 display:
   team_row:
     - source: team_name
+      display: true
     - source: single
       metric: statbotics-points
+      display: true
     - source: single
       metric: statbotics-auto-points
     - source: single
@@ -88,6 +90,8 @@ display:
       metric: stability
     - source: single
       metric: broken
+      display: true
     - source: single
       metric: stopped
+      display: true
   pre_match:

@@ -7,7 +7,7 @@ use ts_rs::TS;
 
 use crate::{
 	api::data::{MatchEntryIdData, MatchEntryValue},
-	config::{match_entry::MatchEntryType, GameConfigs, TeamConfig},
+	config::{match_entry::MatchEntryType, GameConfigs, TeamConfig, SingleMetric, TeamNameMetric},
 	database::Database,
 	statbotics::{StatboticsCache, StatboticsTeam},
 	tba::{EventInfo, Tba},
@@ -60,6 +60,7 @@ pub struct SingleTeamInfo {
 pub struct TeamInfoList {
 	names: Vec<String>,
 	list: Vec<TeamInfoDisplay>,
+    default_display: Vec<usize>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -151,11 +152,11 @@ fn single_team_impl(
 										value: (1.0 - (sb.rp_1_epa_end + sb.rp_2_epa_end)).max(0.0),
 									},
 									PieChartOption {
-										label: "Losses".to_string(),
+										label: "RP 1".to_string(),
 										value: sb.rp_1_epa_end,
 									},
 									PieChartOption {
-										label: "".to_string(),
+										label: "RP 2".to_string(),
 										value: sb.rp_2_epa_end,
 									},
 								],
@@ -247,10 +248,48 @@ fn table_labels(config: &GameConfigs) -> Vec<String> {
 		.team_row
 		.iter()
 		.map(|column| match column {
-			crate::config::DisplayColumn::Single(metric) => metric.metric.clone(),
+			crate::config::DisplayColumn::Single(metric) => {
+                if metric.metric.starts_with("statbotics-") {
+                    match metric.metric.trim_start_matches("statbotics-") {
+                        "wlt-ratio" => "W/L/T",
+                        "rps" => "Ranking Points",
+                        "points" => "Total Points",
+                        "auto-points" => "Auto Points",
+                        "teleop-points" => "Teleop Points",
+                        "endgame-points" => "Endgame Points",
+                        "wins" => "Wins",
+                        "losses" => "Losses",
+                        "ties" => "Ties",
+                        "games" => "Games",
+                        "rp1" => "RP 1",
+                        "rp2" => "RP 2",
+                        _ => "Unknown Statbotics",
+                    }.to_string()
+                } else if let Some(title) = config.match_entry_fields.entries.get(&metric.metric).as_ref().map(|m| &m.title) {
+                    title.clone()
+                } else {
+                    metric.metric.clone()
+                }
+            },
 			crate::config::DisplayColumn::TeamName(_) => "Team Name".to_string(),
 			crate::config::DisplayColumn::CommonYearSpecific(_) => "INVALID".to_string(),
 		})
+		.collect()
+}
+
+fn default_display(config: &GameConfigs) -> Vec<usize> {
+	config
+		.game_config
+		.display
+		.team_row
+		.iter()
+        .enumerate()
+		.filter(|(_id, column)| match column {
+			crate::config::DisplayColumn::Single(SingleMetric { display, .. }) |
+			crate::config::DisplayColumn::TeamName(TeamNameMetric { display, .. }) => *display,
+			_ => false,
+		})
+        .map(|(id, _col)| id)
 		.collect()
 }
 
@@ -312,5 +351,6 @@ pub async fn list(
 				pin_left_count: 4,
 			})
 			.collect(),
+        default_display: default_display(config),
 	}
 }
