@@ -29,6 +29,12 @@ export function DataValue(props: DataValueProps) {
     ChartJS.register(ArcElement, Tooltip, Legend);
   }, []);
   switch (props.value.type) {
+    case "team_name":
+      return (
+        <td>
+          <p><a href={`/team/${props.value.number}`}>{props.value.name} ({props.value.number})</a></p>
+        </td>
+      );
     case "text":
       return (
         <td>

@@ -26,8 +26,17 @@ pub struct TeamInfoDisplay {
 #[serde(tag = "type", rename_all = "snake_case")]
 #[oai(discriminator_name = "type", rename_all = "snake_case")]
 pub enum TeamInfoEntry {
+	TeamName(TeamNameEntry),
 	Text(TeamInfoTextEntry),
 	PieChart(PieChartEntry),
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct TeamNameEntry {
+	pub number: u32,
+	pub name: String,
+	pub icon_uri: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -216,12 +225,10 @@ fn single_team_impl(
 					}
 				}
 			}
-			crate::config::DisplayColumn::TeamName(_) => TeamInfoEntry::Text(TeamInfoTextEntry {
-				sort_text: team.to_string(),
-				display_text: format!(
-					"{} ({})",
-					tba_data.team_infos[&team].name, tba_data.team_infos[&team].num
-				),
+			crate::config::DisplayColumn::TeamName(_) => TeamInfoEntry::TeamName(TeamNameEntry {
+				number: tba_data.team_infos[&team].num,
+				name: tba_data.team_infos[&team].name.clone(),
+				icon_uri: tba_data.team_infos[&team].icon_uri.clone(),
 			}),
 			crate::config::DisplayColumn::CommonYearSpecific(_) => {
 				TeamInfoEntry::Text(TeamInfoTextEntry {
