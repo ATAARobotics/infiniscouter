@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use crate::{
-	api::data::{MatchEntryIdData, MatchEntryValue, MatchEntryData},
-	config::{match_entry::MatchEntryType, GameConfigs, TeamConfig, SingleMetric, TeamNameMetric},
+	api::data::{MatchEntryData, MatchEntryIdData, MatchEntryValue},
+	config::{match_entry::MatchEntryType, GameConfigs, SingleMetric, TeamConfig, TeamNameMetric},
 	database::Database,
 	statbotics::{StatboticsCache, StatboticsTeam},
 	tba::{EventInfo, Tba},
@@ -60,7 +60,7 @@ pub struct SingleTeamInfo {
 pub struct TeamInfoList {
 	names: Vec<String>,
 	list: Vec<TeamInfoDisplay>,
-    default_display: Vec<usize>,
+	default_display: Vec<usize>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -112,7 +112,7 @@ fn get_pie_chart(data_points: &[&MatchEntryValue]) -> TeamInfoEntry {
 fn single_team_impl(
 	config: &GameConfigs,
 	match_entries: &[MatchEntryIdData],
-    pit_entry: Option<&MatchEntryData>,
+	pit_entry: Option<&MatchEntryData>,
 	tba_data: &EventInfo,
 	statbotics: Option<&StatboticsTeam>,
 	team: u32,
@@ -180,7 +180,10 @@ fn single_team_impl(
 								"rp-2" => sb.rp_2_epa_end,
 								_ => panic!("That's not a statbotics thing bruh"),
 							};
-                            TeamInfoEntry::Text(TeamInfoTextEntry { sort_text: format!("{value:09.4}"), display_text: format!("{value:.2}") })
+							TeamInfoEntry::Text(TeamInfoTextEntry {
+								sort_text: format!("{value:09.4}"),
+								display_text: format!("{value:.2}"),
+							})
 						}
 					} else {
 						TeamInfoEntry::Text(TeamInfoTextEntry {
@@ -193,7 +196,12 @@ fn single_team_impl(
 						.iter()
 						.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team)
 						.filter_map(|match_entry| match_entry.data.entries.get(&metric.metric))
-                        .chain(pit_entry.and_then(|pe| pe.entries.get(&metric.metric)).iter().map(|m| *m))
+						.chain(
+							pit_entry
+								.and_then(|pe| pe.entries.get(&metric.metric))
+								.iter()
+								.map(|m| *m),
+						)
 						.collect();
 					match config
 						.match_entry_fields
@@ -251,30 +259,43 @@ fn table_labels(config: &GameConfigs) -> Vec<String> {
 		.iter()
 		.map(|column| match column {
 			crate::config::DisplayColumn::Single(metric) => {
-                if metric.metric.starts_with("statbotics-") {
-                    match metric.metric.trim_start_matches("statbotics-") {
-                        "wlt-ratio" => "W/L/T",
-                        "rps" => "Ranking Points",
-                        "points" => "Total Points",
-                        "auto-points" => "Auto Points",
-                        "teleop-points" => "Teleop Points",
-                        "endgame-points" => "Endgame Points",
-                        "wins" => "Wins",
-                        "losses" => "Losses",
-                        "ties" => "Ties",
-                        "games" => "Games",
-                        "rp1" => "RP 1",
-                        "rp2" => "RP 2",
-                        _ => "Unknown Statbotics",
-                    }.to_string()
-                } else if let Some(title) = config.match_entry_fields.entries.get(&metric.metric).as_ref().map(|m| &m.title) {
-                    title.clone()
-                } else if let Some(title) = config.pit_entry_fields.entries.get(&metric.metric).as_ref().map(|m| &m.title) {
-                    title.clone()
-                } else {
-                    metric.metric.clone()
-                }
-            },
+				if metric.metric.starts_with("statbotics-") {
+					match metric.metric.trim_start_matches("statbotics-") {
+						"wlt-ratio" => "W/L/T",
+						"rps" => "Ranking Points",
+						"points" => "Total Points",
+						"auto-points" => "Auto Points",
+						"teleop-points" => "Teleop Points",
+						"endgame-points" => "Endgame Points",
+						"wins" => "Wins",
+						"losses" => "Losses",
+						"ties" => "Ties",
+						"games" => "Games",
+						"rp1" => "RP 1",
+						"rp2" => "RP 2",
+						_ => "Unknown Statbotics",
+					}
+					.to_string()
+				} else if let Some(title) = config
+					.match_entry_fields
+					.entries
+					.get(&metric.metric)
+					.as_ref()
+					.map(|m| &m.title)
+				{
+					title.clone()
+				} else if let Some(title) = config
+					.pit_entry_fields
+					.entries
+					.get(&metric.metric)
+					.as_ref()
+					.map(|m| &m.title)
+				{
+					title.clone()
+				} else {
+					metric.metric.clone()
+				}
+			}
 			crate::config::DisplayColumn::TeamName(_) => "Team Name".to_string(),
 			crate::config::DisplayColumn::CommonYearSpecific(_) => "INVALID".to_string(),
 		})
@@ -287,13 +308,13 @@ fn default_display(config: &GameConfigs) -> Vec<usize> {
 		.display
 		.team_row
 		.iter()
-        .enumerate()
+		.enumerate()
 		.filter(|(_id, column)| match column {
-			crate::config::DisplayColumn::Single(SingleMetric { display, .. }) |
-			crate::config::DisplayColumn::TeamName(TeamNameMetric { display, .. }) => *display,
+			crate::config::DisplayColumn::Single(SingleMetric { display, .. })
+			| crate::config::DisplayColumn::TeamName(TeamNameMetric { display, .. }) => *display,
 			_ => false,
 		})
-        .map(|(id, _col)| id)
+		.map(|(id, _col)| id)
 		.collect()
 }
 
@@ -318,7 +339,14 @@ pub async fn single_team(
 				single_team_impl(
 					config,
 					&match_entries,
-                    database.get_pit_entry_data(team_config.current_year, &team_config.current_event, &team.to_string()).unwrap().as_ref(),
+					database
+						.get_pit_entry_data(
+							team_config.current_year,
+							&team_config.current_event,
+							&team.to_string(),
+						)
+						.unwrap()
+						.as_ref(),
 					&tba_data,
 					statbotics.get(team).await.as_deref(),
 					team,
@@ -353,11 +381,18 @@ pub async fn list(
 		list: tba_teams
 			.into_iter()
 			.map(|(team, sb)| TeamInfoDisplay {
-				info: single_team_impl(config, &match_entries, pit_entries.get(&team.to_string()), &tba_data, sb.as_deref(), *team),
+				info: single_team_impl(
+					config,
+					&match_entries,
+					pit_entries.get(&team.to_string()),
+					&tba_data,
+					sb.as_deref(),
+					*team,
+				),
 				pin_right_count: 5,
 				pin_left_count: 4,
 			})
 			.collect(),
-        default_display: default_display(config),
+		default_display: default_display(config),
 	}
 }

@@ -148,11 +148,7 @@ impl Api {
 		let fields = &self.config.get_current_game_config().pit_entry_fields;
 		Ok(Json(data.map(|data| validate_match(data, fields))))
 	}
-	fn pit_entry_set_data_inner(
-		&self,
-		team: &str,
-		data: MatchEntryData,
-	) -> poem::Result<()> {
+	fn pit_entry_set_data_inner(&self, team: &str, data: MatchEntryData) -> poem::Result<()> {
 		let fields = &self.config.get_current_game_config().pit_entry_fields;
 		let data = validate_match(data, fields);
 		self.database
@@ -181,10 +177,7 @@ impl Api {
 		data: Json<Vec<PitEntryIdData>>,
 	) -> poem::Result<()> {
 		for match_entry in data.0 {
-			self.pit_entry_set_data_inner(
-				&match_entry.team_id,
-				match_entry.data,
-			)?;
+			self.pit_entry_set_data_inner(&match_entry.team_id, match_entry.data)?;
 		}
 		Ok(())
 	}
@@ -202,7 +195,7 @@ impl Api {
 		Json(
 			analysis::list(
 				&self.tba,
-                &self.statbotics,
+				&self.statbotics,
 				&self.database,
 				self.config.get_server_config(),
 				self.config.get_current_game_config(),
@@ -215,7 +208,7 @@ impl Api {
 		Json(
 			analysis::single_team(
 				&self.tba,
-                &self.statbotics,
+				&self.statbotics,
 				&self.database,
 				self.config.get_server_config(),
 				self.config.get_current_game_config(),

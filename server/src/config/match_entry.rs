@@ -79,7 +79,10 @@ impl MatchEntryFields {
 					category
 						.metrics
 						.iter()
-						.filter(|(_, metric)| (is_pit && metric.collect.collect_in_pit()) || (!is_pit && metric.collect.collect_in_match()))
+						.filter(|(_, metric)| {
+							(is_pit && metric.collect.collect_in_pit())
+								|| (!is_pit && metric.collect.collect_in_match())
+						})
 						.map(|(metric_id, metric)| {
 							(
 								metric_id.clone(),
@@ -101,7 +104,10 @@ impl MatchEntryFields {
 					layout: cat
 						.metrics
 						.iter()
-						.filter(|(_, metric)| (is_pit && metric.collect.collect_in_pit()) || (!is_pit && metric.collect.collect_in_match()))
+						.filter(|(_, metric)| {
+							(is_pit && metric.collect.collect_in_pit())
+								|| (!is_pit && metric.collect.collect_in_match())
+						})
 						.map(|(metric, _)| metric.clone())
 						.collect(),
 				})

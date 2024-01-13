@@ -169,17 +169,17 @@ pub enum DisplayColumn {
 pub struct SingleMetric {
 	/// The id of the metric
 	pub metric: String,
-    #[serde(default)]
-    #[oai(default)]
-    pub display: bool,
+	#[serde(default)]
+	#[oai(default)]
+	pub display: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct TeamNameMetric {
-    #[serde(default)]
-    #[oai(default)]
-    pub display: bool,
+	#[serde(default)]
+	#[oai(default)]
+	pub display: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -220,7 +220,7 @@ impl From<GameConfig> for GameConfigs {
 	fn from(value: GameConfig) -> Self {
 		GameConfigs {
 			match_entry_fields: MatchEntryFields::from_game_config(&value, false),
-            pit_entry_fields: MatchEntryFields::from_game_config(&value, true),
+			pit_entry_fields: MatchEntryFields::from_game_config(&value, true),
 			game_config: value,
 		}
 	}

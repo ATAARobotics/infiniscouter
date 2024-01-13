@@ -34,9 +34,8 @@ impl EventInfo {
 		client: &Client,
 		year: u32,
 	) -> EventInfo {
-		let team_infos: HashMap<_, _> = future::join_all(team_infos
-            .into_iter()
-			.map(|team_info| async move {
+		let team_infos: HashMap<_, _> =
+			future::join_all(team_infos.into_iter().map(|team_info| async move {
 				let image = client // TODO: Use the right event
 					.get(format!(
 						"https://www.thebluealliance.com/api/v3/team/{}/media/{year}",
