@@ -12,8 +12,7 @@ import { TeamInfo } from "./pages/team_info";
 import { Reload } from "./pages/reload";
 
 /**
- *	Main app component.
- * @returns The component
+ * Main app component.
  */
 function App() {
   return (

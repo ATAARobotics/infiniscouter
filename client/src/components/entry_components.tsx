@@ -1,14 +1,12 @@
+import { Button, ToggleButtonGroup } from "@mui/joy";
 import { useState, useEffect } from "preact/hooks";
+
 import { MatchEntryPage } from "../generated/MatchEntryPage";
 import { MatchEntry } from "../generated/MatchEntry";
 import { AbilityMetric } from "../generated/AbilityMetric";
 import { BoolMetric } from "../generated/BoolMetric";
 import { TimerMetric } from "../generated/TimerMetric";
-import { MatchEntryValue } from "src/generated/MatchEntryValue";
-import {
-  Button,
-  ToggleButtonGroup,
-} from "@mui/joy";
+import { MatchEntryValue } from "../generated/MatchEntryValue";
 
 interface MatchPageProps {
   page: MatchEntryPage;
@@ -16,9 +14,9 @@ interface MatchPageProps {
   allEntries: Record<string, MatchEntryValue>;
   setEntry: (id: string, value: MatchEntryValue | undefined) => void;
 }
+
 /**
  * Data entry for anything that is a "match page" (also used for pit scouting)
- * @returns The component
  */
 export function MatchPage(props: MatchPageProps) {
   return (
@@ -40,9 +38,9 @@ interface MatchDetailProps {
   value: MatchEntryValue | undefined;
   setValue: (value: MatchEntryValue | undefined) => void;
 }
+
 /**
  * A single data entry field, e.g. an enum timer, etc
- * @returns The component
  */
 function MatchDetail(props: MatchDetailProps) {
   return (
@@ -83,26 +81,45 @@ function MatchDetail(props: MatchDetailProps) {
   );
 }
 
-interface AbilityEntryProps {
-  value: MatchEntryValue | undefined;
-  setValue: (value: MatchEntryValue | undefined) => void;
-  entry: AbilityMetric;
-}
 interface EnumEntryProps {
   value: MatchEntryValue | undefined;
   setValue: (value: MatchEntryValue | undefined) => void;
   options: Array<{ id: string | boolean; display: string }>;
   entryType: "ability" | "bool" | "enum";
 }
-interface BoolEntryProps {
-  value: MatchEntryValue | undefined;
-  setValue: (value: MatchEntryValue | undefined) => void;
-  entry: BoolMetric;
+
+function EnumEntry(props: EnumEntryProps) {
+  return (
+    <ToggleButtonGroup
+      value={
+        props.value && props.value.type !== "timer"
+          ? props.value.value.toString()
+          : ""
+      }
+      onChange={(_, newValue) => {
+        if (!newValue) {
+          props.setValue(undefined);
+        } else {
+          props.setValue({
+            value: newValue,
+            type: props.entryType,
+          } as MatchEntryValue);
+        }
+      }}
+    >
+      {props.options.map((options) => (
+        <Button value={options.id}>
+          <p className="button-text">{options.display}</p>
+        </Button>
+      ))}
+    </ToggleButtonGroup>
+  );
 }
-interface TimerEntryProps {
+
+interface AbilityEntryProps {
   value: MatchEntryValue | undefined;
   setValue: (value: MatchEntryValue | undefined) => void;
-  entry: TimerMetric;
+  entry: AbilityMetric;
 }
 
 function AbilityEntry(props: AbilityEntryProps) {
@@ -119,29 +136,11 @@ function AbilityEntry(props: AbilityEntryProps) {
     ></EnumEntry>
   );
 }
-function EnumEntry(props: EnumEntryProps) {
-  //const [value, setValue] = useState<string | null>();
-  return (
-    <ToggleButtonGroup
-      value={(props.value as any)?.value as string}
-      onChange={(event, newValue) => {
-        if (newValue === null) {
-          props.setValue(undefined);
-        } else {
-          props.setValue({
-            value: newValue,
-            type: props.entryType,
-          } as MatchEntryValue);
-        }
-      }}
-    >
-      {props.options.map((options, index) => (
-        <Button value={options.id}>
-          <p className="button-text">{options.display}</p>
-        </Button>
-      ))}
-    </ToggleButtonGroup>
-  );
+
+interface BoolEntryProps {
+  value: MatchEntryValue | undefined;
+  setValue: (value: MatchEntryValue | undefined) => void;
+  entry: BoolMetric;
 }
 
 function BoolEntry(props: BoolEntryProps) {
@@ -156,6 +155,12 @@ function BoolEntry(props: BoolEntryProps) {
       entryType="bool"
     ></EnumEntry>
   );
+}
+
+interface TimerEntryProps {
+  value: MatchEntryValue | undefined;
+  setValue: (value: MatchEntryValue | undefined) => void;
+  entry: TimerMetric;
 }
 
 interface NullTimer {
@@ -175,6 +180,15 @@ type TimerState = NullTimer | RunningTimer | ValueTimer;
 function TimerEntry(props: TimerEntryProps) {
   const [state, setState] = useState<TimerState>({ type: "null" });
   const [currentTime, setCurrentTime] = useState<number>(Date.now());
+
+  const value = props.value;
+  useEffect(() => {
+    if (!value || value.type !== "timer") {
+      setState({ type: "null" });
+    } else {
+      setState({ type: "value", totalTime: value.time_seconds });
+    }
+  }, [value]);
 
   useEffect(() => {
     if (state.type === "running") {

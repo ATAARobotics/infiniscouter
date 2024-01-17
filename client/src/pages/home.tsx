@@ -1,6 +1,5 @@
 /**
- *	Component for the home page.
- * @returns The component
+ * Component for the home page.
  */
 export function Home() {
   return (

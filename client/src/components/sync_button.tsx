@@ -1,11 +1,7 @@
-import * as React from "react";
-import Box from "@mui/joy/Box";
-import Drawer from "@mui/joy/Drawer";
 import Button from "@mui/joy/Button";
-import List from "@mui/joy/List";
-import Divider from "@mui/joy/Divider";
-import ListItem from "@mui/joy/ListItem";
-import ListItemButton from "@mui/joy/ListItemButton";
+import * as React from "react";
+
+import { MatchEntryIdData } from "../generated/MatchEntryIdData";
 
 /**
  *	A button that when clicked syncs important data from/to localStorage to/from the server
@@ -16,8 +12,8 @@ export function SyncButton() {
     "saved",
   );
   /**
-	* Sync data by loading event and game info from the server, sending local data, and fetching remote data.
-	*/
+   * Sync data by loading event and game info from the server, sending local data, and fetching remote data.
+   */
   async function doSync() {
     setLoadingState("saving");
     const matchesStr = await fetch("/api/event/matches");
@@ -31,7 +27,7 @@ export function SyncButton() {
       const key: string | null = localStorage.key(entry);
       if (key !== null && key.startsWith("match-")) {
         matchArray.push(
-          JSON.parse(localStorage.getItem(key)) as MatchEntryIdData,
+          JSON.parse(localStorage.getItem(key) ?? "") as MatchEntryIdData,
         );
       }
     }

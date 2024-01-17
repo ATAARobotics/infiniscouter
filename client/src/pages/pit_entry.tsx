@@ -1,6 +1,6 @@
 import { useState, useEffect } from "preact/hooks";
-import { MatchEntryFields } from "../generated/MatchEntryFields";
-import { MatchEntryData } from "src/generated/MatchEntryData";
+
+import { MatchEntryData } from "../generated/MatchEntryData";
 import {
   Box,
   CircularProgress,
@@ -10,22 +10,24 @@ import {
   Typography,
   Input,
 } from "@mui/joy";
-import { EventInfo } from "src/generated/EventInfo";
-import { MatchInfo } from "src/generated/MatchInfo";
+import { EventInfo } from "../generated/EventInfo";
+import { MatchInfo } from "../generated/MatchInfo";
 import { ChangeEvent } from "preact/compat";
-import { MatchEntryIdData } from "src/generated/MatchEntryIdData";
-import { MatchPage } from "src/components/entry_components";
-import { PitEntryFields } from "src/generated/PitEntryFields";
+import { MatchEntryIdData } from "../generated/MatchEntryIdData";
+import { MatchPage } from "../components/entry_components";
+import { MatchEntryFields } from "../generated/MatchEntryFields";
 
 /**
  * Pit Entry Page Component
- * @returns the component
  */
 export function PitEntry() {
   const [matchId, setMatchId] = useState<number>();
   const [teamId, setTeamId] = useState<number>();
 
-  const [data, setData] = useState<MatchEntryData>({ entries: {} });
+  const [data, setData] = useState<MatchEntryData>({
+    entries: {},
+    timestamp_ms: BigInt(0),
+  });
   useEffect(() => {
     if (matchId !== undefined && teamId !== undefined) {
       const saveData: MatchEntryIdData = {
@@ -49,7 +51,7 @@ export function PitEntry() {
       if (newData !== null) {
         setData(newData.data);
       } else {
-        setData({ entries: {} });
+        setData({ entries: {}, timestamp_ms: BigInt(0) });
       }
     }
   }, [matchId, teamId]);
@@ -57,7 +59,7 @@ export function PitEntry() {
   const matchTeams: EventInfo | null = JSON.parse(
     localStorage.getItem("matchList") ?? "null",
   );
-  const fields: PitEntryFields | null = JSON.parse(
+  const fields: MatchEntryFields | null = JSON.parse(
     localStorage.getItem("matchList") ?? "null",
   );
   if (!matchTeams) {
@@ -79,14 +81,17 @@ export function PitEntry() {
     <Box>
       <h1>Match Entry Page</h1>
       <Box>
-        <Input
-          type="number"
-          placeholder={"Qualification Match Number"}
-          onChange={(ev: InputEvent) => {
-            setMatchId(parseInt((ev.target as HTMLInputElement).value));
-            setTeamId(undefined);
-          }}
-        />
+        {
+          // @ts-expect-error Input seems to want a component for some reason?
+          <Input
+            type="number"
+            placeholder={"Qualification Match Number"}
+            onChange={(ev: InputEvent) => {
+              setMatchId(parseInt((ev.target as HTMLInputElement).value));
+              setTeamId(undefined);
+            }}
+          />
+        }
       </Box>
       {teamsForMatch && (
         <Box>
@@ -124,14 +129,14 @@ export function PitEntry() {
                 if (value === undefined) {
                   const tmp = {
                     entries: { ...data.entries },
-                    timestamp_ms: Date.now(),
+                    timestamp_ms: BigInt(Date.now()),
                   };
                   delete tmp.entries[id];
                   setData(tmp);
                 } else {
                   setData({
                     entries: { ...data.entries, [id]: value },
-                    timestamp_ms: Date.now(),
+                    timestamp_ms: BigInt(Date.now()),
                   });
                 }
               }}
@@ -152,4 +157,5 @@ export function PitEntry() {
           </div>
         ))}
     </Box>
+  );
 }

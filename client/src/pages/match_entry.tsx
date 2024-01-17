@@ -1,7 +1,3 @@
-import { useState, useEffect } from "preact/hooks";
-import { MatchEntryFields } from "../generated/MatchEntryFields";
-import { MatchEntry } from "../generated/MatchEntry";
-import { MatchEntryData } from "src/generated/MatchEntryData";
 import {
   Box,
   CircularProgress,
@@ -11,11 +7,16 @@ import {
   Typography,
   Input,
 } from "@mui/joy";
-import { EventInfo } from "src/generated/EventInfo";
-import { MatchInfo } from "src/generated/MatchInfo";
 import { ChangeEvent } from "preact/compat";
-import { MatchEntryIdData } from "src/generated/MatchEntryIdData";
-import { MatchPage } from "src/components/entry_components";
+import { useState, useEffect } from "preact/hooks";
+
+import { MatchPage } from "../components/entry_components";
+import { MatchEntryFields } from "../generated/MatchEntryFields";
+import { MatchEntry } from "../generated/MatchEntry";
+import { MatchEntryData } from "../generated/MatchEntryData";
+import { EventInfo } from "../generated/EventInfo";
+import { MatchInfo } from "../generated/MatchInfo";
+import { MatchEntryIdData } from "../generated/MatchEntryIdData";
 
 // Match Entry Page Component
 export function MatchEntry() {
@@ -31,7 +32,10 @@ export function MatchEntry() {
         setFields(data2);
       });
   }, []);
-  const [data, setData] = useState<MatchEntryData>({ entries: {} });
+  const [data, setData] = useState<MatchEntryData>({
+    entries: {},
+    timestamp_ms: BigInt(0),
+  });
   useEffect(() => {
     if (matchId !== undefined && teamId !== undefined) {
       const saveData: MatchEntryIdData = {
@@ -55,7 +59,7 @@ export function MatchEntry() {
       if (newData !== null) {
         setData(newData.data);
       } else {
-        setData({ entries: {} });
+        setData({ entries: {}, timestamp_ms: BigInt(0) });
       }
     }
   }, [matchId, teamId]);
@@ -82,14 +86,17 @@ export function MatchEntry() {
     <Box>
       <h1>Match Entry Page</h1>
       <Box>
-        <Input
-          type="number"
-          placeholder={"Qualification Match Number"}
-          onChange={(ev: InputEvent) => {
-            setMatchId(parseInt((ev.target as HTMLInputElement).value));
-            setTeamId(undefined);
-          }}
-        />
+        {
+          // @ts-expect-error Input seems to want a component for some reason?
+          <Input
+            type="number"
+            placeholder={"Qualification Match Number"}
+            onChange={(ev: InputEvent) => {
+              setMatchId(parseInt((ev.target as HTMLInputElement).value));
+              setTeamId(undefined);
+            }}
+          />
+        }
       </Box>
       {teamsForMatch && (
         <Box>
@@ -124,17 +131,17 @@ export function MatchEntry() {
               page={page}
               entries={fields.entries}
               setEntry={(id, value) => {
-                if (value === undefined) {
+                if (!value) {
                   const tmp = {
                     entries: { ...data.entries },
-                    timestamp_ms: Date.now(),
+                    timestamp_ms: BigInt(Date.now()),
                   };
                   delete tmp.entries[id];
                   setData(tmp);
                 } else {
                   setData({
                     entries: { ...data.entries, [id]: value },
-                    timestamp_ms: Date.now(),
+                    timestamp_ms: BigInt(Date.now()),
                   });
                 }
               }}
@@ -157,4 +164,3 @@ export function MatchEntry() {
     </Box>
   );
 }
-
