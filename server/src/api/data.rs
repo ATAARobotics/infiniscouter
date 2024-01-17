@@ -24,6 +24,7 @@ pub struct MatchEntryData {
 	/// The mapping from entry ids to entry values.
 	pub entries: HashMap<String, MatchEntryValue>,
 	#[serde(default)]
+    #[oai(default)]
 	pub timestamp_ms: u64,
 }
 

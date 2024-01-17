@@ -94,7 +94,19 @@ impl Tba {
 		Some(
 			match self.event_cache.lock().await.entry(event.to_string()) {
 				Entry::Occupied(entry) => entry.into_mut(),
-				Entry::Vacant(entry) => entry.insert(Arc::new(
+				Entry::Vacant(entry) => entry.insert(Arc::new({
+					let mut teams = self
+						.client
+						.get(format!(
+							"https://www.thebluealliance.com/api/v3/event/{event}/teams"
+						))
+						.send()
+						.await
+						.ok()?
+						.json::<Vec<RawTbaTeam>>()
+						.await
+						.ok()?;
+					teams.retain(|t| !(9990..=9999).contains(&t.team_number));
 					EventInfo::new(
 						self.client // TODO: Use the right event
 							.get(format!(
@@ -106,21 +118,12 @@ impl Tba {
 							.json::<Vec<RawTbaMatch>>()
 							.await
 							.ok()?,
-						self.client
-							.get(format!(
-								"https://www.thebluealliance.com/api/v3/event/{event}/teams"
-							))
-							.send()
-							.await
-							.ok()?
-							.json::<Vec<RawTbaTeam>>()
-							.await
-							.ok()?,
+						teams,
 						&self.client,
 						event[0..4].parse::<u32>().unwrap(), // TODO: Pass year to this function instead
 					)
-					.await,
-				)),
+					.await
+				})),
 			}
 			.to_owned(),
 		)
