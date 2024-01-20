@@ -25,7 +25,7 @@ pub struct MatchEntryData {
 	pub entries: HashMap<String, MatchEntryValue>,
 	#[serde(default)]
     #[oai(default)]
-	pub timestamp_ms: u64,
+	pub timestamp_ms: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]

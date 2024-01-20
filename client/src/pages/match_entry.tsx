@@ -25,7 +25,7 @@ export function MatchEntry() {
 
   const [data, setData] = useState<MatchEntryData>({
     entries: {},
-    timestamp_ms: BigInt(0),
+    timestamp_ms: 0,
   });
   useEffect(() => {
     if (matchId !== undefined && teamId !== undefined) {
@@ -50,7 +50,7 @@ export function MatchEntry() {
       if (newData !== null) {
         setData(newData.data);
       } else {
-        setData({ entries: {}, timestamp_ms: BigInt(0) });
+        setData({ entries: {}, timestamp_ms: 0 });
       }
     }
   }, [matchId, teamId]);
@@ -128,14 +128,14 @@ export function MatchEntry() {
                 if (!value) {
                   const tmp = {
                     entries: { ...data.entries },
-                    timestamp_ms: BigInt(Date.now()),
+                    timestamp_ms: Date.now(),
                   };
                   delete tmp.entries[id];
                   setData(tmp);
                 } else {
                   setData({
                     entries: { ...data.entries, [id]: value },
-                    timestamp_ms: BigInt(Date.now()),
+                    timestamp_ms: Date.now(),
                   });
                 }
               }}

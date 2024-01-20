@@ -25,7 +25,10 @@ export function MatchPage(props: MatchPageProps) {
       {props.page.layout.map((entryName) => (
         <MatchDetail
           entry={props.entries[entryName]}
-          setValue={(value) => props.setEntry(entryName, value)}
+          setValue={(value) => {
+            console.log(`Setting ${entryName} to ${value}`);
+            props.setEntry(entryName, value);
+          }}
           value={props.allEntries[entryName]}
         ></MatchDetail>
       ))}
@@ -186,7 +189,7 @@ function TimerEntry(props: TimerEntryProps) {
     if (!value || value.type !== "timer") {
       setState({ type: "null" });
     } else {
-      setState({ type: "value", totalTime: value.time_seconds });
+      setState({ type: "value", totalTime: value.time_seconds * 1000 });
     }
   }, [value]);
 
