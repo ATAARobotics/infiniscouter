@@ -23,15 +23,6 @@ export function MatchEntry() {
   const [matchId, setMatchId] = useState<number>();
   const [teamId, setTeamId] = useState<number>();
 
-  const [fields, setFields] = useState<MatchEntryFields>();
-  useEffect(() => {
-    // TODO: Fetch in the sync and store in local storage.
-    fetch("/api/match_entry/fields")
-      .then((response) => response.json())
-      .then((data2) => {
-        setFields(data2);
-      });
-  }, []);
   const [data, setData] = useState<MatchEntryData>({
     entries: {},
     timestamp_ms: BigInt(0),
@@ -66,6 +57,9 @@ export function MatchEntry() {
 
   const matchTeams: EventInfo | null = JSON.parse(
     localStorage.getItem("matchList") ?? "null",
+  );
+  const fields: MatchEntryFields | null = JSON.parse(
+    localStorage.getItem("matchFields") ?? "null",
   );
   if (!matchTeams) {
     return (
@@ -124,7 +118,7 @@ export function MatchEntry() {
         </Box>
       )}
       {teamsForMatch &&
-        teamId &&
+        teamId !== undefined &&
         (fields ? (
           fields.pages.map((page) => (
             <MatchPage
