@@ -7,7 +7,7 @@ use color_eyre::{eyre::bail, Result};
 use futures_util::future;
 use log::error;
 use poem::http::{HeaderMap, HeaderValue};
-use poem_openapi::{Object, Union};
+use poem_openapi::{Enum, Object, Union};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
@@ -68,11 +68,13 @@ impl EventInfo {
 			.await
 			.into_iter()
 			.collect();
+		let mut match_infos: Vec<_> = match_infos
+			.into_iter()
+			.filter_map(|m| m.into_match().ok())
+			.collect();
+		match_infos.sort_by_key(|m| m.start_time);
 		EventInfo {
-			match_infos: match_infos
-				.into_iter()
-				.filter_map(|m| m.into_match().ok())
-				.collect(),
+			match_infos,
 			team_infos,
 		}
 	}
@@ -138,6 +140,7 @@ struct RawTbaMatch {
 	comp_level: String,
 	set_number: u32,
 	match_number: u32,
+	winning_alliance: Option<String>,
 }
 
 impl RawTbaMatch {
@@ -180,7 +183,25 @@ impl RawTbaMatch {
 				.into_iter()
 				.map(|t| t.trim_start_matches("frc").parse().unwrap())
 				.collect(),
-			completed: false,
+			score_blue: self.alliances.blue.score.and_then(|score| {
+				if score >= 0 {
+					Some(score as u16)
+				} else {
+					None
+				}
+			}),
+			score_red: self.alliances.red.score.and_then(|score| {
+				if score >= 0 {
+					Some(score as u16)
+				} else {
+					None
+				}
+			}),
+			result: match self.winning_alliance.as_deref() {
+				Some("red") => MatchResult::Red,
+				Some("blue") => MatchResult::Blue,
+				_ => MatchResult::Tbd,
+			},
 		})
 	}
 }
@@ -193,6 +214,7 @@ struct RawTbaAlliances {
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 struct RawTbaAlliance {
+	score: Option<i16>,
 	team_keys: Vec<String>,
 }
 
@@ -242,6 +264,14 @@ pub enum MatchId {
 	Final(SetMatch),
 }
 
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Enum, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub enum MatchResult {
+	Tbd,
+	Red,
+	Blue,
+}
+
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct MatchInfo {
@@ -252,5 +282,7 @@ pub struct MatchInfo {
 	// gross real-world "practical" reasons (ew)
 	pub teams_blue: Vec<u32>,
 	pub teams_red: Vec<u32>,
-	pub completed: bool,
+	pub result: MatchResult,
+	pub score_blue: Option<u16>,
+	pub score_red: Option<u16>,
 }
