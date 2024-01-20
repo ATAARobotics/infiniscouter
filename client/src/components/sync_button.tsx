@@ -8,26 +8,24 @@ import { useEffect, useState } from "preact/hooks";
  *	@returns the component
  */
 export function SyncButton() {
-  const [loadingState, setLoadingState] = useState<"saved" | "saving">(
-    "saved",
-  );
+  const [loadingState, setLoadingState] = useState<"saved" | "saving">("saved");
 
   useEffect(() => {
     const controller = new AbortController();
 
     fetch("/api/event/matches", { signal: controller.signal })
-      .then(matchesResponse => matchesResponse.text())
-      .then(matchesStr => {
+      .then((matchesResponse) => matchesResponse.text())
+      .then((matchesStr) => {
         localStorage.setItem("matchList", matchesStr);
       });
     fetch("/api/match_entry/fields", { signal: controller.signal })
-      .then(matchesResponse => matchesResponse.text())
-      .then(matchesStr => {
+      .then((matchesResponse) => matchesResponse.text())
+      .then((matchesStr) => {
         localStorage.setItem("matchFields", matchesStr);
       });
     fetch("/api/pit_entry/fields", { signal: controller.signal })
-      .then(matchesResponse => matchesResponse.text())
-      .then(matchesStr => {
+      .then((matchesResponse) => matchesResponse.text())
+      .then((matchesStr) => {
         localStorage.setItem("pitFields", matchesStr);
       });
 
