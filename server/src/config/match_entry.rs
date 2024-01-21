@@ -69,9 +69,9 @@ impl From<&CollectedMetricType> for MatchEntryType {
 			CollectedMetricType::Enum(e) => Self::Enum(e.clone()),
 			CollectedMetricType::Bool(b) => Self::Bool(b.clone()),
 			CollectedMetricType::Timer(t) => Self::Timer(t.clone()),
-            CollectedMetricType::Counter(c) => Self::Counter(c.clone()),
-            CollectedMetricType::TextEntry(t) => Self::TextEntry(t.clone()),
-            CollectedMetricType::Image(i) => Self::Image(i.clone()),
+			CollectedMetricType::Counter(c) => Self::Counter(c.clone()),
+			CollectedMetricType::TextEntry(t) => Self::TextEntry(t.clone()),
+			CollectedMetricType::Image(i) => Self::Image(i.clone()),
 			CollectedMetricType::StatboticsTeam(_) => {
 				unimplemented!("Statbotics metrics aren't collectable per-match.");
 			}
@@ -105,7 +105,9 @@ impl MatchEntryFields {
 						})
 				})
 				.collect(),
-			pages: ["auto", "teleop", "endgame", "impressions"]
+			pages: game_config
+				.categories
+				.keys()
 				.into_iter()
 				.filter_map(|page| game_config.categories.get(page))
 				.map(|cat| MatchEntryPage {
