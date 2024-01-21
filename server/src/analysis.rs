@@ -188,7 +188,7 @@ fn single_team_impl(
 					} else {
 						TeamInfoEntry::Text(TeamInfoTextEntry {
 							sort_text: "zzzzzz".to_string(),
-							display_text: format!("ERROR: No statbotics for team"),
+							display_text: "ERROR: No statbotics for team".to_string(),
 						})
 					}
 				} else {
@@ -200,7 +200,7 @@ fn single_team_impl(
 							pit_entry
 								.and_then(|pe| pe.entries.get(&metric.metric))
 								.iter()
-								.map(|m| *m),
+								.copied(),
 						)
 						.collect();
 					match config

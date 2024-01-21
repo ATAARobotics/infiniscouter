@@ -71,7 +71,7 @@ impl EventInfo {
 		EventInfo {
 			match_infos: match_infos
 				.into_iter()
-				.filter_map(|m| m.to_match().ok())
+				.filter_map(|m| m.into_match().ok())
 				.collect(),
 			team_infos,
 		}
@@ -141,7 +141,7 @@ struct RawTbaMatch {
 }
 
 impl RawTbaMatch {
-	fn to_match(self) -> Result<MatchInfo> {
+	fn into_match(self) -> Result<MatchInfo> {
 		Ok(MatchInfo {
 			id: match self.comp_level.as_str() {
 				"q" | "qm" => MatchId::Qualification(SetMatch {

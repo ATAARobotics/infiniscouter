@@ -94,8 +94,8 @@ impl Api {
 			.set_match_entry_data(
 				self.config.get_server_config().current_year,
 				&self.config.get_server_config().current_event,
-				&match_id,
-				&team,
+				match_id,
+				team,
 				&data,
 			)
 			.map_err(|e| poem::Error::new(e, StatusCode::INTERNAL_SERVER_ERROR))?;
@@ -155,7 +155,7 @@ impl Api {
 			.set_pit_entry_data(
 				self.config.get_server_config().current_year,
 				&self.config.get_server_config().current_event,
-				&team,
+				team,
 				&data,
 			)
 			.map_err(|e| poem::Error::new(e, StatusCode::INTERNAL_SERVER_ERROR))?;

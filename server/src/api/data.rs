@@ -40,6 +40,12 @@ pub enum MatchEntryValue {
 	Enum(MatchEnumEntry),
 	/// An entry that represents a yes/no question
 	Bool(MatchBoolEntry),
+	/// A metric that represents an amount of things
+	Counter(CounterEntry),
+	/// A text entry field, either single line or multi lined
+	TextEntry(TextFieldEntry),
+	/// An picture field, for example for pit scouting robot pictures
+	Image(ImageEntry),
 	/// An entry that represents an amount of real-world time
 	Timer(MatchTimerEntry),
 }
@@ -83,4 +89,26 @@ pub struct MatchBoolEntry {
 pub struct MatchTimerEntry {
 	/// The value, in seconds
 	pub time_seconds: f32,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct CounterEntry {
+	/// The value
+	pub count: i32,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct TextFieldEntry {
+    // The text gathered from the user
+    pub text: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct ImageEntry {
+    /// The actual image data, can be encoded as png, jpeg, or other formats idk (gif, bmp, or webp
+    /// would all work I'm sure)
+	pub image_data: Vec<u8>,
 }
