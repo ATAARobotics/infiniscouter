@@ -1,64 +1,112 @@
-import Button from "@mui/joy/Button";
-import Box from "@mui/joy/Box";
-import { AspectRatio, Card, CardContent, Typography } from "@mui/joy";
+import { useState, useEffect } from "preact/hooks";
 
-// Pit Entry Page Component
+import { MatchEntryData } from "../generated/MatchEntryData";
+import { Autocomplete, Box, CircularProgress, Typography } from "@mui/joy";
+import { EventInfo } from "../generated/EventInfo";
+import { MatchEntryIdData } from "../generated/MatchEntryIdData";
+import { MatchEntryFields } from "../generated/MatchEntryFields";
+import { PitEntryIdData } from "src/generated/PitEntryIdData";
+import { MatchPage } from "src/components/entry_components";
+
+/**
+ * Pit Entry Page Component
+ */
 export function PitEntry() {
+  const [teamId, setTeamId] = useState<number>();
+
+  const [data, setData] = useState<MatchEntryData>({
+    entries: {},
+    timestamp_ms: 0,
+  });
+  useEffect(() => {
+    if (teamId !== undefined) {
+      const saveData: PitEntryIdData = {
+        team_id: teamId.toString(),
+        data,
+      };
+      localStorage.setItem(
+        "team-" + teamId?.toString(),
+        JSON.stringify(saveData),
+      );
+    }
+  }, [data]);
+  useEffect(() => {
+    if (teamId !== undefined) {
+      const newData: MatchEntryIdData | null = JSON.parse(
+        localStorage.getItem("team-" + teamId?.toString()) ?? "null",
+      );
+      if (newData !== null) {
+        setData(newData.data);
+      } else {
+        setData({ entries: {}, timestamp_ms: 0 });
+      }
+    }
+  }, [teamId]);
+
+  const event_info: EventInfo | null = JSON.parse(
+    localStorage.getItem("matchList") ?? "null",
+  );
+  const fields: MatchEntryFields | null = JSON.parse(
+    localStorage.getItem("pitFields") ?? "null",
+  );
+  if (!event_info) {
+    return (
+      <Box>
+        <Typography>Click "Save Data" to get list of teams...</Typography>
+      </Box>
+    );
+  }
   return (
     <Box>
-      <Card sx={{ width: 320 }}>
-        <div>
-          <Typography level="title-lg">4421 - Forge Robotics</Typography>
-          <Typography level="body-sm">Amount of Breaks: 0</Typography>
-        </div>
-        <AspectRatio minHeight="120px" maxHeight="200px">
-          <img src="https://i.ytimg.com/vi/pXpfVwNjV7Q/maxresdefault.jpg" />
-        </AspectRatio>
-        <CardContent orientation="horizontal">
-          <div>
-            <Typography level="body-sm">EPA:</Typography>
-            <Typography fontSize="lg" fontWeight="lg">
-              100
-            </Typography>
-          </div>
-          <Button
-            variant="solid"
-            size="md"
-            color="primary"
-            aria-label="View team"
-            sx={{ ml: "auto", alignSelf: "center", fontWeight: 600 }}
-          >
-            View
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card sx={{ width: 320 }}>
-        <div>
-          <Typography level="title-lg">4627 - Manning Robotics</Typography>
-          <Typography level="body-sm">Amount of Breaks: 0</Typography>
-        </div>
-        <AspectRatio minHeight="120px" maxHeight="200px">
-          <img src="https://hagadone.media.clients.ellingtoncms.com/ARTICLE_170429960_AR_0_WAMEMDNNOVJB_t1170.jpg?5cc718665ab672dba93d511ab4c682bb370e5f86" />
-        </AspectRatio>
-        <CardContent orientation="horizontal">
-          <div>
-            <Typography level="body-sm">EPA:</Typography>
-            <Typography fontSize="lg" fontWeight="lg">
-              90
-            </Typography>
-          </div>
-          <Button
-            variant="solid"
-            size="md"
-            color="primary"
-            aria-label="View team"
-            sx={{ ml: "auto", alignSelf: "center", fontWeight: 600 }}
-          >
-            View
-          </Button>
-        </CardContent>
-      </Card>
+      <h1>Pit Entry Page</h1>
+      <Box>
+        <Autocomplete
+          placeholder={"Team Number"}
+          options={Object.entries(event_info?.team_infos).map((v, k) => {
+            return { label: `${v[1].name} (${v[1].num})`, num: k };
+          })}
+          onChange={(_ev, value) => {
+            setTeamId(value?.num ?? 0);
+          }}
+        />
+        {teamId !== undefined &&
+          (fields ? (
+            fields.pages.map((page) => (
+              <MatchPage
+                page={page}
+                entries={fields.entries}
+                setEntry={(id, value) => {
+                  if (!value) {
+                    const tmp = {
+                      entries: { ...data.entries },
+                      timestamp_ms: Date.now(),
+                    };
+                    delete tmp.entries[id];
+                    setData(tmp);
+                  } else {
+                    setData({
+                      entries: { ...data.entries, [id]: value },
+                      timestamp_ms: Date.now(),
+                    });
+                  }
+                }}
+                allEntries={data.entries}
+              ></MatchPage>
+            ))
+          ) : (
+            <div>
+              <CircularProgress
+                color="danger"
+                determinate={false}
+                size="sm"
+                value={25}
+                variant="solid"
+                thickness={7}
+              />
+              {"  "}Loading...
+            </div>
+          ))}
+      </Box>
     </Box>
   );
 }

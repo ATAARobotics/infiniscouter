@@ -64,9 +64,10 @@ impl StatboticsCache {
 
 		match team_stats {
 			None => match Self::load_team(&self.client, self.year, team).await {
-				Ok(data) => {
+				Ok(team_stats) => {
 					info!("Statbotics ({team}): load complete");
-					self.teams.write().await.insert(team, data)
+					self.teams.write().await.insert(team, team_stats.clone());
+					Some(team_stats)
 				}
 				Err(err) => {
 					error!("Statbotics ({team}): load error: {err}");

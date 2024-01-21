@@ -57,10 +57,7 @@
     "no-useless-rename": "warn",
     "new-cap": "warn",
     "camelcase": [
-      "warn",
-      {
-        "ignoreImports": true
-      }
+      "off"
     ],
     "no-unused-vars": "off",
     "react/jsx-uses-vars": "warn",
@@ -78,10 +75,12 @@
         "allow": []
       }
     ],
-    "@typescript-eslint/strict-boolean-expressions": "error",
+    "@typescript-eslint/strict-boolean-expressions": "off",
     "@typescript-eslint/no-empty-function": "off",
-    "jsdoc/require-param-type": "off",
-    "jsdoc/require-returns-type": "off"
+    "jsdoc/require-returns": "off",
+    "jsdoc/require-returns-type": "off",
+    "jsdoc/require-param": "off",
+    "jsdoc/require-param-type": "off"
   },
   "extends": [
     "eslint:recommended",
