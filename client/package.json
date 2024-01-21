@@ -24,8 +24,8 @@
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "dev": "esbuild --bundle --watch --sourcemap --outdir=dist --target=es2020 --format=iife src/app.tsx --alias:react=preact/compat --alias:react-dom=preact/compat",
-    "build": "esbuild --bundle --sourcemap --splitting --minify --target=es2020 --format=iife --outdir=dist --format=esm source/app.tsx",
+    "dev": "esbuild --bundle --watch --sourcemap --alias:react=preact/compat --alias:react-dom=preact/compat --target=es2020 --format=iife --outdir=dist src/app.tsx",
+    "build": "esbuild --bundle --minify --sourcemap --alias:react=preact/compat --alias:react-dom=preact/compat --target=es2020 --format=iife --outdir=dist src/app.tsx",
     "lint": "tsc --noEmit --pretty && eslint src/*.tsx",
     "format": "prettier -w src/**"
   }
