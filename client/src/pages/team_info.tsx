@@ -4,6 +4,7 @@ import { Card, Typography, AspectRatio, CardContent, Stack } from "@mui/joy";
 import { SingleTeamInfo } from "src/generated/SingleTeamInfo";
 import { useEffect, useState } from "react";
 import { DataValue } from "src/components/data_value";
+import { LoadIndicator } from "../components/load_indicator";
 
 interface TeamInfoProps {
   team: number;
@@ -19,6 +20,11 @@ export function TeamInfo(props: TeamInfoProps) {
         setData(data2);
       });
   }, []);
+
+  if (!data) {
+    return <LoadIndicator></LoadIndicator>;
+  }
+
   return (
     <Stack
       direction="row"
