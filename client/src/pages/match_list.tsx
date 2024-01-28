@@ -1,39 +1,14 @@
 import { Box, Table } from "@mui/joy";
-import { useEffect, useState } from "preact/compat";
+import { useAtomValue } from "jotai/react";
 
 import { LoadIndicator } from "../components/load_indicator";
-import { EventInfo } from "../generated/EventInfo";
+import { matchListAtom } from "../data/atoms";
 
 /**
  * Page that shows a list of all matches.
  */
 export function MatchList() {
-  const [eventInfo, setEventInfo] = useState<EventInfo>();
-
-  useEffect(() => {
-    const loadEventInfo = () => {
-      const localEventInfo: EventInfo | null = JSON.parse(
-        localStorage.getItem("matchList") ?? "null",
-      );
-
-      if (localEventInfo) {
-        setEventInfo(localEventInfo);
-        return true;
-      } else {
-        return false;
-      }
-    };
-
-    if (eventInfo || loadEventInfo()) {
-      return () => {};
-    } else {
-      const intervalId = setInterval(() => {
-        loadEventInfo();
-      }, 100);
-
-      return () => clearInterval(intervalId);
-    }
-  }, [eventInfo, setEventInfo]);
+  const eventInfo = useAtomValue(matchListAtom);
 
   if (!eventInfo) {
     return <LoadIndicator></LoadIndicator>;

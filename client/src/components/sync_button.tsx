@@ -1,6 +1,8 @@
 import { Button } from "@mui/joy";
+import { useSetAtom } from "jotai/react";
 import { useEffect, useState } from "preact/hooks";
 
+import { matchFieldsAtom, matchListAtom, pitFieldsAtom } from "../data/atoms";
 import { MatchEntryIdData } from "../generated/MatchEntryIdData";
 
 /**
@@ -9,24 +11,27 @@ import { MatchEntryIdData } from "../generated/MatchEntryIdData";
  */
 export function SyncButton() {
   const [loadingState, setLoadingState] = useState<"saved" | "saving">("saved");
+  const setMatchList = useSetAtom(matchListAtom);
+  const setMatchFields = useSetAtom(matchFieldsAtom);
+  const setPitFields = useSetAtom(pitFieldsAtom);
 
   useEffect(() => {
     const controller = new AbortController();
 
     fetch("/api/event/matches", { signal: controller.signal })
-      .then((matchesResponse) => matchesResponse.text())
-      .then((matchesStr) => {
-        localStorage.setItem("matchList", matchesStr);
+      .then((matchesResponse) => matchesResponse.json())
+      .then((matchList) => {
+        setMatchList(matchList);
       });
     fetch("/api/match_entry/fields", { signal: controller.signal })
-      .then((matchesResponse) => matchesResponse.text())
-      .then((matchesStr) => {
-        localStorage.setItem("matchFields", matchesStr);
+      .then((matchesResponse) => matchesResponse.json())
+      .then((matchFields) => {
+        setMatchFields(matchFields);
       });
     fetch("/api/pit_entry/fields", { signal: controller.signal })
-      .then((matchesResponse) => matchesResponse.text())
-      .then((matchesStr) => {
-        localStorage.setItem("pitFields", matchesStr);
+      .then((matchesResponse) => matchesResponse.json())
+      .then((pitFields) => {
+        setPitFields(pitFields);
       });
 
     return () => controller.abort();
