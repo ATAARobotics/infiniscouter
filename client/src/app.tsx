@@ -1,7 +1,7 @@
 import CssBaseline from "@mui/joy/CssBaseline";
 import { CssVarsProvider } from "@mui/joy/styles";
 import { render } from "preact";
-import { LocationProvider, Router, Route } from "preact-iso";
+import { LocationProvider, Route, Router } from "preact-iso";
 
 import { Navbar } from "./components/navbar";
 import { Analysis } from "./pages/analysis";

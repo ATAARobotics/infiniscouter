@@ -6,7 +6,9 @@ interface MatchInfoProps {
   set: number;
 }
 
-// Team Info Page Component
+/**
+ * Team Info Page Component
+ */
 export function MatchInfo(props: MatchInfoProps) {
   return <LoadIndicator></LoadIndicator>;
 }

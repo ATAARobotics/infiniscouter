@@ -1,7 +1,7 @@
-import Button from "@mui/joy/Button";
+import { Button } from "@mui/joy";
+import { useEffect, useState } from "preact/hooks";
 
 import { MatchEntryIdData } from "../generated/MatchEntryIdData";
-import { useEffect, useState } from "preact/hooks";
 
 /**
  *	A button that when clicked syncs important data from/to localStorage to/from the server

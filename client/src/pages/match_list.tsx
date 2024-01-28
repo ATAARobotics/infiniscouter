@@ -1,9 +1,8 @@
-import { Box, Checkbox, Chip, Stack, Table } from "@mui/joy";
+import { Box, Table } from "@mui/joy";
 import { useEffect, useState } from "preact/compat";
 
-import { DataValue } from "../components/data_value";
-import { EventInfo } from "../generated/EventInfo";
 import { LoadIndicator } from "../components/load_indicator";
+import { EventInfo } from "../generated/EventInfo";
 
 /**
  * Page that shows a list of all matches.

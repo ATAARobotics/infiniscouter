@@ -17,7 +17,7 @@
   "env": {
     "browser": true
   },
-  "plugins": ["@typescript-eslint", "eslint-plugin-jsdoc", "react"],
+  "plugins": ["@typescript-eslint", "eslint-plugin-jsdoc", "react", "simple-import-sort"],
   "parserOptions": {
     "sourceType": "module",
     "ecmaVersion": 2021,
@@ -75,12 +75,20 @@
         "allow": []
       }
     ],
+
+    // eslint-plugin-simple-sort rules
     "@typescript-eslint/strict-boolean-expressions": "off",
     "@typescript-eslint/no-empty-function": "off",
+
+    // eslint-plugin-simple-sort rules
     "jsdoc/require-returns": "off",
     "jsdoc/require-returns-type": "off",
     "jsdoc/require-param": "off",
-    "jsdoc/require-param-type": "off"
+    "jsdoc/require-param-type": "off",
+
+    // eslint-plugin-simple-sort rules
+    "simple-import-sort/exports": "warn",
+    "simple-import-sort/imports": "warn"
   },
   "extends": [
     "eslint:recommended",

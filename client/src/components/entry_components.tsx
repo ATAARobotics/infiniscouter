@@ -1,16 +1,16 @@
 import { Button, Input, Stack, Textarea, ToggleButtonGroup } from "@mui/joy";
-import { useState, useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 
-import { MatchEntryPage } from "../generated/MatchEntryPage";
-import { MatchEntry } from "../generated/MatchEntry";
 import { AbilityMetric } from "../generated/AbilityMetric";
 import { BoolMetric } from "../generated/BoolMetric";
-import { TimerMetric } from "../generated/TimerMetric";
+import { CounterMetric } from "../generated/CounterMetric";
+import { ImageMetric } from "../generated/ImageMetric";
+import { MatchEntry } from "../generated/MatchEntry";
+import { MatchEntryPage } from "../generated/MatchEntryPage";
 import { MatchEntryValue } from "../generated/MatchEntryValue";
-import { CounterMetric } from "src/generated/CounterMetric";
-import { TextEntryMetric } from "src/generated/TextEntryMetric";
-import { ImageMetric } from "src/generated/ImageMetric";
-import { saveImage } from "src/images";
+import { TextEntryMetric } from "../generated/TextEntryMetric";
+import { TimerMetric } from "../generated/TimerMetric";
+import { saveImage } from "../images";
 
 interface MatchPageProps {
 	page: MatchEntryPage;

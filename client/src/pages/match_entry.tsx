@@ -1,24 +1,26 @@
 import {
   Box,
   CircularProgress,
-  RadioGroup,
+  Input,
   Radio,
+  RadioGroup,
   Stack,
   Typography,
-  Input,
 } from "@mui/joy";
 import { ChangeEvent } from "preact/compat";
-import { useState, useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 
 import { MatchPage } from "../components/entry_components";
-import { MatchEntryFields } from "../generated/MatchEntryFields";
+import { EventInfo } from "../generated/EventInfo";
 import { MatchEntry } from "../generated/MatchEntry";
 import { MatchEntryData } from "../generated/MatchEntryData";
-import { EventInfo } from "../generated/EventInfo";
-import { MatchInfo } from "../generated/MatchInfo";
+import { MatchEntryFields } from "../generated/MatchEntryFields";
 import { MatchEntryIdData } from "../generated/MatchEntryIdData";
+import { MatchInfo } from "../generated/MatchInfo";
 
-// Match Entry Page Component
+/**
+ * Match Entry Page Component
+ */
 export function MatchEntry() {
   const [matchId, setMatchId] = useState<number>();
   const [teamId, setTeamId] = useState<number>();

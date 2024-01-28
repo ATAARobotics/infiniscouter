@@ -1,12 +1,12 @@
-import { useState, useEffect } from "preact/hooks";
-
-import { MatchEntryData } from "../generated/MatchEntryData";
 import { Autocomplete, Box, CircularProgress, Typography } from "@mui/joy";
+import { useEffect, useState } from "preact/hooks";
+
+import { MatchPage } from "../components/entry_components";
 import { EventInfo } from "../generated/EventInfo";
-import { MatchEntryIdData } from "../generated/MatchEntryIdData";
+import { MatchEntryData } from "../generated/MatchEntryData";
 import { MatchEntryFields } from "../generated/MatchEntryFields";
-import { PitEntryIdData } from "src/generated/PitEntryIdData";
-import { MatchPage } from "src/components/entry_components";
+import { MatchEntryIdData } from "../generated/MatchEntryIdData";
+import { PitEntryIdData } from "../generated/PitEntryIdData";
 
 /**
  * Pit Entry Page Component

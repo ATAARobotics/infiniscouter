@@ -1,4 +1,4 @@
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
 import { useEffect } from "react";
 import { Pie } from "react-chartjs-2";
 
@@ -25,6 +25,9 @@ const colorSchemes = [
   ["#3437c1", "#cf00de", "#ff69a0", "#ffffff", "#000000"],
 ];
 
+/**
+ * Displays a data value for analysis.
+ */
 export function DataValue(props: DataValueProps) {
   useEffect(() => {
     ChartJS.register(ArcElement, Tooltip, Legend);
