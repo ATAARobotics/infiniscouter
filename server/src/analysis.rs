@@ -258,7 +258,7 @@ fn single_team_impl(
 									.sum::<f32>() / data_points.len() as f32;
 							TeamInfoEntry::Text(TeamInfoTextEntry {
 								sort_text: average.to_string(),
-								display_text: format!("{average:.1}s"),
+								display_text: format!("{average:.1}"),
 							})
 						}
 						Some(MatchEntryType::TextEntry(_)) => {
