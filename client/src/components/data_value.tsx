@@ -26,6 +26,22 @@ const colorSchemes = [
 	["#3437c1", "#cf00de", "#ff69a0", "#ffffff", "#000000"],
 ];
 
+const excludeWords = [
+	"the",
+	"of",
+	"it",
+	"in",
+	"and",
+	"or",
+	"by",
+	"is",
+	"a",
+	"this",
+	"that",
+	"then",
+	"s",
+];
+
 /**
  * Displays a data value for analysis.
  */
@@ -85,16 +101,23 @@ export function DataValue(props: DataValueProps) {
 						(() => {
 							const words: { [word: string]: number } = {};
 							for (const string of props.value.strings) {
-								for (const word of string.split(/[^\w]+/)) {
-									words[word] = (words[word] ?? 0) + 10;
+								for (const wordUp of string.split(/[^\w]+/)) {
+									const word = wordUp.toLowerCase();
+									if (excludeWords.indexOf(word) === -1) {
+										words[word] = (words[word] ?? 0) + 1;
+									}
 								}
 							}
-							const labelsAndWordCounts: [string, number][] = [["?", 10]];
-							for (const [label, wordCount] of Object.entries(words)) {
-								labelsAndWordCounts.push([label, wordCount]);
-							}
+							const labelsAndWordCounts: [string, number][] = [...Object.entries(words), ["?", 1]];
 							labelsAndWordCounts.sort((a, b) => (b[1] - a[1]));
 							labelsAndWordCounts.length = Math.min(labelsAndWordCounts.length, 15);
+							let total = 0;
+							for (const wc of labelsAndWordCounts) {
+								total += wc[1];
+							}
+							for (const wc of labelsAndWordCounts) {
+								wc[1] = Math.min(Math.max(Math.round(wc[1]*250/total), 10), 100);
+							}
 							console.log(labelsAndWordCounts);
 							return <Chart
 								type={WordCloudController.id}
