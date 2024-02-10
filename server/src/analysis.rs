@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use crate::{
-	api::data::{MatchEntryData, MatchEntryIdData, MatchEntryValue},
+	api::data::{MatchEntryData, MatchEntryIdData, MatchEntryValue, ImageData},
 	config::{match_entry::MatchEntryType, GameConfigs, SingleMetric, TeamConfig, TeamNameMetric},
 	database::Database,
 	statbotics::{StatboticsCache, StatboticsTeam},
@@ -29,6 +29,8 @@ pub enum TeamInfoEntry {
 	TeamName(TeamNameEntry),
 	Text(TeamInfoTextEntry),
 	PieChart(PieChartEntry),
+	MultiText(MultiTextEntry),
+	Images(ImagesEntry),
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -75,6 +77,19 @@ pub struct PieChartEntry {
 pub struct PieChartOption {
 	label: String,
 	value: f32,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct MultiTextEntry {
+	strings: Vec<String>,
+	sentiment: f32,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct ImagesEntry {
+	images: Vec<ImageData>,
 }
 
 fn get_pie_chart(data_points: &[&MatchEntryValue]) -> TeamInfoEntry {
@@ -228,6 +243,60 @@ fn single_team_impl(
 								sort_text: value.to_string(),
 								display_text: format!("{value:.1}s"),
 							})
+						}
+						Some(MatchEntryType::Counter(_)) => {
+							let average =
+								data_points
+									.iter()
+									.map(|dp| {
+										if let MatchEntryValue::Counter(cm) = dp {
+											cm.count as f32
+										} else {
+											panic!("Invalid data type of {dp:?} for counter match entry");
+										}
+									})
+									.sum::<f32>() / data_points.len() as f32;
+							TeamInfoEntry::Text(TeamInfoTextEntry {
+								sort_text: average.to_string(),
+								display_text: format!("{average:.1}s"),
+							})
+						}
+						Some(MatchEntryType::TextEntry(_)) => {
+							let strings = data_points
+								.iter()
+								.map(|dp| {
+									if let MatchEntryValue::TextEntry(te) = dp {
+										te.text.clone()
+									} else {
+										panic!("Invalid data type of {dp:?} for text entry match entry");
+									}
+								})
+								.collect::<Vec<_>>();
+							let analyzer = vader_sentiment::SentimentIntensityAnalyzer::new();
+							let sentiment = strings
+								.iter()
+								.map(|s| {
+									analyzer
+										.polarity_scores(s)
+										.get("compound")
+										.copied()
+										.unwrap_or_default() as f32
+								})
+								.sum();
+							TeamInfoEntry::MultiText(MultiTextEntry { strings, sentiment })
+						}
+						Some(MatchEntryType::Image(_)) => {
+							let images = data_points
+								.iter()
+								.flat_map(|dp| {
+									if let MatchEntryValue::Image(im) = dp {
+										im.images.clone()
+									} else {
+										panic!("Invalid data type of {dp:?} for image match entry");
+									}
+								})
+								.collect::<Vec<_>>();
+							TeamInfoEntry::Images(ImagesEntry { images })
 						}
 						_ => TeamInfoEntry::Text(TeamInfoTextEntry {
 							sort_text: "zzzzzz".to_string(),

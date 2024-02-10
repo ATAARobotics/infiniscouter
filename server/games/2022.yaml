@@ -115,6 +115,16 @@ ranking_points:
 display:
   team_row:
     - source: single
+      metric: test-counter-metric
+    - source: single
+      metric: test-counter-metric-with-range
+    - source: single
+      metric: test-text-field
+    - source: single
+      metric: test-multiline-text-field
+    - source: single
+      metric: test-image
+    - source: single
       metric: taxi
     - source: single
       metric: auto-score
