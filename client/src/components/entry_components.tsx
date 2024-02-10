@@ -1,4 +1,4 @@
-import { Button, Input, Stack, Textarea, ToggleButtonGroup } from "@mui/joy";
+import { Box, Button, Input, Stack, Textarea, ToggleButtonGroup } from "@mui/joy";
 import { useEffect, useState } from "preact/hooks";
 
 import { AbilityMetric } from "../generated/AbilityMetric";
@@ -30,7 +30,7 @@ export function MatchPage(props: MatchPageProps) {
 				<MatchDetail
 					entry={props.entries[entryName]}
 					setValue={(value) => {
-						console.log(`Setting ${entryName} to ${value}`);
+						console.log(`Setting ${entryName} to ${JSON.stringify(value)}`);
 						props.setEntry(entryName, value);
 					}}
 					value={props.allEntries[entryName]}
@@ -207,7 +207,7 @@ function CounterEntry(props: CounterEntryProps) {
 				if (props.value?.type !== "counter") {
 					props.setValue({ count: (props.entry.limit_range?.start ?? 0), type: "counter" });
 				} else if (props.entry?.limit_range === null || props.entry?.limit_range === undefined || props.value.count > props.entry.limit_range.start) {
-					props.setValue({ count: props.value.count-1, type: "counter" });
+					props.setValue({ count: props.value.count - 1, type: "counter" });
 				}
 			}}>-</Button>
 			<Input
@@ -229,7 +229,7 @@ function CounterEntry(props: CounterEntryProps) {
 				if (props.value?.type !== "counter") {
 					props.setValue({ count: (props.entry.limit_range?.start ?? 0), type: "counter" });
 				} else if (props.entry?.limit_range === null || props.entry?.limit_range === undefined || props.value.count < props.entry.limit_range.end_inclusive) {
-					props.setValue({ count: props.value.count+1, type: "counter" });
+					props.setValue({ count: props.value.count + 1, type: "counter" });
 				}
 			}}>+</Button>
 		</Stack>
@@ -247,12 +247,12 @@ interface TextFieldEntryProps {
  */
 function TextFieldEntry(props: TextFieldEntryProps) {
 	const cl = (ev: InputEvent) => {
-				let value = (ev.target as HTMLInputElement).value;
-				if (!props.entry.multiline) {
-					value = value.replaceAll("\n", "");
-				}
-				props.setValue({ type: "text_entry", text: value });
-			};
+		let value = (ev.target as HTMLInputElement).value;
+		if (!props.entry.multiline) {
+			value = value.replaceAll("\n", "");
+		}
+		props.setValue({ type: "text_entry", text: value });
+	};
 	return (
 		<Textarea
 			minRows={props.entry.multiline ? 4 : 1}
@@ -277,26 +277,59 @@ interface ImageEntryProps {
 }
 
 /**
+ * Convert an image filename to a mime type.
+ */
+function toMime(filename: string): string {
+	if (filename.endsWith(".png")) {
+		return "image/png";
+	} else if (filename.endsWith(".jpg") || filename.endsWith(".jpeg") || filename.endsWith(".jfif")) {
+		return "image/jpeg";
+	} else if (filename.endsWith(".heic") || filename.endsWith(".heif")) {
+		return "image/heic";
+	} else if (filename.endsWith(".webp")) {
+		return "image/webp";
+	} else if (filename.endsWith(".gif")) {
+		return "image/gif";
+	} else if (filename.endsWith(".bmp")) {
+		return "image/bmp";
+	} else {
+		return "image/jpeg";
+	}
+}
+
+/**
  *	An entry for image thingies
  */
 function ImageEntry(props: ImageEntryProps) {
 	return (
-		<Input
-			type="file"
-			capture="environment"
-			accept="image/*"
-			onChange={(ev: InputEvent) => {
-				const files = (ev.target as HTMLInputElement).files;
-				for (let f = 0; f < (files?.length ?? 0); f++) {
-					const file = (files ?? [])[f];
-					if (file !== null) {
-						console.log("File: ");
-						console.log(file);
-						saveImage(file);
-					}
-				}
-			}}
-		/>
+		<Box>
+			{
+				<input
+					type="file"
+					capture="environment"
+					accept="image/*"
+					onChange={ev => {
+						const files = (ev.target as HTMLInputElement).files;
+						for (let f = 0; f < (files?.length ?? 0); f++) {
+							const file = (files ?? [])[f];
+							if (file !== null) {
+								console.log("File: ");
+								console.log(file);
+								saveImage(file).then(imageUuid => {
+									props.setValue({
+										"type": "image", "images": [
+											...((props.value?.type === "image" ? props.value?.images : undefined) ?? []),
+											// @ts-expect-error yeah I know this is the wrong type but we're replacing it before sending anyway so it's fine
+											{ "image_mime": toMime(file.name), "image_uuid": imageUuid },
+										],
+									});
+								});
+							}
+						}
+					}}
+				/>
+			}
+		</Box>
 	);
 }
 
