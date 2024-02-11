@@ -11,6 +11,10 @@ export const matchFieldsAtom = atomWithStorage<MatchEntryFields | null>(
 	"matchFields",
 	null,
 );
+export const driverFieldsAtom = atomWithStorage<MatchEntryFields | null>(
+	"driverFields",
+	null,
+);
 export const pitFieldsAtom = atomWithStorage<MatchEntryFields | null>(
 	"pitFields",
 	null,

@@ -70,6 +70,10 @@ export function Navbar() {
 								name: "Pit Entry",
 							},
 							{
+								path: "/driver_entry",
+								name: "Driver Entry",
+							},
+							{
 								path: "/analysis",
 								name: "Analysis",
 							},
