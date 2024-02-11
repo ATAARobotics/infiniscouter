@@ -27,7 +27,7 @@
   "scripts": {
     "dev": "esbuild --bundle --watch --sourcemap --alias:react=preact/compat --alias:react-dom=preact/compat --target=es2020 --format=iife --outdir=dist src/app.tsx",
     "build": "esbuild --bundle --minify --sourcemap --alias:react=preact/compat --alias:react-dom=preact/compat --target=es2020 --format=iife --outdir=dist src/app.tsx",
-    "lint": "tsc --noEmit --pretty && eslint --help src/*.tsx",
+    "lint": "tsc --noEmit --pretty && eslint src/*.tsx",
     "fix": "eslint --fix src/*.tsx",
     "format": "prettier -w src/**"
   }

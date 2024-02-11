@@ -1,4 +1,11 @@
-import { Box, Button, Input, Stack, Textarea, ToggleButtonGroup } from "@mui/joy";
+import {
+	Box,
+	Button,
+	Input,
+	Stack,
+	Textarea,
+	ToggleButtonGroup,
+} from "@mui/joy";
 import { useEffect, useState } from "preact/hooks";
 
 import { AbilityMetric } from "../generated/AbilityMetric";
@@ -30,7 +37,9 @@ export function MatchPage(props: MatchPageProps) {
 				<MatchDetail
 					entry={props.entries[entryName]}
 					setValue={(value) => {
-						console.log(`Setting ${entryName} to ${JSON.stringify(value)}`);
+						console.log(
+							`Setting ${entryName} to ${JSON.stringify(value)}`,
+						);
 						props.setEntry(entryName, value);
 					}}
 					value={props.allEntries[entryName]}
@@ -120,7 +129,10 @@ function EnumEntry(props: EnumEntryProps) {
 	return (
 		<ToggleButtonGroup
 			value={
-				props.value && (props.value.type === "enum" || props.value.type === "ability" || props.value.type === "bool")
+				props.value &&
+				(props.value.type === "enum" ||
+					props.value.type === "ability" ||
+					props.value.type === "bool")
 					? props.value.value.toString()
 					: ""
 			}
@@ -203,35 +215,74 @@ interface CounterEntryProps {
 function CounterEntry(props: CounterEntryProps) {
 	return (
 		<Stack direction="row">
-			<Button color="danger" onClick={() => {
-				if (props.value?.type !== "counter") {
-					props.setValue({ count: (props.entry.limit_range?.start ?? 0), type: "counter" });
-				} else if (props.entry?.limit_range === null || props.entry?.limit_range === undefined || props.value.count > props.entry.limit_range.start) {
-					props.setValue({ count: props.value.count - 1, type: "counter" });
-				}
-			}}>-</Button>
-			<Input
-				type="number"
-				placeholder={"Enter a number uwu..."}
-				onChange={(ev: InputEvent) => {
-					const value = parseInt((ev.target as HTMLInputElement).value);
-					if (!isNaN(value) && (props.entry?.limit_range === null || props.entry?.limit_range === undefined || (value >= props.entry.limit_range.start && value <= props.entry.limit_range.end_inclusive))) {
-						props.setValue({ type: "counter", count: value });
+			<Button
+				color="danger"
+				onClick={() => {
+					if (props.value?.type !== "counter") {
+						props.setValue({
+							count: props.entry.limit_range?.start ?? 0,
+							type: "counter",
+						});
+					} else if (
+						props.entry?.limit_range === null ||
+						props.entry?.limit_range === undefined ||
+						props.value.count > props.entry.limit_range.start
+					) {
+						props.setValue({
+							count: props.value.count - 1,
+							type: "counter",
+						});
 					}
 				}}
-				value={
-					props.value && props.value.type === "counter"
-						? props.value.count
-						: (props.entry.limit_range?.start ?? 0)
-				}
-			/>
-			<Button color="primary" onClick={() => {
-				if (props.value?.type !== "counter") {
-					props.setValue({ count: (props.entry.limit_range?.start ?? 0), type: "counter" });
-				} else if (props.entry?.limit_range === null || props.entry?.limit_range === undefined || props.value.count < props.entry.limit_range.end_inclusive) {
-					props.setValue({ count: props.value.count + 1, type: "counter" });
-				}
-			}}>+</Button>
+			>
+				-
+			</Button>
+			{
+				// @ts-expect-error Input seems to want a component for some reason?
+				<Input
+					type="number"
+					placeholder={"Enter a number uwu..."}
+					onChange={(ev: InputEvent) => {
+						const value = parseInt((ev.target as HTMLInputElement).value);
+						if (
+							!isNaN(value) &&
+							(props.entry?.limit_range === null ||
+								props.entry?.limit_range === undefined ||
+								(value >= props.entry.limit_range.start &&
+									value <= props.entry.limit_range.end_inclusive))
+						) {
+							props.setValue({ type: "counter", count: value });
+						}
+					}}
+					value={
+						props.value && props.value.type === "counter"
+							? props.value.count
+							: props.entry.limit_range?.start ?? 0
+					}
+				/>
+			}
+			<Button
+				color="primary"
+				onClick={() => {
+					if (props.value?.type !== "counter") {
+						props.setValue({
+							count: props.entry.limit_range?.start ?? 0,
+							type: "counter",
+						});
+					} else if (
+						props.entry?.limit_range === null ||
+						props.entry?.limit_range === undefined ||
+						props.value.count < props.entry.limit_range.end_inclusive
+					) {
+						props.setValue({
+							count: props.value.count + 1,
+							type: "counter",
+						});
+					}
+				}}
+			>
+				+
+			</Button>
 		</Stack>
 	);
 }
@@ -254,6 +305,7 @@ function TextFieldEntry(props: TextFieldEntryProps) {
 		props.setValue({ type: "text_entry", text: value });
 	};
 	return (
+		// @ts-expect-error Input seems to want a component for some reason?
 		<Textarea
 			minRows={props.entry.multiline ? 4 : 1}
 			maxRows={props.entry.multiline ? 8 : 1}
@@ -282,7 +334,11 @@ interface ImageEntryProps {
 function toMime(filename: string): string {
 	if (filename.endsWith(".png")) {
 		return "image/png";
-	} else if (filename.endsWith(".jpg") || filename.endsWith(".jpeg") || filename.endsWith(".jfif")) {
+	} else if (
+		filename.endsWith(".jpg") ||
+		filename.endsWith(".jpeg") ||
+		filename.endsWith(".jfif")
+	) {
 		return "image/jpeg";
 	} else if (filename.endsWith(".heic") || filename.endsWith(".heif")) {
 		return "image/heic";
@@ -308,19 +364,25 @@ function ImageEntry(props: ImageEntryProps) {
 					type="file"
 					capture="environment"
 					accept="image/*"
-					onChange={ev => {
+					onChange={(ev) => {
 						const files = (ev.target as HTMLInputElement).files;
 						for (let f = 0; f < (files?.length ?? 0); f++) {
 							const file = (files ?? [])[f];
 							if (file !== null) {
 								console.log("File: ");
 								console.log(file);
-								saveImage(file).then(imageUuid => {
+								saveImage(file).then((imageUuid) => {
 									props.setValue({
-										"type": "image", "images": [
-											...((props.value?.type === "image" ? props.value?.images : undefined) ?? []),
-											// @ts-expect-error yeah I know this is the wrong type but we're replacing it before sending anyway so it's fine
-											{ "image_mime": toMime(file.name), "image_uuid": imageUuid },
+										type: "image",
+										images: [
+											...((props.value?.type === "image"
+												? props.value?.images
+												: undefined) ?? []),
+											{
+												image_mime: toMime(file.name),
+												// @ts-expect-error yeah I know this is the wrong type but we're replacing it before sending anyway so it's fine
+												image_uuid: imageUuid,
+											},
 										],
 									});
 								});
@@ -391,7 +453,9 @@ function TimerEntry(props: TimerEntryProps) {
 		</Button>
 	) : state.type === "running" ? (
 		<>
-			<p>Running! {(currentTime - state.startTime) / 1000} seconds elapsed.</p>
+			<p>
+				Running! {(currentTime - state.startTime) / 1000} seconds elapsed.
+			</p>
 			<Button
 				onClick={() => {
 					const time = Date.now() - state.startTime;

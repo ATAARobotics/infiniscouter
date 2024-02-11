@@ -52,6 +52,7 @@
         "after": true
       }
     ],
+    "no-mixed-spaces-and-tabs": ["error", "smart-tabs"],
     "multiline-comment-style": ["warn", "separate-lines"],
     "no-label-var": "warn",
     "no-useless-rename": "warn",

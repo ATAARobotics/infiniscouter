@@ -2,8 +2,9 @@
  * Uhhhh oh right this one just returns a new uuid v4
  */
 function uuidv4(): string {
-	return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
-		const r = Math.random() * 16 | 0, v = c === "x" ? r : (r & 0x3 | 0x8);
+	return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+		const r = (Math.random() * 16) | 0,
+			v = c === "x" ? r : (r & 0x3) | 0x8;
 		return v.toString(16);
 	});
 }
@@ -12,7 +13,7 @@ function uuidv4(): string {
  * Make a da database uwu
  */
 async function ensureDbPrepared(): Promise<IDBDatabase> {
-	if (!await navigator.storage.persist()) {
+	if (!(await navigator.storage.persist())) {
 		alert("WARNING: Images might get deleted without persisted storage!");
 	}
 	return new Promise((resolve, reject) => {
@@ -37,7 +38,10 @@ export async function saveImage(file: File): Promise<string> {
 	console.log("Data:");
 	console.log(data);
 	return await new Promise((resolve, reject) => {
-		const trans = db.transaction("images", "readwrite").objectStore("images").put({ uuid: imageUuid, data: data });
+		const trans = db
+			.transaction("images", "readwrite")
+			.objectStore("images")
+			.put({ uuid: imageUuid, data: data });
 		trans.addEventListener("success", () => {
 			console.log("Image saved, uuid=" + imageUuid);
 			resolve(imageUuid);
@@ -54,7 +58,10 @@ export async function saveImage(file: File): Promise<string> {
 export async function getImage(uuid: string): Promise<ArrayBuffer | undefined> {
 	const db = await ensureDbPrepared();
 	return await new Promise((resolve, reject) => {
-		const trans = db.transaction("images", "readonly").objectStore("images").get(uuid);
+		const trans = db
+			.transaction("images", "readonly")
+			.objectStore("images")
+			.get(uuid);
 		trans.addEventListener("success", () => {
 			resolve(trans.result.data);
 		});

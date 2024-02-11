@@ -11,7 +11,9 @@ import { getImage } from "src/images";
  *	@returns the component
  */
 export function SyncButton() {
-	const [loadingState, setLoadingState] = useState<"saved" | "saving">("saved");
+	const [loadingState, setLoadingState] = useState<"saved" | "saving">(
+		"saved",
+	);
 	const setMatchList = useSetAtom(matchListAtom);
 	const setMatchFields = useSetAtom(matchFieldsAtom);
 	const setPitFields = useSetAtom(pitFieldsAtom);
@@ -47,7 +49,9 @@ export function SyncButton() {
 		for (let entry = 0; entry < localStorage.length; entry++) {
 			const key: string | null = localStorage.key(entry);
 			if (key !== null && key.startsWith("match-")) {
-				const match_entry = JSON.parse(localStorage.getItem(key) ?? "") as MatchEntryIdData;
+				const match_entry = JSON.parse(
+					localStorage.getItem(key) ?? "",
+				) as MatchEntryIdData;
 				for (const value of Object.values(match_entry.data.entries)) {
 					if (value.type === "image") {
 						for (const image of value.images) {

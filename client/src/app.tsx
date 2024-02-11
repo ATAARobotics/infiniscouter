@@ -18,27 +18,27 @@ import { TeamInfo } from "./pages/team_info";
  * Main app component.
  */
 function App() {
-  return (
-    <CssVarsProvider defaultMode="dark">
-      <CssBaseline />
-      <LocationProvider>
-        <Navbar />
-        <main>
-          <Router>
-            <Route path="/" component={Home} />
-            <Route path="/api/docs" component={Reload} />
-            <Route path="/match_entry" component={MatchEntry} />
-            <Route path="/match_list" component={MatchList} />
-            <Route path="/match/:type/:num/:set" component={MatchInfo} />
-            <Route path="/pit_entry" component={PitEntry} />
-            <Route path="/analysis" component={Analysis} />
-            <Route path="/team/:team" component={TeamInfo} />
-            <Route default component={NotFound} />
-          </Router>
-        </main>
-      </LocationProvider>
-    </CssVarsProvider>
-  );
+	return (
+		<CssVarsProvider defaultMode="dark">
+			<CssBaseline />
+			<LocationProvider>
+				<Navbar />
+				<main>
+					<Router>
+						<Route path="/" component={Home} />
+						<Route path="/api/docs" component={Reload} />
+						<Route path="/match_entry" component={MatchEntry} />
+						<Route path="/match_list" component={MatchList} />
+						<Route path="/match/:type/:num/:set" component={MatchInfo} />
+						<Route path="/pit_entry" component={PitEntry} />
+						<Route path="/analysis" component={Analysis} />
+						<Route path="/team/:team" component={TeamInfo} />
+						<Route default component={NotFound} />
+					</Router>
+				</main>
+			</LocationProvider>
+		</CssVarsProvider>
+	);
 }
 
 render(<App />, document.getElementById("app")!);
