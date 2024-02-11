@@ -2,6 +2,7 @@ import { Box, Checkbox, Chip, Stack, Table } from "@mui/joy";
 import { useEffect, useState } from "preact/compat";
 
 import { DataValue } from "../components/data_value";
+import { LoadIndicator } from "../components/load_indicator";
 import { TeamInfoList } from "../generated/TeamInfoList";
 
 /**
@@ -22,7 +23,7 @@ export function Analysis() {
 	}, []);
 
 	if (!table) {
-		return <div>:( (loading...)</div>;
+		return <LoadIndicator></LoadIndicator>;
 	}
 
 	return (
