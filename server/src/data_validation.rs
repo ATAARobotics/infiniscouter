@@ -10,9 +10,9 @@ pub fn validate_match(mut data: MatchEntryData, fields: &MatchEntryFields) -> Ma
 					| (MatchEntryType::Enum(_), MatchEntryValue::Enum(_))
 					| (MatchEntryType::Bool(_), MatchEntryValue::Bool(_))
 					| (MatchEntryType::Timer(_), MatchEntryValue::Timer(_))
-                    | (MatchEntryType::Counter(_), MatchEntryValue::Counter(_))
-                    | (MatchEntryType::TextEntry(_), MatchEntryValue::TextEntry(_))
-                    | (MatchEntryType::Image(_), MatchEntryValue::Image(_))
+					| (MatchEntryType::Counter(_), MatchEntryValue::Counter(_))
+					| (MatchEntryType::TextEntry(_), MatchEntryValue::TextEntry(_))
+					| (MatchEntryType::Image(_), MatchEntryValue::Image(_))
 			)
 		} else {
 			false

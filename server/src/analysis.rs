@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use crate::{
-	api::data::{MatchEntryData, MatchEntryIdData, MatchEntryValue, ImageData},
+	api::data::{ImageData, MatchEntryData, MatchEntryIdData, MatchEntryValue},
 	config::{match_entry::MatchEntryType, GameConfigs, SingleMetric, TeamConfig, TeamNameMetric},
 	database::Database,
 	statbotics::{StatboticsCache, StatboticsTeam},

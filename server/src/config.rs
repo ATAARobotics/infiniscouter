@@ -102,12 +102,12 @@ pub enum CollectedMetricType {
 	Bool(BoolMetric),
 	/// A metric that represents an amount of real-world time
 	Timer(TimerMetric),
-    /// A metric that represents an amount of things
-    Counter(CounterMetric),
-    /// A text entry field, either single line or multi lined
-    TextEntry(TextEntryMetric),
-    /// An picture field, for example for pit scouting robot pictures
-    Image(ImageMetric),
+	/// A metric that represents an amount of things
+	Counter(CounterMetric),
+	/// A text entry field, either single line or multi lined
+	TextEntry(TextEntryMetric),
+	/// An picture field, for example for pit scouting robot pictures
+	Image(ImageMetric),
 	/// A metric that represents data fetched from statbotics' team api
 	StatboticsTeam(StatboticsTeamMetric),
 }
@@ -138,26 +138,26 @@ pub struct TimerMetric {}
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct CounterMetric {
-    limit_range: Option<CounterRange>,
+	limit_range: Option<CounterRange>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct CounterRange {
-    start: i32,
-    end_inclusive: i32,
+	start: i32,
+	end_inclusive: i32,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct TextEntryMetric {
-    multiline: bool,
+	multiline: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct ImageMetric {
-    allow_video: bool,
+	allow_video: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
