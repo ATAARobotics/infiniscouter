@@ -3,8 +3,9 @@ import { useAtomValue } from "jotai/react";
 import { useEffect, useState } from "preact/hooks";
 
 import { MatchPage } from "../components/entry_components";
+import { GetScoutName } from "../components/get_scout_name";
 import { LoadIndicator } from "../components/load_indicator";
-import { matchListAtom, pitFieldsAtom } from "../data/atoms";
+import { matchListAtom, pitFieldsAtom, scoutNameAtom } from "../data/atoms";
 import { MatchEntryData } from "../generated/MatchEntryData";
 import { MatchEntryIdData } from "../generated/MatchEntryIdData";
 import { PitEntryIdData } from "../generated/PitEntryIdData";
@@ -15,24 +16,32 @@ import { PitEntryIdData } from "../generated/PitEntryIdData";
 export function PitEntry() {
 	const [teamId, setTeamId] = useState<number>();
 
-	const [data, setData] = useState<MatchEntryData>({
+	const [data, setData] = useState<Omit<MatchEntryData, "scout">>({
 		entries: {},
 		timestamp_ms: 0,
 	});
+
+	const scoutName = useAtomValue(scoutNameAtom);
+	const event_info = useAtomValue(matchListAtom);
+	const fields = useAtomValue(pitFieldsAtom);
+
 	useEffect(() => {
-		if (teamId !== undefined) {
+		if (teamId && scoutName) {
 			const saveData: PitEntryIdData = {
 				team_id: teamId.toString(),
-				data,
+				data: {
+					...data,
+					scout: scoutName,
+				},
 			};
 			localStorage.setItem(
 				"team-" + teamId?.toString(),
 				JSON.stringify(saveData),
 			);
 		}
-	}, [data]);
+	}, [data, scoutName]);
 	useEffect(() => {
-		if (teamId !== undefined) {
+		if (teamId) {
 			const newData: MatchEntryIdData | null = JSON.parse(
 				localStorage.getItem("team-" + teamId?.toString()) ?? "null",
 			);
@@ -44,12 +53,13 @@ export function PitEntry() {
 		}
 	}, [teamId]);
 
-	const event_info = useAtomValue(matchListAtom);
-	const fields = useAtomValue(pitFieldsAtom);
-
+	if (!scoutName) {
+		return <GetScoutName></GetScoutName>;
+	}
 	if (!event_info) {
 		return <LoadIndicator></LoadIndicator>;
 	}
+
 	return (
 		<Box>
 			<h1>Pit Entry Page</h1>

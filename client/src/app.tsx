@@ -5,6 +5,7 @@ import { LocationProvider, Route, Router } from "preact-iso";
 
 import { Navbar } from "./components/navbar";
 import { Analysis } from "./pages/analysis";
+import { Configuration } from "./pages/configuration";
 import { Home } from "./pages/home";
 import { MatchEntry } from "./pages/match_entry";
 import { MatchInfo } from "./pages/match_info";
@@ -27,6 +28,7 @@ function App() {
 					<Router>
 						<Route path="/" component={Home} />
 						<Route path="/api/docs" component={Reload} />
+						<Route path="/config" component={Configuration} />
 						<Route path="/match_entry" component={MatchEntry} />
 						<Route path="/match_list" component={MatchList} />
 						<Route path="/match/:type/:num/:set" component={MatchInfo} />

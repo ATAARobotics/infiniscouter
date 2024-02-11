@@ -15,3 +15,5 @@ export const pitFieldsAtom = atomWithStorage<MatchEntryFields | null>(
 	"pitFields",
 	null,
 );
+
+export const scoutNameAtom = atomWithStorage<string | null>("scoutName", null);
