@@ -5,6 +5,14 @@ use ts_rs::TS;
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
+pub struct DriverEntryIdData {
+	pub match_id: String,
+	pub team_id: String,
+	pub data: MatchEntryData,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct MatchEntryIdData {
 	pub match_id: String,
 	pub team_id: String,
@@ -23,6 +31,9 @@ pub struct PitEntryIdData {
 pub struct MatchEntryData {
 	/// The mapping from entry ids to entry values.
 	pub entries: HashMap<String, MatchEntryValue>,
+	#[serde(default)]
+	#[oai(default)]
+	pub scout: String,
 	#[serde(default)]
 	#[oai(default)]
 	#[ts(type = "number")]

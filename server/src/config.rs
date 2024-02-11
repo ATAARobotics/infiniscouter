@@ -1,6 +1,6 @@
 pub mod match_entry;
 
-use crate::config::match_entry::MatchEntryFields;
+use crate::config::match_entry::{EntryType, MatchEntryFields};
 use color_eyre::eyre::eyre;
 use color_eyre::Result;
 use poem_openapi::{Enum, Object, Union};
@@ -74,6 +74,12 @@ pub enum CollectionOption {
 }
 
 impl CollectionOption {
+	pub fn collect_from_drive(&self) -> bool {
+		matches!(
+			self,
+			CollectionOption::PitDrive | CollectionOption::DriveOnly
+		)
+	}
 	pub fn collect_in_match(&self) -> bool {
 		matches!(
 			self,
@@ -241,17 +247,20 @@ pub struct TeamConfig {
 pub struct GameConfigs {
 	/// The actual game config, all other configs are generated from this
 	pub game_config: GameConfig,
-	/// The fields to gather per match
+	/// The fields to gather per match when scouting
 	pub match_entry_fields: MatchEntryFields,
-	/// The fields to gather per match
+	/// The fields to gather per match from the drive team
+	pub driver_entry_fields: MatchEntryFields,
+	/// The fields to gather for pit scouting
 	pub pit_entry_fields: MatchEntryFields,
 }
 
 impl From<GameConfig> for GameConfigs {
 	fn from(value: GameConfig) -> Self {
 		GameConfigs {
-			match_entry_fields: MatchEntryFields::from_game_config(&value, false),
-			pit_entry_fields: MatchEntryFields::from_game_config(&value, true),
+			match_entry_fields: MatchEntryFields::from_game_config(&value, EntryType::Match),
+			driver_entry_fields: MatchEntryFields::from_game_config(&value, EntryType::DriveTeam),
+			pit_entry_fields: MatchEntryFields::from_game_config(&value, EntryType::Pit),
 			game_config: value,
 		}
 	}

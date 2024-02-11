@@ -9,6 +9,17 @@ use ts_rs::TS;
 
 // TODO: Rename the following types
 
+/// The type of data entry
+#[derive(Debug, Clone, Copy)]
+pub enum EntryType {
+	/// Data entered by the drive team
+	DriveTeam,
+	/// Data entered when scouting a match
+	Match,
+	/// Data entered when pit scouting
+	Pit,
+}
+
 /// The list of entries to display to the user to collect and then send back to the server
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
@@ -80,7 +91,7 @@ impl From<&CollectedMetricType> for MatchEntryType {
 }
 
 impl MatchEntryFields {
-	pub fn from_game_config(game_config: &GameConfig, is_pit: bool) -> Self {
+	pub fn from_game_config(game_config: &GameConfig, entry_type: EntryType) -> Self {
 		Self {
 			entries: game_config
 				.categories
@@ -89,9 +100,10 @@ impl MatchEntryFields {
 					category
 						.metrics
 						.iter()
-						.filter(|(_, metric)| {
-							(is_pit && metric.collect.collect_in_pit())
-								|| (!is_pit && metric.collect.collect_in_match())
+						.filter(|(_, metric)| match entry_type {
+							EntryType::DriveTeam => metric.collect.collect_from_drive(),
+							EntryType::Match => metric.collect.collect_in_match(),
+							EntryType::Pit => metric.collect.collect_in_pit(),
 						})
 						.map(|(metric_id, metric)| {
 							(
@@ -108,7 +120,6 @@ impl MatchEntryFields {
 			pages: game_config
 				.categories
 				.keys()
-				.into_iter()
 				.filter_map(|page| game_config.categories.get(page))
 				.map(|cat| MatchEntryPage {
 					title: cat.name.clone(),
@@ -116,13 +127,15 @@ impl MatchEntryFields {
 					layout: cat
 						.metrics
 						.iter()
-						.filter(|(_, metric)| {
-							(is_pit && metric.collect.collect_in_pit())
-								|| (!is_pit && metric.collect.collect_in_match())
+						.filter(|(_, metric)| match entry_type {
+							EntryType::DriveTeam => metric.collect.collect_from_drive(),
+							EntryType::Match => metric.collect.collect_in_match(),
+							EntryType::Pit => metric.collect.collect_in_pit(),
 						})
 						.map(|(metric, _)| metric.clone())
 						.collect(),
 				})
+				.filter(|page| !page.layout.is_empty())
 				.collect(),
 		}
 	}
