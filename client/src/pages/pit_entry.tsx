@@ -1,12 +1,13 @@
-import { useState, useEffect } from "preact/hooks";
+import { Autocomplete, Box } from "@mui/joy";
+import { useAtomValue } from "jotai/react";
+import { useEffect, useState } from "preact/hooks";
 
+import { MatchPage } from "../components/entry_components";
+import { LoadIndicator } from "../components/load_indicator";
+import { matchListAtom, pitFieldsAtom } from "../data/atoms";
 import { MatchEntryData } from "../generated/MatchEntryData";
-import { Autocomplete, Box, CircularProgress, Typography } from "@mui/joy";
-import { EventInfo } from "../generated/EventInfo";
 import { MatchEntryIdData } from "../generated/MatchEntryIdData";
-import { MatchEntryFields } from "../generated/MatchEntryFields";
-import { PitEntryIdData } from "src/generated/PitEntryIdData";
-import { MatchPage } from "src/components/entry_components";
+import { PitEntryIdData } from "../generated/PitEntryIdData";
 
 /**
  * Pit Entry Page Component
@@ -43,18 +44,11 @@ export function PitEntry() {
     }
   }, [teamId]);
 
-  const event_info: EventInfo | null = JSON.parse(
-    localStorage.getItem("matchList") ?? "null",
-  );
-  const fields: MatchEntryFields | null = JSON.parse(
-    localStorage.getItem("pitFields") ?? "null",
-  );
+  const event_info = useAtomValue(matchListAtom);
+  const fields = useAtomValue(pitFieldsAtom);
+
   if (!event_info) {
-    return (
-      <Box>
-        <Typography>Click "Save Data" to get list of teams...</Typography>
-      </Box>
-    );
+    return <LoadIndicator></LoadIndicator>;
   }
   return (
     <Box>
@@ -94,17 +88,7 @@ export function PitEntry() {
               ></MatchPage>
             ))
           ) : (
-            <div>
-              <CircularProgress
-                color="danger"
-                determinate={false}
-                size="sm"
-                value={25}
-                variant="solid"
-                thickness={7}
-              />
-              {"  "}Loading...
-            </div>
+            <LoadIndicator></LoadIndicator>
           ))}
       </Box>
     </Box>

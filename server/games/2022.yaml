@@ -73,11 +73,57 @@ categories:
         collect: pit_drive
         metric:
           type: bool
+      test-counter-metric:
+        name: Test Counter
+        description: You better get ready to get tested uwu
+        collect: match_only
+        metric:
+          type: counter
+      test-counter-metric-with-range:
+        name: Test Limited Counter
+        description: Really gonna test you now
+        collect: match_only
+        metric:
+          type: counter
+          limit_range:
+            start: 2
+            end_inclusive: 5
+      test-text-field:
+        name: Test Text Field
+        description: Please write nothing in this box or I will murder you
+        collect: match_only
+        metric:
+          type: text_entry
+          multiline: false
+      test-multiline-text-field:
+        name: Test Multiline Text Field
+        description: UwU the testing is going so hard right now
+        collect: match_only
+        metric:
+          type: text_entry
+          multiline: true
+      test-image:
+        name: Test Images
+        description: ":eyes:"
+        collect: match_only
+        metric:
+          type: image
+          allow_video: true
 ranking_points:
   - Ball Threshold
   - Climb Threshold
 display:
   team_row:
+    - source: single
+      metric: test-counter-metric
+    - source: single
+      metric: test-counter-metric-with-range
+    - source: single
+      metric: test-text-field
+    - source: single
+      metric: test-multiline-text-field
+    - source: single
+      metric: test-image
     - source: single
       metric: taxi
     - source: single

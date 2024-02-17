@@ -1,24 +1,19 @@
-import {
-  Box,
-  CircularProgress,
-  RadioGroup,
-  Radio,
-  Stack,
-  Typography,
-  Input,
-} from "@mui/joy";
+import { Box, Input, Radio, RadioGroup, Stack, Typography } from "@mui/joy";
+import { useAtomValue } from "jotai/react";
 import { ChangeEvent } from "preact/compat";
-import { useState, useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 
 import { MatchPage } from "../components/entry_components";
-import { MatchEntryFields } from "../generated/MatchEntryFields";
+import { LoadIndicator } from "../components/load_indicator";
+import { matchFieldsAtom, matchListAtom } from "../data/atoms";
 import { MatchEntry } from "../generated/MatchEntry";
 import { MatchEntryData } from "../generated/MatchEntryData";
-import { EventInfo } from "../generated/EventInfo";
-import { MatchInfo } from "../generated/MatchInfo";
 import { MatchEntryIdData } from "../generated/MatchEntryIdData";
+import { MatchInfo } from "../generated/MatchInfo";
 
-// Match Entry Page Component
+/**
+ * Match Entry Page Component
+ */
 export function MatchEntry() {
   const [matchId, setMatchId] = useState<number>();
   const [teamId, setTeamId] = useState<number>();
@@ -55,18 +50,10 @@ export function MatchEntry() {
     }
   }, [matchId, teamId]);
 
-  const matchTeams: EventInfo | null = JSON.parse(
-    localStorage.getItem("matchList") ?? "null",
-  );
-  const fields: MatchEntryFields | null = JSON.parse(
-    localStorage.getItem("matchFields") ?? "null",
-  );
+  const matchTeams = useAtomValue(matchListAtom);
+  const fields = useAtomValue(matchFieldsAtom);
   if (!matchTeams) {
-    return (
-      <Box>
-        <Typography>Click "Save Data" to get list of matches...</Typography>
-      </Box>
-    );
+    return <LoadIndicator></LoadIndicator>;
   }
   const teamsForMatch: MatchInfo | undefined | 0 =
     matchId !== undefined
@@ -143,17 +130,7 @@ export function MatchEntry() {
             ></MatchPage>
           ))
         ) : (
-          <div>
-            <CircularProgress
-              color="danger"
-              determinate={false}
-              size="sm"
-              value={25}
-              variant="solid"
-              thickness={7}
-            />
-            {"  "}Loading...
-          </div>
+          <LoadIndicator></LoadIndicator>
         ))}
     </Box>
   );

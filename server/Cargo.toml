@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+async-openai = "0.18"
 color-eyre = "0.6"
 futures-util = "0.3"
 log = "0.4"
@@ -20,3 +21,4 @@ sled = "0.34"
 thiserror = "1"
 tokio = { version = "1", features = ["full"] }
 ts-rs = "7"
+vader_sentiment = "0.1"

@@ -1,5 +1,6 @@
 use crate::config::{
-	AbilityMetric, BoolMetric, CollectedMetricType, EnumMetric, GameConfig, TimerMetric,
+	AbilityMetric, BoolMetric, CollectedMetricType, CounterMetric, EnumMetric, GameConfig,
+	ImageMetric, TextEntryMetric, TimerMetric,
 };
 use poem_openapi::{Object, Union};
 use serde::{Deserialize, Serialize};
@@ -51,6 +52,12 @@ pub enum MatchEntryType {
 	Enum(EnumMetric),
 	/// An entry that represents a yes/no question
 	Bool(BoolMetric),
+	/// A metric that represents an amount of things
+	Counter(CounterMetric),
+	/// A text entry field, either single line or multi lined
+	TextEntry(TextEntryMetric),
+	/// An picture field, for example for pit scouting robot pictures
+	Image(ImageMetric),
 	/// An entry that represents an amount of real-world time
 	Timer(TimerMetric),
 }
@@ -62,6 +69,9 @@ impl From<&CollectedMetricType> for MatchEntryType {
 			CollectedMetricType::Enum(e) => Self::Enum(e.clone()),
 			CollectedMetricType::Bool(b) => Self::Bool(b.clone()),
 			CollectedMetricType::Timer(t) => Self::Timer(t.clone()),
+			CollectedMetricType::Counter(c) => Self::Counter(c.clone()),
+			CollectedMetricType::TextEntry(t) => Self::TextEntry(t.clone()),
+			CollectedMetricType::Image(i) => Self::Image(i.clone()),
 			CollectedMetricType::StatboticsTeam(_) => {
 				unimplemented!("Statbotics metrics aren't collectable per-match.");
 			}
@@ -95,7 +105,9 @@ impl MatchEntryFields {
 						})
 				})
 				.collect(),
-			pages: ["auto", "teleop", "endgame", "impressions"]
+			pages: game_config
+				.categories
+				.keys()
 				.into_iter()
 				.filter_map(|page| game_config.categories.get(page))
 				.map(|cat| MatchEntryPage {

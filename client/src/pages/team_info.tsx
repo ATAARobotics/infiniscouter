@@ -1,15 +1,22 @@
-import Button from "@mui/joy/Button";
-import Box from "@mui/joy/Box";
-import { Card, Typography, AspectRatio, CardContent, Stack } from "@mui/joy";
-import { SingleTeamInfo } from "src/generated/SingleTeamInfo";
+import {
+  AspectRatio,
+  Card,
+  Stack,
+  Typography,
+} from "@mui/joy";
 import { useEffect, useState } from "react";
-import { DataValue } from "src/components/data_value";
+
+import { DataValue } from "../components/data_value";
+import { LoadIndicator } from "../components/load_indicator";
+import { SingleTeamInfo } from "../generated/SingleTeamInfo";
 
 interface TeamInfoProps {
   team: number;
 }
 
-// Team Info Page Component
+/**
+ * Team Info Page Component
+ */
 export function TeamInfo(props: TeamInfoProps) {
   const [data, setData] = useState<SingleTeamInfo>();
   useEffect(() => {
@@ -19,6 +26,11 @@ export function TeamInfo(props: TeamInfoProps) {
         setData(data2);
       });
   }, []);
+
+  if (!data) {
+    return <LoadIndicator></LoadIndicator>;
+  }
+
   return (
     <Stack
       direction="row"
@@ -45,7 +57,7 @@ export function TeamInfo(props: TeamInfoProps) {
             return (
               <Card sx={{ width: 320 }}>
                 <Typography level="title-lg">{entry[0]}</Typography>
-                <DataValue value={entry[1]}></DataValue>
+                <DataValue listView={false} value={entry[1]}></DataValue>
               </Card>
             );
           })

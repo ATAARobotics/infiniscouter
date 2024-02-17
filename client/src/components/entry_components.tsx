@@ -1,253 +1,429 @@
-import { Button, ToggleButtonGroup } from "@mui/joy";
-import { useState, useEffect } from "preact/hooks";
+import { Box, Button, Input, Stack, Textarea, ToggleButtonGroup } from "@mui/joy";
+import { useEffect, useState } from "preact/hooks";
 
-import { MatchEntryPage } from "../generated/MatchEntryPage";
-import { MatchEntry } from "../generated/MatchEntry";
 import { AbilityMetric } from "../generated/AbilityMetric";
 import { BoolMetric } from "../generated/BoolMetric";
-import { TimerMetric } from "../generated/TimerMetric";
+import { CounterMetric } from "../generated/CounterMetric";
+import { ImageMetric } from "../generated/ImageMetric";
+import { MatchEntry } from "../generated/MatchEntry";
+import { MatchEntryPage } from "../generated/MatchEntryPage";
 import { MatchEntryValue } from "../generated/MatchEntryValue";
+import { TextEntryMetric } from "../generated/TextEntryMetric";
+import { TimerMetric } from "../generated/TimerMetric";
+import { saveImage } from "../images";
 
 interface MatchPageProps {
-  page: MatchEntryPage;
-  entries: Record<string, MatchEntry>;
-  allEntries: Record<string, MatchEntryValue>;
-  setEntry: (id: string, value: MatchEntryValue | undefined) => void;
+	page: MatchEntryPage;
+	entries: Record<string, MatchEntry>;
+	allEntries: Record<string, MatchEntryValue>;
+	setEntry: (id: string, value: MatchEntryValue | undefined) => void;
 }
 
 /**
  * Data entry for anything that is a "match page" (also used for pit scouting)
  */
 export function MatchPage(props: MatchPageProps) {
-  return (
-    <>
-      <h2>{props.page.title}</h2>
-      {props.page.layout.map((entryName) => (
-        <MatchDetail
-          entry={props.entries[entryName]}
-          setValue={(value) => {
-            console.log(`Setting ${entryName} to ${value}`);
-            props.setEntry(entryName, value);
-          }}
-          value={props.allEntries[entryName]}
-        ></MatchDetail>
-      ))}
-    </>
-  );
+	return (
+		<>
+			<h2>{props.page.title}</h2>
+			{props.page.layout.map((entryName) => (
+				<MatchDetail
+					entry={props.entries[entryName]}
+					setValue={(value) => {
+						console.log(`Setting ${entryName} to ${JSON.stringify(value)}`);
+						props.setEntry(entryName, value);
+					}}
+					value={props.allEntries[entryName]}
+				></MatchDetail>
+			))}
+		</>
+	);
 }
 
 interface MatchDetailProps {
-  entry: MatchEntry;
-  value: MatchEntryValue | undefined;
-  setValue: (value: MatchEntryValue | undefined) => void;
+	entry: MatchEntry;
+	value: MatchEntryValue | undefined;
+	setValue: (value: MatchEntryValue | undefined) => void;
 }
 
 /**
  * A single data entry field, e.g. an enum timer, etc
  */
 function MatchDetail(props: MatchDetailProps) {
-  return (
-    <>
-      <h3>{props.entry.title}</h3>
-      {props.entry.entry.type === "ability" ? (
-        <AbilityEntry
-          entry={props.entry.entry}
-          value={props.value}
-          setValue={props.setValue}
-        ></AbilityEntry>
-      ) : props.entry.entry.type === "enum" ? (
-        <EnumEntry
-          options={props.entry.entry.options.map((item) => ({
-            id: item,
-            display: item,
-          }))}
-          value={props.value}
-          setValue={props.setValue}
-          entryType="enum"
-        ></EnumEntry>
-      ) : props.entry.entry.type === "bool" ? (
-        <BoolEntry
-          entry={props.entry.entry}
-          value={props.value}
-          setValue={props.setValue}
-        ></BoolEntry>
-      ) : props.entry.entry.type === "timer" ? (
-        <TimerEntry
-          entry={props.entry.entry}
-          value={props.value}
-          setValue={props.setValue}
-        ></TimerEntry>
-      ) : (
-        <p> Error </p>
-      )}
-    </>
-  );
+	return (
+		<>
+			<h3>{props.entry.title}</h3>
+			{props.entry.entry.type === "ability" ? (
+				<AbilityEntry
+					entry={props.entry.entry}
+					value={props.value}
+					setValue={props.setValue}
+				></AbilityEntry>
+			) : props.entry.entry.type === "enum" ? (
+				<EnumEntry
+					options={props.entry.entry.options.map((item) => ({
+						id: item,
+						display: item,
+					}))}
+					value={props.value}
+					setValue={props.setValue}
+					entryType="enum"
+				></EnumEntry>
+			) : props.entry.entry.type === "bool" ? (
+				<BoolEntry
+					entry={props.entry.entry}
+					value={props.value}
+					setValue={props.setValue}
+				></BoolEntry>
+			) : props.entry.entry.type === "timer" ? (
+				<TimerEntry
+					entry={props.entry.entry}
+					value={props.value}
+					setValue={props.setValue}
+				></TimerEntry>
+			) : props.entry.entry.type === "counter" ? (
+				<CounterEntry
+					entry={props.entry.entry}
+					value={props.value}
+					setValue={props.setValue}
+				/>
+			) : props.entry.entry.type === "text_entry" ? (
+				<TextFieldEntry
+					entry={props.entry.entry}
+					value={props.value}
+					setValue={props.setValue}
+				/>
+			) : props.entry.entry.type === "image" ? (
+				<ImageEntry
+					entry={props.entry.entry}
+					value={props.value}
+					setValue={props.setValue}
+				/>
+			) : (
+				<p> Error </p>
+			)}
+		</>
+	);
 }
 
 interface EnumEntryProps {
-  value: MatchEntryValue | undefined;
-  setValue: (value: MatchEntryValue | undefined) => void;
-  options: Array<{ id: string | boolean; display: string }>;
-  entryType: "ability" | "bool" | "enum";
+	value: MatchEntryValue | undefined;
+	setValue: (value: MatchEntryValue | undefined) => void;
+	options: Array<{ id: string | boolean; display: string }>;
+	entryType: "ability" | "bool" | "enum";
 }
 
+/**
+ *	An entry for enum thingies
+ */
 function EnumEntry(props: EnumEntryProps) {
-  return (
-    <ToggleButtonGroup
-      value={
-        props.value && props.value.type !== "timer"
-          ? props.value.value.toString()
-          : ""
-      }
-      onChange={(_, newValue) => {
-        if (!newValue) {
-          props.setValue(undefined);
-        } else {
-          props.setValue({
-            value: newValue,
-            type: props.entryType,
-          } as MatchEntryValue);
-        }
-      }}
-    >
-      {props.options.map((options) => (
-        <Button value={options.id}>
-          <p className="button-text">{options.display}</p>
-        </Button>
-      ))}
-    </ToggleButtonGroup>
-  );
+	return (
+		<ToggleButtonGroup
+			value={
+				props.value && (props.value.type === "enum" || props.value.type === "ability" || props.value.type === "bool")
+					? props.value.value.toString()
+					: ""
+			}
+			onChange={(_, newValue) => {
+				if (!newValue) {
+					props.setValue(undefined);
+				} else {
+					props.setValue({
+						value: newValue,
+						type: props.entryType,
+					} as MatchEntryValue);
+				}
+			}}
+		>
+			{props.options.map((options) => (
+				<Button value={options.id}>
+					<p className="button-text">{options.display}</p>
+				</Button>
+			))}
+		</ToggleButtonGroup>
+	);
 }
 
 interface AbilityEntryProps {
-  value: MatchEntryValue | undefined;
-  setValue: (value: MatchEntryValue | undefined) => void;
-  entry: AbilityMetric;
+	value: MatchEntryValue | undefined;
+	setValue: (value: MatchEntryValue | undefined) => void;
+	entry: AbilityMetric;
 }
 
+/**
+ *	An entry for ability thingies
+ */
 function AbilityEntry(props: AbilityEntryProps) {
-  return (
-    <EnumEntry
-      options={[
-        { id: "nothing", display: "Nothing" },
-        { id: "attempted", display: "Attempted" },
-        { id: "succeeded", display: "Succeeded" },
-      ]}
-      value={props.value}
-      setValue={props.setValue}
-      entryType="ability"
-    ></EnumEntry>
-  );
+	return (
+		<EnumEntry
+			options={[
+				{ id: "nothing", display: "Nothing" },
+				{ id: "attempted", display: "Attempted" },
+				{ id: "succeeded", display: "Succeeded" },
+			]}
+			value={props.value}
+			setValue={props.setValue}
+			entryType="ability"
+		></EnumEntry>
+	);
 }
 
 interface BoolEntryProps {
-  value: MatchEntryValue | undefined;
-  setValue: (value: MatchEntryValue | undefined) => void;
-  entry: BoolMetric;
+	value: MatchEntryValue | undefined;
+	setValue: (value: MatchEntryValue | undefined) => void;
+	entry: BoolMetric;
 }
 
+/**
+ *	An entry for bool thingies
+ */
 function BoolEntry(props: BoolEntryProps) {
-  return (
-    <EnumEntry
-      options={[
-        { id: false, display: "No" },
-        { id: true, display: "Yes" },
-      ]}
-      value={props.value}
-      setValue={props.setValue}
-      entryType="bool"
-    ></EnumEntry>
-  );
+	return (
+		<EnumEntry
+			options={[
+				{ id: false, display: "No" },
+				{ id: true, display: "Yes" },
+			]}
+			value={props.value}
+			setValue={props.setValue}
+			entryType="bool"
+		></EnumEntry>
+	);
+}
+
+interface CounterEntryProps {
+	value: MatchEntryValue | undefined;
+	setValue: (value: MatchEntryValue | undefined) => void;
+	entry: CounterMetric;
+}
+
+/**
+ *	An entry for counter / number up down thingies
+ */
+function CounterEntry(props: CounterEntryProps) {
+	return (
+		<Stack direction="row">
+			<Button color="danger" onClick={() => {
+				if (props.value?.type !== "counter") {
+					props.setValue({ count: (props.entry.limit_range?.start ?? 0), type: "counter" });
+				} else if (props.entry?.limit_range === null || props.entry?.limit_range === undefined || props.value.count > props.entry.limit_range.start) {
+					props.setValue({ count: props.value.count - 1, type: "counter" });
+				}
+			}}>-</Button>
+			<Input
+				type="number"
+				placeholder={"Enter a number uwu..."}
+				onChange={(ev: InputEvent) => {
+					const value = parseInt((ev.target as HTMLInputElement).value);
+					if (!isNaN(value) && (props.entry?.limit_range === null || props.entry?.limit_range === undefined || (value >= props.entry.limit_range.start && value <= props.entry.limit_range.end_inclusive))) {
+						props.setValue({ type: "counter", count: value });
+					}
+				}}
+				value={
+					props.value && props.value.type === "counter"
+						? props.value.count
+						: (props.entry.limit_range?.start ?? 0)
+				}
+			/>
+			<Button color="primary" onClick={() => {
+				if (props.value?.type !== "counter") {
+					props.setValue({ count: (props.entry.limit_range?.start ?? 0), type: "counter" });
+				} else if (props.entry?.limit_range === null || props.entry?.limit_range === undefined || props.value.count < props.entry.limit_range.end_inclusive) {
+					props.setValue({ count: props.value.count + 1, type: "counter" });
+				}
+			}}>+</Button>
+		</Stack>
+	);
+}
+
+interface TextFieldEntryProps {
+	value: MatchEntryValue | undefined;
+	setValue: (value: MatchEntryValue | undefined) => void;
+	entry: TextEntryMetric;
+}
+
+/**
+ *	An entry for TEXTTT thingies
+ */
+function TextFieldEntry(props: TextFieldEntryProps) {
+	const cl = (ev: InputEvent) => {
+		let value = (ev.target as HTMLInputElement).value;
+		if (!props.entry.multiline) {
+			value = value.replaceAll("\n", "");
+		}
+		props.setValue({ type: "text_entry", text: value });
+	};
+	return (
+		<Textarea
+			minRows={props.entry.multiline ? 4 : 1}
+			maxRows={props.entry.multiline ? 8 : 1}
+			placeholder={"Enter some text uwu..."}
+			onKeyDown={cl}
+			onKeyUp={cl}
+			onChange={cl}
+			value={
+				props.value && props.value.type === "text_entry"
+					? props.value.text
+					: ""
+			}
+		/>
+	);
+}
+
+interface ImageEntryProps {
+	value: MatchEntryValue | undefined;
+	setValue: (value: MatchEntryValue | undefined) => void;
+	entry: ImageMetric;
+}
+
+/**
+ * Convert an image filename to a mime type.
+ */
+function toMime(filename: string): string {
+	if (filename.endsWith(".png")) {
+		return "image/png";
+	} else if (filename.endsWith(".jpg") || filename.endsWith(".jpeg") || filename.endsWith(".jfif")) {
+		return "image/jpeg";
+	} else if (filename.endsWith(".heic") || filename.endsWith(".heif")) {
+		return "image/heic";
+	} else if (filename.endsWith(".webp")) {
+		return "image/webp";
+	} else if (filename.endsWith(".gif")) {
+		return "image/gif";
+	} else if (filename.endsWith(".bmp")) {
+		return "image/bmp";
+	} else {
+		return "image/jpeg";
+	}
+}
+
+/**
+ *	An entry for image thingies
+ */
+function ImageEntry(props: ImageEntryProps) {
+	return (
+		<Box>
+			{
+				<input
+					type="file"
+					capture="environment"
+					accept="image/*"
+					onChange={ev => {
+						const files = (ev.target as HTMLInputElement).files;
+						for (let f = 0; f < (files?.length ?? 0); f++) {
+							const file = (files ?? [])[f];
+							if (file !== null) {
+								console.log("File: ");
+								console.log(file);
+								saveImage(file).then(imageUuid => {
+									props.setValue({
+										"type": "image", "images": [
+											...((props.value?.type === "image" ? props.value?.images : undefined) ?? []),
+											// @ts-expect-error yeah I know this is the wrong type but we're replacing it before sending anyway so it's fine
+											{ "image_mime": toMime(file.name), "image_uuid": imageUuid },
+										],
+									});
+								});
+							}
+						}
+					}}
+				/>
+			}
+		</Box>
+	);
 }
 
 interface TimerEntryProps {
-  value: MatchEntryValue | undefined;
-  setValue: (value: MatchEntryValue | undefined) => void;
-  entry: TimerMetric;
+	value: MatchEntryValue | undefined;
+	setValue: (value: MatchEntryValue | undefined) => void;
+	entry: TimerMetric;
 }
 
 interface NullTimer {
-  type: "null";
+	type: "null";
 }
 interface RunningTimer {
-  type: "running";
-  startTime: number;
+	type: "running";
+	startTime: number;
 }
 interface ValueTimer {
-  type: "value";
-  totalTime: number;
+	type: "value";
+	totalTime: number;
 }
 
 type TimerState = NullTimer | RunningTimer | ValueTimer;
 
+/**
+ *	An entry for timer thingies
+ */
 function TimerEntry(props: TimerEntryProps) {
-  const [state, setState] = useState<TimerState>({ type: "null" });
-  const [currentTime, setCurrentTime] = useState<number>(Date.now());
+	const [state, setState] = useState<TimerState>({ type: "null" });
+	const [currentTime, setCurrentTime] = useState<number>(Date.now());
 
-  const value = props.value;
-  useEffect(() => {
-    if (!value || value.type !== "timer") {
-      setState({ type: "null" });
-    } else {
-      setState({ type: "value", totalTime: value.time_seconds * 1000 });
-    }
-  }, [value]);
+	const value = props.value;
+	useEffect(() => {
+		if (!value || value.type !== "timer") {
+			setState({ type: "null" });
+		} else {
+			setState({ type: "value", totalTime: value.time_seconds * 1000 });
+		}
+	}, [value]);
 
-  useEffect(() => {
-    if (state.type === "running") {
-      const id = setTimeout(() => setCurrentTime(Date.now()), 100);
+	useEffect(() => {
+		if (state.type === "running") {
+			const id = setTimeout(() => setCurrentTime(Date.now()), 100);
 
-      return () => clearTimeout(id);
-    }
-  }, [currentTime, setCurrentTime, state]);
+			return () => clearTimeout(id);
+		}
+	}, [currentTime, setCurrentTime, state]);
 
-  return state.type === "null" ? (
-    <Button
-      onClick={() => {
-        setState({
-          type: "running",
-          startTime: Date.now(),
-        });
-        setCurrentTime(Date.now());
-      }}
-    >
-      Start
-    </Button>
-  ) : state.type === "running" ? (
-    <>
-      <p>Running! {(currentTime - state.startTime) / 1000} seconds elapsed.</p>
-      <Button
-        onClick={() => {
-          const time = Date.now() - state.startTime;
-          setState({ type: "value", totalTime: time });
-          props.setValue({ type: "timer", time_seconds: time / 1000 });
-        }}
-      >
-        Stop
-      </Button>
-    </>
-  ) : (
-    <>
-      <p>Stopped. {state.totalTime / 1000} seconds elapsed.</p>
-      <Button
-        onClick={() => {
-          setState({
-            type: "running",
-            startTime: Date.now() - state.totalTime,
-          });
-          setCurrentTime(Date.now());
-        }}
-      >
-        Continue timer?
-      </Button>
-      <Button
-        onClick={() => {
-          setState({ type: "null" });
-          props.setValue(undefined);
-        }}
-      >
-        Reset timer?
-      </Button>
-    </>
-  );
+	return state.type === "null" ? (
+		<Button
+			onClick={() => {
+				setState({
+					type: "running",
+					startTime: Date.now(),
+				});
+				setCurrentTime(Date.now());
+			}}
+		>
+			Start
+		</Button>
+	) : state.type === "running" ? (
+		<>
+			<p>Running! {(currentTime - state.startTime) / 1000} seconds elapsed.</p>
+			<Button
+				onClick={() => {
+					const time = Date.now() - state.startTime;
+					setState({ type: "value", totalTime: time });
+					props.setValue({ type: "timer", time_seconds: time / 1000 });
+				}}
+			>
+				Stop
+			</Button>
+		</>
+	) : (
+		<>
+			<p>Stopped. {state.totalTime / 1000} seconds elapsed.</p>
+			<Button
+				onClick={() => {
+					setState({
+						type: "running",
+						startTime: Date.now() - state.totalTime,
+					});
+					setCurrentTime(Date.now());
+				}}
+			>
+				Continue timer?
+			</Button>
+			<Button
+				onClick={() => {
+					setState({ type: "null" });
+					props.setValue(undefined);
+				}}
+			>
+				Reset timer?
+			</Button>
+		</>
+	);
 }

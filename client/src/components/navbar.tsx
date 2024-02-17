@@ -1,18 +1,24 @@
+import {
+  Box,
+  Button,
+  Divider,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+} from "@mui/joy";
 import * as React from "react";
-import Box from "@mui/joy/Box";
-import Drawer from "@mui/joy/Drawer";
-import Button from "@mui/joy/Button";
-import List from "@mui/joy/List";
-import Divider from "@mui/joy/Divider";
-import ListItem from "@mui/joy/ListItem";
-import ListItemButton from "@mui/joy/ListItemButton";
+
 import { SyncButton } from "./sync_button";
 
+/**
+ * Displays a colapsable nav bar.
+ */
 export function Navbar() {
-  const [open, setOpen] = React.useState(false);
+  const [navbarOpen, setNavbarOpen] = React.useState(false);
 
   const toggleDrawer = (inOpen: boolean) => () => {
-    setOpen(inOpen);
+    setNavbarOpen(inOpen);
   };
 
   return (
@@ -20,7 +26,7 @@ export function Navbar() {
       <Button variant="soft" color="neutral" onClick={toggleDrawer(true)}>
         Menu
       </Button>
-      <Drawer open={open} onClose={toggleDrawer(false)}>
+      <Drawer open={navbarOpen} onClose={toggleDrawer(false)}>
         <Box
           role="presentation"
           onClick={toggleDrawer(false)}
@@ -39,6 +45,7 @@ export function Navbar() {
               <a href={"/match_entry"}>Match Entry</a>,
               <a href={"/pit_entry"}>Pit Entry</a>,
               <a href={"/analysis"}>Analysis</a>,
+              <a href={"/match_list"}>Match List</a>,
             ].map((text) => (
               <ListItem key={text}>
                 <ListItemButton>{text}</ListItemButton>
@@ -59,19 +66,3 @@ export function Navbar() {
     </Box>
   );
 }
-/*
-export function Navbar() {
-  return (
-    <nav className="header">
-      <span>
-        <div className="navbar">
-          <a href={"/"}>Home</a> /{" "}
-          <a href={"/match_entry"}>Match Entry</a> /{" "}
-          <a href={"/api/docs"}>Documentation</a>
-        </div>
-      </span>
-    </nav>
-  );
-}
-
-*/
