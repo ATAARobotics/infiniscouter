@@ -1,8 +1,19 @@
 name: _
 year: 0
 categories:
+  data:
+    name: Data
+    order: 10
+    metrics:
+      total-points:
+        name: Total Points
+        description: Total average points scored
+        metric:
+          type: statbotics_team
+          prop: total_epa_end
   auto:
     name: Auto
+    order: 20
     metrics:
       auto-points:
         name: Points
@@ -12,6 +23,7 @@ categories:
           prop: auto_epa_end
   teleop:
     name: Teleop
+    order: 30
     metrics:
       teleop-points:
         name: Points
@@ -19,8 +31,12 @@ categories:
         metric:
           type: statbotics_team
           prop: auto_epa_end
+  endgame:
+    name: Endgame
+    order: 40
   impressions:
       name: Impressions
+      order: 50
       metrics:
         speed:
           name: Speed
@@ -60,41 +76,9 @@ categories:
           collect: match_only
           metric:
             type: bool
-  data:
-    name: Data
-    metrics:
-      total-points:
-        name: Total Points
-        description: Total average points scored
-        metric:
-          type: statbotics_team
-          prop: total_epa_end
-  pit-team:
-    name: Team
-    metrics:
-      confidence-level:
-        name: Confidence in Answers
-        description: No Description
-        collect: pit_only
-        metric:
-          type: enum
-          options: ["Honest about issues", "Unsure on a lot", "Generally anxious", "Uncertain on a few things", "Confident"]
-      pit-people:
-        name: Number of People in Pit
-        description: No Description
-        collect: pit_only
-        metric:
-          type: enum
-          options: ["Hard to find", "One or two", "A few", "Very a lot"]
-      chaos:
-        name: Chaos Level
-        description: No Description
-        collect: pit_only
-        metric:
-          type: enum
-          options: ["Boring", "Calm, Cool & Collected", "Average", "Slightly Frantic", "Pure Chaos"]
-  pit-robot:
+  robot:
     name: Robot
+    order: 90
     metrics:
       bumper-type:
         name: Bumper Type
@@ -103,7 +87,7 @@ categories:
         metric:
           type: enum
           options: ["Swap Manually", "Reversible", "Other"]
-      bumper-type:
+      vision:
         name: Has Vision
         description: No Description
         collect: pit_only
@@ -136,6 +120,43 @@ categories:
         metric:
           type: enum
           options: ["Tank", "Omni/Mecanum", "Swerve", "Hoverboard/Other"]
+  team:
+    name: Team
+    order: 100
+    metrics:
+      friendly:
+        name: Friendly
+        description: Was the team friendly
+        collect: pit_drive
+        metric:
+          type: bool
+      professionalism:
+        name: Professionalism
+        description: Did the team seem professional / well-coordinated
+        collect: pit_drive
+        metric:
+          type: bool
+      confidence-level:
+        name: Confidence in Answers
+        description: No Description
+        collect: pit_only
+        metric:
+          type: enum
+          options: ["Honest about issues", "Unsure on a lot", "Generally anxious", "Uncertain on a few things", "Confident"]
+      pit-people:
+        name: Number of People in Pit
+        description: No Description
+        collect: pit_only
+        metric:
+          type: enum
+          options: ["Hard to find", "One or two", "A few", "Very a lot"]
+      chaos:
+        name: Chaos Level
+        description: No Description
+        collect: pit_only
+        metric:
+          type: enum
+          options: ["Boring", "Calm, Cool & Collected", "Average", "Slightly Frantic", "Pure Chaos"]
 ranking_points:
 display:
   team_row:

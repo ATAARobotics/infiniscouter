@@ -56,23 +56,12 @@ categories:
       climb-time:
         name: Climb Timer
         description: How long the robot took to climb
+        collect: match_only
         metric:
           type: timer
   team:
     name: Team
     metrics:
-      friendly:
-        name: Friendly
-        description: Was the team friendly
-        collect: pit_drive
-        metric:
-          type: bool
-      professionalism:
-        name: Professionalism
-        description: Did the team seem professional / well-coordinated
-        collect: pit_drive
-        metric:
-          type: bool
       test-counter-metric:
         name: Test Counter
         description: You better get ready to get tested uwu

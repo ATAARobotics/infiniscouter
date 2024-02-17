@@ -33,7 +33,10 @@ pub struct GameConfig {
 pub struct MetricCategory {
 	/// The display name for the category
 	pub name: String,
+	/// The relative position of this category in the UI; lower comes before higher
+	pub order: Option<u32>,
 	/// List of metrics to collect in this category
+	#[serde(default)]
 	pub metrics: HashMap<String, CollectedMetric>,
 }
 
@@ -309,6 +312,9 @@ impl ConfigManager {
 						.collect();
 					for (cat_id, common_cat) in &common_config.categories {
 						if let Some(cat) = config.categories.get_mut(cat_id) {
+							if cat.order.is_none() {
+								cat.order = common_cat.order;
+							}
 							for (id, met) in &common_cat.metrics {
 								cat.metrics.insert(id.clone(), met.clone());
 							}
