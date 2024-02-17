@@ -1,4 +1,4 @@
-import { Box, Input, Radio, RadioGroup, Stack, Typography } from "@mui/joy";
+import { Box, Button, Input, Radio, RadioGroup, Stack, ToggleButtonGroup, Typography } from "@mui/joy";
 import { useAtomValue } from "jotai/react";
 import { ChangeEvent } from "preact/compat";
 import { useState } from "preact/hooks";
@@ -44,55 +44,58 @@ export function MatchEntry() {
 	const teamsForMatch: MatchInfo | undefined | 0 =
 		matchId !== undefined
 			? matchList.match_infos.filter(
-					(match) =>
-						match.id.match_type === "qualification" &&
-						match.id.num === matchId,
-			  )[0]
+				(match) =>
+					match.id.match_type === "qualification" &&
+					match.id.num === matchId,
+			)[0]
 			: undefined;
 
 	return (
 		<Box>
 			<h1>Match Entry</h1>
-			<Box>
-				{
-					// @ts-expect-error Input seems to want a component for some reason?
-					<Input
-						type="number"
-						placeholder={"Qualification Match Number"}
-						onChange={(ev: InputEvent) => {
-							setMatchId(
-								parseInt((ev.target as HTMLInputElement).value),
-							);
-							setTeamId(undefined);
-						}}
-					/>
-				}
-			</Box>
-			{teamsForMatch && (
+			<Stack direction={{ xs: "column", md: "row" }} gap="1em">
 				<Box>
-					<RadioGroup
+					{
+						// @ts-expect-error Input seems to want a component for some reason?
+						<Input
+							type="number"
+							placeholder={"Qualification Match Number"}
+							onChange={(ev: InputEvent) => {
+								setMatchId(
+									parseInt((ev.target as HTMLInputElement).value),
+								);
+								setTeamId(undefined);
+							}}
+							sx={{
+								width: "20em",
+							}}
+						/>
+					}
+				</Box>
+				{teamsForMatch && (
+					<ToggleButtonGroup
 						onChange={(ev: ChangeEvent) =>
 							setTeamId(parseInt((ev.target as HTMLInputElement).value))
 						}
 						value={teamId ?? null}
 					>
-						<Stack direction="row">
-							<Stack direction="column">
-								<Typography>RED</Typography>
+						<Stack direction={{ xs: "column", md: "row" }} sx={{ border: "none !important" }}>
+							<Stack direction="row">
+								<Typography level="h2" color="danger" marginX="0.5em">RED</Typography>
 								{teamsForMatch?.teams_red.map((team) => (
-									<Radio value={team} label={team.toString()} />
+									<Button value={team} color="danger" label={team.toString()}>{team.toString()}</Button>
 								))}
 							</Stack>
-							<Stack direction="column">
-								<Typography>BLUE</Typography>
+							<Stack direction="row">
+								<Typography level="h2" color="primary" marginX="0.5em">BLUE</Typography>
 								{teamsForMatch?.teams_blue.map((team) => (
-									<Radio value={team} label={team.toString()} />
+									<Button value={team} color="primary">{team.toString()}</Button>
 								))}
 							</Stack>
 						</Stack>
-					</RadioGroup>
-				</Box>
-			)}
+					</ToggleButtonGroup>
+				)}
+			</Stack>
 			{teamsForMatch &&
 				teamId !== undefined &&
 				(fields ? (

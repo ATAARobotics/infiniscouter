@@ -4,6 +4,7 @@ import { useEffect, useState } from "preact/compat";
 import { DataValue } from "../components/data_value";
 import { LoadIndicator } from "../components/load_indicator";
 import { TeamInfoList } from "../generated/TeamInfoList";
+import { TeamInfoEntry } from "src/generated/TeamInfoEntry";
 
 /**
  * Analysis Page Component
@@ -12,13 +13,20 @@ export function Analysis() {
 	const [table, setTable] = useState<TeamInfoList>();
 	const [enabledColumns, setEnabledColumns] = useState<number[]>([0]);
 
+	const [colours, setColours] = useState<number[]>([]);
+
 	useEffect(() => {
 		// TODO: Fetch in the sync and store in local storage.
 		fetch("/api/analysis/list")
 			.then((response) => response.json())
-			.then((data2) => {
+			.then((data2: TeamInfoList) => {
 				setTable(data2);
 				setEnabledColumns(data2.default_display);
+				setColours(
+					data2.names.map(() =>
+						Math.floor(Math.random() * 64 * 54 * 25 * 13 * 7),
+					),
+				);
 			});
 	}, []);
 
@@ -85,9 +93,16 @@ export function Analysis() {
 					{table.list.map((row) => (
 						<tr style={{ height: "100px" }}>
 							{row.info
+								.map(
+									(val, idx) => [val, idx] as [TeamInfoEntry, number],
+								)
 								.filter((_, idx) => enabledColumns.includes(idx))
-								.map((val) => (
-									<DataValue listView={true} value={val} />
+								.map(([val, idx]) => (
+									<DataValue
+										listView={true}
+										value={val}
+										forceColorScheme={colours[idx] ?? 0}
+									/>
 								))}
 						</tr>
 					))}

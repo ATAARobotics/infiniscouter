@@ -20,31 +20,47 @@ interface DataValueProps {
 	forceColorScheme?: number;
 }
 
+// Pride colour schemes -Veda
+// White and gray have been added to some of these to make each at least 4 colours.
+// Oh I commented out some that are similar to other ones
 const colorSchemes = [
-	["#e74c3c", "#f1c40f", "#3498db", "#e67e22", "#2ecc71", "#9b59b6"],
-	["#5bcffa", "#ff8eb2", "#ffffff"],
-	["#fff433", "#9b59d0", "#2d2d2d", "#ffffff"],
-	["#ff218c", "#ffd800", "#0094ff"],
-	["#d60270", "#9b4f97", "#0038a7"],
-	["#b9b9b9", "#b8f483", "#ffffff", "#000000"],
-	["#e28d00", "#eccd00", "#65ace2", "#223756", "#ffffff"],
-	["#3da542", "#a7d379", "#a9a9a9", "#ffffff", "#000000"],
-	["#800080", "#808080", "#ffffff", "#000000"],
-	["#d62900", "#a50062", "#ff9b55", "#d462a6", "#ffffff"],
+	// Rainbow
+	["#e74c3c", "#f1c40f", "#2ecc71", "#3498db", "#9b59b6", "#e67e22"],
+	// Trans
+	["#5bcffa", "#ff8eb2", "#ffffff", "#a9a9a9"],
+	// Nonbinary
+	["#9b59d0", "#fff433", "#2d2d2d", "#ffffff"],
+	// Pan
+	["#ff218c", "#ffd800", "#0094ff", "#2d2d2d"],
+	// Bi
+	["#d60270", "#9b4f97", "#0038a7", "#2d2d2d"],
+	// Aro-ace
+	["#e28d00", "#65ace2", "#eccd00", "#223756", "#ffffff"],
+	// Aro/Agender
+	["#3da542", "#b8f483", "#a9a9a9", "#ffffff", "#2d2d2d"],
+	// Ace
+	// ["#800080", "#808080", "#ffffff", "#2d2d2d"],
+	// Lesbian
+	["#a50062", "#ff9b55", "#d462a6", "#ffffff", "#d62900"],
+	// Gay men
 	[
 		"#089276",
 		"#451d7e",
-		"#2ad1ad",
-		"#584fcf",
 		"#9de9c3",
+		"#584fcf",
+		"#ffffff",
 		"#81b0e4",
-		"#f3f1ff",
+		"#2ad1ad",
 	],
-	["#b77fdd", "#4b821e", "#ffffff"],
-	["#ff02bc", "#00d959", "#0092fd"],
-	["#3437c1", "#cf00de", "#ff69a0", "#ffffff", "#000000"],
+	// Genderqueer
+	// ["#b77fdd", "#4b821e", "#ffffff", "#a9a9a9"],
+	// Polysexual
+	// ["#ff02bc", "#00d959", "#0092fd", "#a9a9a9"],
+	// Genderfluid
+	["#3437c1", "#cf00de", "#ff69a0", "#ffffff", "#a9a9a9"],
 ];
 
+// These shouldn't go in the word cloud
 const excludeWords = [
 	"the",
 	"of",
@@ -58,6 +74,7 @@ const excludeWords = [
 	"this",
 	"that",
 	"then",
+	// s is a word now because contractions
 	"s",
 ];
 
@@ -126,9 +143,10 @@ export function DataValue(props: DataValueProps) {
 											.map((op) => op.value),
 										backgroundColor:
 											colorSchemes[
-												Math.floor(
-													Math.random() * colorSchemes.length,
-												)
+												(props.forceColorScheme ??
+													Math.floor(
+														Math.random() * colorSchemes.length,
+													)) % colorSchemes.length
 											],
 									},
 								],
@@ -170,7 +188,7 @@ export function DataValue(props: DataValueProps) {
 							}
 							for (const wc of labelsAndWordCounts) {
 								wc[1] = Math.min(
-									Math.max(Math.round((wc[1] * 250) / total), 10),
+									Math.max(Math.round((wc[1] * 300) / total), 15),
 									100,
 								);
 							}
@@ -185,7 +203,7 @@ export function DataValue(props: DataValueProps) {
 												data: labelsAndWordCounts.map(
 													(lw) => lw[1],
 												),
-												backgroundColor: `rgb(${
+												color: `rgb(${
 													Math.min(
 														Math.max(-props.value.sentiment, 0),
 														2,
