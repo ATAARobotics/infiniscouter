@@ -5,7 +5,8 @@ use crate::statbotics::StatboticsCache;
 use crate::tba::Tba;
 use color_eyre::Result;
 use poem::endpoint::StaticFilesEndpoint;
-use poem::{listener::TcpListener, Route, Server};
+use poem::middleware::Compression;
+use poem::{listener::TcpListener, EndpointExt, Route, Server};
 use poem_openapi::OpenApiService;
 
 pub struct ScoutingServer {
@@ -41,7 +42,8 @@ impl ScoutingServer {
 			)
 			.nest("/dist", StaticFilesEndpoint::new("../client/dist"))
 			.nest("/api", api_service)
-			.nest("/api/docs", swagger_ui);
+			.nest("/api/docs", swagger_ui)
+			.with(Compression::new());
 		Server::new(TcpListener::bind(addr)).run(app).await?;
 		Ok(())
 	}
