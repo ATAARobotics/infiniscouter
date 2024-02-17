@@ -57,7 +57,7 @@ export function TeamInfo(props: TeamInfoProps) {
             return (
               <Card sx={{ width: 320 }}>
                 <Typography level="title-lg">{entry[0]}</Typography>
-                <DataValue value={entry[1]}></DataValue>
+                <DataValue listView={false} value={entry[1]}></DataValue>
               </Card>
             );
           })

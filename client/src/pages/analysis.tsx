@@ -74,7 +74,7 @@ export function Analysis() {
               {row.info
                 .filter((_, idx) => enabledColumns.includes(idx))
                 .map((val) => (
-                  <DataValue value={val} />
+                  <DataValue listView={true} value={val} />
                 ))}
             </tr>
           ))}

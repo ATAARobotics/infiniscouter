@@ -4,9 +4,12 @@ import { useEffect } from "react";
 import { Chart, Pie } from "react-chartjs-2";
 
 import { TeamInfoEntry } from "../generated/TeamInfoEntry";
+import { Box } from "@mui/joy";
 
 interface DataValueProps {
 	value: TeamInfoEntry;
+	listView: boolean;
+	forceColorScheme?: number;
 }
 
 const colorSchemes = [
@@ -95,44 +98,71 @@ export function DataValue(props: DataValueProps) {
 			);
 		}
 		case "multi_text": {
-			return (
-				<td>
-					{
-						(() => {
-							const words: { [word: string]: number } = {};
-							for (const string of props.value.strings) {
-								for (const wordUp of string.split(/[^\w]+/)) {
-									const word = wordUp.toLowerCase();
-									if (excludeWords.indexOf(word) === -1) {
-										words[word] = (words[word] ?? 0) + 1;
+			if (props.listView) {
+				return (
+					<td>
+						{
+							(() => {
+								const words: { [word: string]: number } = {};
+								for (const string of props.value.strings) {
+									for (const wordUp of string.split(/[^\w]+/)) {
+										const word = wordUp.toLowerCase();
+										if (excludeWords.indexOf(word) === -1) {
+											words[word] = (words[word] ?? 0) + 1;
+										}
 									}
 								}
-							}
-							const labelsAndWordCounts: [string, number][] = [...Object.entries(words), ["?", 1]];
-							labelsAndWordCounts.sort((a, b) => (b[1] - a[1]));
-							labelsAndWordCounts.length = Math.min(labelsAndWordCounts.length, 15);
-							let total = 0;
-							for (const wc of labelsAndWordCounts) {
-								total += wc[1];
-							}
-							for (const wc of labelsAndWordCounts) {
-								wc[1] = Math.min(Math.max(Math.round(wc[1]*250/total), 10), 100);
-							}
-							console.log(labelsAndWordCounts);
-							return <Chart
-								type={WordCloudController.id}
-								data={{
-									labels: labelsAndWordCounts.map(lw => lw[0]),
-									datasets: [{ label: "DS", data: labelsAndWordCounts.map(lw => lw[1]) }],
-								}}
-							/>;
-						})()
-					}
-				</td>
-			);
+								const labelsAndWordCounts: [string, number][] = [...Object.entries(words), ["?", 1]];
+								labelsAndWordCounts.sort((a, b) => (b[1] - a[1]));
+								labelsAndWordCounts.length = Math.min(labelsAndWordCounts.length, 15);
+								let total = 0;
+								for (const wc of labelsAndWordCounts) {
+									total += wc[1];
+								}
+								for (const wc of labelsAndWordCounts) {
+									wc[1] = Math.min(Math.max(Math.round(wc[1] * 250 / total), 10), 100);
+								}
+								console.log(labelsAndWordCounts);
+								return <Chart
+									type={WordCloudController.id}
+									data={{
+										labels: labelsAndWordCounts.map(lw => lw[0]),
+										datasets: [{
+											label: "Data",
+											data: labelsAndWordCounts.map(lw => lw[1]),
+											backgroundColor: `rgb(${Math.min(Math.max(-props.value.sentiment, 0), 2)*128}, 128, ${Math.min(Math.max(props.value.sentiment, 0), 2)*128})`,
+										}],
+									}}
+									options={{
+										plugins: { legend: { display: false, reverse: true } },
+									}}
+								/>;
+							})()
+						}
+					</td>
+				);
+			} else {
+				return (<td>
+					{props.value.strings.map(text =>
+						<Box>{text}</Box>,
+					)}
+				</td>);
+			}
 		}
-		default: {
-			return (<td><p>NOT IMPLEMENTED ON THE CLIENT SIDE: {props.value.type}</p></td>);
+		case "images": {
+			if (props.listView) {
+				return (<td>
+					{props.value.images.map(image =>
+						<img height={100} src={`data:${image.image_mime};base64,${btoa(String.fromCharCode.apply(null, image.image_data))}`}/>,
+					)[0]}
+				</td>);
+			} else {
+				return (<td>
+					{props.value.images.map(image =>
+						<img width={256} src={`data:${image.image_mime};base64,${btoa(String.fromCharCode.apply(null, image.image_data))}`}/>,
+					)}
+				</td>);
+			}
 		}
 	}
 }
