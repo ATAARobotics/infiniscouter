@@ -55,108 +55,110 @@ categories:
           metric:
             type: enum
             options:
-              - Solid
-              - Average
-              - Wobbly
               - Fell Over
-        broken:
-          name: Broken
-          description: Did the robot break
+              - Almost Fell
+              - Normal
+        malfunction:
+          name: Malfunction
+          description: Did the robot malfunction?
           collect: match_only
           metric:
             type: enum
             options:
-              - "No"
-              - Yes (drivetrain)
-              - Yes (scoring mechanism)
-              - Yes (other/both)
-        stopped:
-          name: Stopped
-          description: Robot stopped for any reason (disabled, disconnected, etc..)
-          collect: match_only
-          metric:
-            type: bool
-  robot:
-    name: Robot
-    order: 90
+              - Complete/stopped
+              - Minor
+              - Nothing
+  team:
+    name: Team
+    order: 0
     metrics:
-      bumper-type:
-        name: Bumper Type
-        description: No Description
-        collect: pit_only
-        metric:
-          type: enum
-          options: ["Swap Manually", "Reversible", "Other"]
-      vision:
-        name: Has Vision
-        description: No Description
-        collect: pit_only
-        metric:
-          type: bool
-      playstyle:
-        name: Preferred Playstyle
-        description: No Description
-        collect: pit_only
-        metric:
-          type: enum
-          options: ["Only Defence", "Prefer Defence", "Prefer Offence", "Only Offence", "Both/Other"]
-      charge-battery:
-        name: Can charge batteries
-        description: No Description
+      exists:
+        name: Exists
+        description: Can we find the pit crew?
         collect: pit_only
         metric:
           type: bool
       battery-count:
         name: Amount of batteries
-        description: No Description
+        description: How many batteries does the team have on hand?
         collect: pit_only
         metric:
+          type: counter
+          limit_range:
+            start: 1
+            end_inclusive: 12
+      overpromised:
+        name: Overpromised
+        description: Did the team overpromise things/underdeliver?
+        collect: drive_only
+        metric:
+          type: bool
+      teamwork:
+        name: Teamwork
+        description: How was it to work together with this team
+        collect: drive_only
+        metric:
           type: enum
-          options: ["Just one", "Two", "At least four", "Six+"]
+          options:
+              - Harmful
+              - Unhelpful
+              - Normal
+              - Great!!!!!
+  robot:
+    name: Robot
+    order: 100
+    metrics:
+      reversable-bumpers:
+        name: Reversable Bumpers
+        description: Are the bumpers reversable
+        collect: pit_only
+        metric:
+          type: bool
+      vision:
+        name: Has Vision
+        description: Does the robot use vision in any way?
+        collect: pit_only
+        metric:
+          type: bool
       drive-train:
         name: Drive Train Type
         description: No Description
         collect: pit_only
         metric:
           type: enum
-          options: ["Tank", "Omni/Mecanum", "Swerve", "Hoverboard/Other"]
-  team:
-    name: Team
-    order: 100
+          options: ["Other", "Tank", "Swerve"]
+      robot-picture:
+        name: Robot Pictures
+        description: Take some pictures of their robot pls
+        collect: pit_only
+        metric:
+          type: image
+          allow_video: true
+  notes:
+    name: Notes
+    order: 1000
     metrics:
-      friendly:
-        name: Friendly
-        description: Was the team friendly
-        collect: pit_drive
+      match-notes:
+        name: Match Notes
+        description: Notes from scouting matches
+        collect: match_only
         metric:
-          type: bool
-      professionalism:
-        name: Professionalism
-        description: Did the team seem professional / well-coordinated
-        collect: pit_drive
-        metric:
-          type: bool
-      confidence-level:
-        name: Confidence in Answers
-        description: No Description
+          type: text_entry
+          multiline: true
+      pit-notes:
+        name: Pit Notes
+        description: Notes from pit scouting
         collect: pit_only
         metric:
-          type: enum
-          options: ["Honest about issues", "Unsure on a lot", "Generally anxious", "Uncertain on a few things", "Confident"]
-      pit-people:
-        name: Number of People in Pit
-        description: No Description
-        collect: pit_only
+          type: text_entry
+          multiline: true
+      driver-notes:
+        name: Driver Notes
+        description: Notes from driver scouting
+        collect: drive_only
         metric:
-          type: enum
-          options: ["Hard to find", "One or two", "A few", "Very a lot"]
-      chaos:
-        name: Chaos Level
-        description: No Description
-        collect: pit_only
-        metric:
-          type: enum
-          options: ["Boring", "Calm, Cool & Collected", "Average", "Slightly Frantic", "Pure Chaos"]
+          type: text_entry
+          multiline: true
 ranking_points:
 display:
   team_row:

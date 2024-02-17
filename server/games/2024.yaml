@@ -4,97 +4,82 @@ categories:
   auto:
     name: Auto
     metrics:
-      leave:
-        name: Leave
+      moved:
+        name: Moved
         description: Moved from the starting line in the auto period
+        collect: match_only
         metric:
           type: ability
+      auto-notes:
+        name: Auto Notes
+        description: Number of notes picked up in auto period
+        metric:
+          type: counter
+          limit_range:
+            start: 0
+            end_inclusive: 8
       auto-amp:
         name: Auto Amp
-        description: Scored in Amp
+        description: Scored in the amp in the auto period
+        collect: match_only
         metric:
           type: ability
-          implies: [leave]
+          implies: [moved]
       auto-speaker:
         name: Auto Speaker
-        description: Scored in Speaker
+        description: Scored in speaker in the auto period
+        collect: match_only
         metric:
           type: ability
-          implies: [leave]
-      
+          implies: [moved]
   teleop:
-    name: Scoring (Teleop)
+    name: Teleop
     metrics:
       teleop-amp:
         name: Teleop Amp
-        description: Scored in Amp
+        description: Scored in the amp
         metric:
           type: ability
       teleop-speaker:
         name: Teleop Speaker
-        description: Scored in Speaker
+        description: Scored in the speaker
         metric:
           type: ability
-      coopertition:
-        name: Coopertition
-        description: Activated Coopertition
-        metric:
-          type: ability
-      amplifier:
-        name: Amplifier
-        description: Activated Amplifier
+      note-pickup:
+        name: Note Pickup
+        description: Can pick up notes from various sources
         metric:
           type: enum
           options:
-            - "No"
-            - Once
-            - Twice
-            - Thrice
-            - Quadrice
-            - Five+
+            - None
+            - Chute
+            - Field
+  endgame:
+    name: Endgame
+    metrics:
       climb:
         name: Climb
         description: Can they climb
         metric:
-          type: enum
-          options:
-            - Didnt attempt
-            - Climbed
-            - Fell
-            - Fell on alliance partner
+          type: ability
       trap:
         name: Trap
-        description: Did Trap
+        description: Scored in the trap
         metric:
           type: ability
       harmony:
         name: Harmony
-        description: Can they climb with others
+        description: Can climb with others
         metric:
           type: ability
-      spotlit:
-        name: Spotlit
-        description: Human player skill
-        metric:
-          type: enum
-          options:
-            - Failed
-            - One on
-            - Two on
-            - All three on (pro gamer)
+          implies: [climb]
   team:
     name: Team
     metrics:
-      friendly:
-        name: Friendly
-        description: Was the team friendly
-        collect: pit_drive
-        metric:
-          type: bool
-      professionalism:
-        name: Professionalism
-        description: Did the team seem professional / well-coordinated
-        collect: pit_drive
+      human-player:
+        name: Human Player
+        description: Was this team's human player the active human player for this match
+        collect: match_only
         metric:
           type: bool
 ranking_points:
@@ -103,7 +88,9 @@ ranking_points:
 display:
   team_row:
     - source: single
-      metric: leave
+      metric: moved
+    - source: single
+      metric: auto-notes
     - source: single
       metric: auto-amp
     - source: single
@@ -113,16 +100,12 @@ display:
     - source: single
       metric: teleop-speaker
     - source: single
-      metric: coopertition
-    - source: single
-      metric: amplifier
-    - source: single
       metric: climb
     - source: single
       metric: trap
     - source: single
       metric: harmony
     - source: single
-      metric: spotlit
+      metric: human-player
   pre_match:
     # TODO
