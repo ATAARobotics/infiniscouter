@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use crate::{
-	api::data::{MatchEntryData, MatchEntryIdData, MatchEntryValue, ImageData},
+	api::data::{DriverEntryIdData, ImageData, MatchEntryData, MatchEntryIdData, MatchEntryValue},
 	config::{match_entry::MatchEntryType, GameConfigs, SingleMetric, TeamConfig, TeamNameMetric},
 	database::Database,
 	statbotics::{StatboticsCache, StatboticsTeam},
@@ -127,11 +127,13 @@ fn get_pie_chart(data_points: &[&MatchEntryValue]) -> TeamInfoEntry {
 fn single_team_impl(
 	config: &GameConfigs,
 	match_entries: &[MatchEntryIdData],
+	_driver_entries: &[DriverEntryIdData],
 	pit_entry: Option<&MatchEntryData>,
 	tba_data: &EventInfo,
 	statbotics: Option<&StatboticsTeam>,
 	team: u32,
 ) -> Vec<TeamInfoEntry> {
+	// TODO incorporate driver entries
 	config
 		.game_config
 		.display
@@ -397,6 +399,8 @@ pub async fn single_team(
 ) -> SingleTeamInfo {
 	let match_entries =
 		database.get_all_match_entries(team_config.current_year, &team_config.current_event);
+	let driver_entries =
+		database.get_all_driver_entries(team_config.current_year, &team_config.current_event);
 	let tba_data = tba.get_event(&team_config.current_event).await.unwrap();
 	SingleTeamInfo {
 		team_number: team,
@@ -408,6 +412,7 @@ pub async fn single_team(
 				single_team_impl(
 					config,
 					&match_entries,
+					&driver_entries,
 					database
 						.get_pit_entry_data(
 							team_config.current_year,
@@ -435,6 +440,8 @@ pub async fn list(
 ) -> TeamInfoList {
 	let match_entries =
 		database.get_all_match_entries(team_config.current_year, &team_config.current_event);
+	let driver_entries =
+		database.get_all_driver_entries(team_config.current_year, &team_config.current_event);
 	let pit_entries =
 		database.get_all_pit_entries(team_config.current_year, &team_config.current_event);
 	let tba_data = tba.get_event(&team_config.current_event).await.unwrap();
@@ -453,6 +460,7 @@ pub async fn list(
 				info: single_team_impl(
 					config,
 					&match_entries,
+					&driver_entries,
 					pit_entries.get(&team.to_string()),
 					&tba_data,
 					sb.as_deref(),

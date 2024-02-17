@@ -1,4 +1,10 @@
-import { ArcElement, Chart as ChartJS, Legend, Tooltip, LinearScale } from "chart.js";
+import {
+	ArcElement,
+	Chart as ChartJS,
+	Legend,
+	Tooltip,
+	LinearScale,
+} from "chart.js";
 import { WordCloudController, WordElement } from "chartjs-chart-wordcloud";
 import { useEffect } from "react";
 import { Chart, Pie } from "react-chartjs-2";
@@ -23,7 +29,15 @@ const colorSchemes = [
 	["#3da542", "#a7d379", "#a9a9a9", "#ffffff", "#000000"],
 	["#800080", "#808080", "#ffffff", "#000000"],
 	["#d62900", "#a50062", "#ff9b55", "#d462a6", "#ffffff"],
-	["#089276", "#451d7e", "#2ad1ad", "#584fcf", "#9de9c3", "#81b0e4", "#f3f1ff"],
+	[
+		"#089276",
+		"#451d7e",
+		"#2ad1ad",
+		"#584fcf",
+		"#9de9c3",
+		"#81b0e4",
+		"#f3f1ff",
+	],
 	["#b77fdd", "#4b821e", "#ffffff"],
 	["#ff02bc", "#00d959", "#0092fd"],
 	["#3437c1", "#cf00de", "#ff69a0", "#ffffff", "#000000"],
@@ -50,7 +64,14 @@ const excludeWords = [
  */
 export function DataValue(props: DataValueProps) {
 	useEffect(() => {
-		ChartJS.register(ArcElement, Tooltip, Legend, LinearScale, WordCloudController, WordElement);
+		ChartJS.register(
+			ArcElement,
+			Tooltip,
+			Legend,
+			LinearScale,
+			WordCloudController,
+			WordElement,
+		);
 	}, []);
 	switch (props.value.type) {
 		case "team_name":
@@ -77,14 +98,20 @@ export function DataValue(props: DataValueProps) {
 							// @ts-expect-error style is missing from preact/compat, it seems
 							style={{ width: "100px", height: "100px" }}
 							data={{
-								labels: props.value.options.reverse().map((op) => op.label),
+								labels: props.value.options
+									.reverse()
+									.map((op) => op.label),
 								datasets: [
 									{
 										label: "Data",
-										data: props.value.options.reverse().map((op) => op.value),
+										data: props.value.options
+											.reverse()
+											.map((op) => op.value),
 										backgroundColor:
 											colorSchemes[
-											Math.floor(Math.random() * colorSchemes.length)
+												Math.floor(
+													Math.random() * colorSchemes.length,
+												)
 											],
 									},
 								],
@@ -101,67 +128,110 @@ export function DataValue(props: DataValueProps) {
 			if (props.listView) {
 				return (
 					<td>
-						{
-							(() => {
-								const words: { [word: string]: number } = {};
-								for (const string of props.value.strings) {
-									for (const wordUp of string.split(/[^\w]+/)) {
-										const word = wordUp.toLowerCase();
-										if (excludeWords.indexOf(word) === -1) {
-											words[word] = (words[word] ?? 0) + 1;
-										}
+						{(() => {
+							const words: { [word: string]: number } = {};
+							for (const string of props.value.strings) {
+								for (const wordUp of string.split(/[^\w]+/)) {
+									const word = wordUp.toLowerCase();
+									if (excludeWords.indexOf(word) === -1) {
+										words[word] = (words[word] ?? 0) + 1;
 									}
 								}
-								const labelsAndWordCounts: [string, number][] = [...Object.entries(words), ["?", 1]];
-								labelsAndWordCounts.sort((a, b) => (b[1] - a[1]));
-								labelsAndWordCounts.length = Math.min(labelsAndWordCounts.length, 15);
-								let total = 0;
-								for (const wc of labelsAndWordCounts) {
-									total += wc[1];
-								}
-								for (const wc of labelsAndWordCounts) {
-									wc[1] = Math.min(Math.max(Math.round(wc[1] * 250 / total), 10), 100);
-								}
-								console.log(labelsAndWordCounts);
-								return <Chart
+							}
+							const labelsAndWordCounts: [string, number][] = [
+								...Object.entries(words),
+								["?", 1],
+							];
+							labelsAndWordCounts.sort((a, b) => b[1] - a[1]);
+							labelsAndWordCounts.length = Math.min(
+								labelsAndWordCounts.length,
+								15,
+							);
+							let total = 0;
+							for (const wc of labelsAndWordCounts) {
+								total += wc[1];
+							}
+							for (const wc of labelsAndWordCounts) {
+								wc[1] = Math.min(
+									Math.max(Math.round((wc[1] * 250) / total), 10),
+									100,
+								);
+							}
+							console.log(labelsAndWordCounts);
+							return (
+								<Chart
 									type={WordCloudController.id}
 									data={{
-										labels: labelsAndWordCounts.map(lw => lw[0]),
-										datasets: [{
-											label: "Data",
-											data: labelsAndWordCounts.map(lw => lw[1]),
-											backgroundColor: `rgb(${Math.min(Math.max(-props.value.sentiment, 0), 2)*128}, 128, ${Math.min(Math.max(props.value.sentiment, 0), 2)*128})`,
-										}],
+										labels: labelsAndWordCounts.map((lw) => lw[0]),
+										datasets: [
+											{
+												label: "Data",
+												data: labelsAndWordCounts.map(
+													(lw) => lw[1],
+												),
+												backgroundColor: `rgb(${
+													Math.min(
+														Math.max(-props.value.sentiment, 0),
+														2,
+													) * 128
+												}, 128, ${
+													Math.min(
+														Math.max(props.value.sentiment, 0),
+														2,
+													) * 128
+												})`,
+											},
+										],
 									}}
 									options={{
-										plugins: { legend: { display: false, reverse: true } },
+										plugins: {
+											legend: { display: false, reverse: true },
+										},
 									}}
-								/>;
-							})()
-						}
+								/>
+							);
+						})()}
 					</td>
 				);
 			} else {
-				return (<td>
-					{props.value.strings.map(text =>
-						<Box>{text}</Box>,
-					)}
-				</td>);
+				return (
+					<td>
+						{props.value.strings.map((text) => (
+							<Box>{text}</Box>
+						))}
+					</td>
+				);
 			}
 		}
 		case "images": {
 			if (props.listView) {
-				return (<td>
-					{props.value.images.map(image =>
-						<img height={100} src={`data:${image.image_mime};base64,${btoa(String.fromCharCode.apply(null, image.image_data))}`}/>,
-					)[0]}
-				</td>);
+				return (
+					<td>
+						{
+							props.value.images.map((image) => (
+								<img
+									height={100}
+									src={`data:${image.image_mime};base64,${btoa(
+										String.fromCharCode.apply(null, image.image_data),
+									)}`}
+								/>
+							))[0]
+						}
+					</td>
+				);
 			} else {
-				return (<td>
-					{props.value.images.map(image =>
-						<img width={256} src={`data:${image.image_mime};base64,${btoa(String.fromCharCode.apply(null, image.image_data))}`}/>,
-					)}
-				</td>);
+				return (
+					<td>
+						{props.value.images.map((image) => (
+							<img
+								width={256}
+								src={`data:${image.image_mime};base64,${btoa(
+									String.fromCharCode.apply(null, image.image_data),
+								)}`}
+							/>
+						))}
+					</td>
+				);
 			}
 		}
 	}

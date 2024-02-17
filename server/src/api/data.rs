@@ -5,6 +5,14 @@ use ts_rs::TS;
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
+pub struct DriverEntryIdData {
+	pub match_id: String,
+	pub team_id: String,
+	pub data: MatchEntryData,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct MatchEntryIdData {
 	pub match_id: String,
 	pub team_id: String,
@@ -24,7 +32,10 @@ pub struct MatchEntryData {
 	/// The mapping from entry ids to entry values.
 	pub entries: HashMap<String, MatchEntryValue>,
 	#[serde(default)]
-    #[oai(default)]
+	#[oai(default)]
+	pub scout: String,
+	#[serde(default)]
+	#[oai(default)]
 	#[ts(type = "number")]
 	pub timestamp_ms: u64,
 }
@@ -101,23 +112,23 @@ pub struct CounterEntry {
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct TextFieldEntry {
-    /// The text gathered from the user
-    pub text: String,
+	/// The text gathered from the user
+	pub text: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct ImageEntry {
-    /// A list of images
+	/// A list of images
 	pub images: Vec<ImageData>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct ImageData {
-    /// The format mime type of the image, e.g. `image/png`
-    pub image_mime: String,
-    /// The actual image data, can be encoded as png, jpeg, or other formats idk (gif, bmp, or webp
-    /// would all work I'm sure)
-    pub image_data: Vec<u8>,
+	/// The format mime type of the image, e.g. `image/png`
+	pub image_mime: String,
+	/// The actual image data, can be encoded as png, jpeg, or other formats idk (gif, bmp, or webp
+	/// would all work I'm sure)
+	pub image_data: Vec<u8>,
 }

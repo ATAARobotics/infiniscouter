@@ -1,4 +1,4 @@
-use crate::api::data::{MatchEntryData, MatchEntryIdData};
+use crate::api::data::{DriverEntryIdData, MatchEntryData, MatchEntryIdData};
 use sled::{Db, Tree};
 use std::{collections::HashMap, path::Path};
 use thiserror::Error;
@@ -14,6 +14,7 @@ pub enum DbError {
 #[derive(Debug, Clone)]
 pub struct Database {
 	_inner: Db,
+	driver_entries: Tree,
 	match_entries: Tree,
 	pit_entries: Tree,
 }
@@ -28,6 +29,22 @@ impl Database {
 				let match_id = String::from_utf8_lossy(key_parts.next().unwrap());
 				let team_id = String::from_utf8_lossy(key_parts.next().unwrap());
 				MatchEntryIdData {
+					match_id: match_id.to_string(),
+					team_id: team_id.to_string(),
+					data: serde_json::from_slice(&v).unwrap(),
+				}
+			})
+			.collect()
+	}
+	pub fn get_all_driver_entries(&self, year: u32, event: &str) -> Vec<DriverEntryIdData> {
+		self.driver_entries
+			.scan_prefix(Self::driver_entry_prefix(year, event))
+			.flatten()
+			.map(|(k, v)| {
+				let mut key_parts = k.split(|n| *n == 255).skip(3);
+				let match_id = String::from_utf8_lossy(key_parts.next().unwrap());
+				let team_id = String::from_utf8_lossy(key_parts.next().unwrap());
+				DriverEntryIdData {
 					match_id: match_id.to_string(),
 					team_id: team_id.to_string(),
 					data: serde_json::from_slice(&v).unwrap(),
@@ -78,6 +95,35 @@ impl Database {
 			.insert(Self::match_entry_key(year, event, match_id, team), data)?;
 		Ok(())
 	}
+	pub fn get_driver_entry_data(
+		&self,
+		year: u32,
+		event: &str,
+		match_id: &str,
+		team: &str,
+	) -> Result<Option<MatchEntryData>, DbError> {
+		let value = self
+			.driver_entries
+			.get(Self::driver_entry_key(year, event, match_id, team))?;
+		Ok(if let Some(val) = value {
+			Some(serde_json::from_slice(&val)?)
+		} else {
+			None
+		})
+	}
+	pub fn set_driver_entry_data(
+		&self,
+		year: u32,
+		event: &str,
+		match_id: &str,
+		team: &str,
+		data: &MatchEntryData,
+	) -> Result<(), DbError> {
+		let data = serde_json::to_vec(data)?;
+		self.driver_entries
+			.insert(Self::driver_entry_key(year, event, match_id, team), data)?;
+		Ok(())
+	}
 	pub fn get_pit_entry_data(
 		&self,
 		year: u32,
@@ -104,6 +150,22 @@ impl Database {
 		self.pit_entries
 			.insert(Self::pit_entry_key(year, event, team), data)?;
 		Ok(())
+	}
+	fn driver_entry_prefix(year: u32, event: &str) -> Vec<u8> {
+		let mut bytes = "driver_entry".as_bytes().to_vec();
+		bytes.push(255);
+		bytes.extend_from_slice(&year.to_le_bytes());
+		bytes.push(255);
+		bytes.extend_from_slice(event.as_bytes());
+		bytes.push(255);
+		bytes
+	}
+	fn driver_entry_key(year: u32, event: &str, match_id: &str, team: &str) -> Vec<u8> {
+		let mut bytes = Self::driver_entry_prefix(year, event);
+		bytes.extend_from_slice(match_id.as_bytes());
+		bytes.push(255);
+		bytes.extend_from_slice(team.as_bytes());
+		bytes
 	}
 	fn match_entry_prefix(year: u32, event: &str) -> Vec<u8> {
 		let mut bytes = "match_entry".as_bytes().to_vec();
@@ -140,10 +202,12 @@ impl Database {
 impl Database {
 	pub fn open<P: AsRef<Path>>(path: P) -> Result<Database, DbError> {
 		let db = sled::open(path)?;
+		let driver_entries = db.open_tree("driver_entires".as_bytes())?;
 		let match_entries = db.open_tree("match_entires".as_bytes())?;
 		let pit_entries = db.open_tree("pit_entires".as_bytes())?;
 		Ok(Database {
 			_inner: db,
+			driver_entries,
 			match_entries,
 			pit_entries,
 		})

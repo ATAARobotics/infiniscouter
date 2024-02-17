@@ -6,16 +6,15 @@ import { useEffect, useState } from "preact/hooks";
 import { MatchPage } from "../components/entry_components";
 import { GetScoutName } from "../components/get_scout_name";
 import { LoadIndicator } from "../components/load_indicator";
-import { matchFieldsAtom, matchListAtom, scoutNameAtom } from "../data/atoms";
-import { MatchEntry } from "../generated/MatchEntry";
+import { driverFieldsAtom, matchListAtom, scoutNameAtom } from "../data/atoms";
+import { DriverEntryIdData } from "../generated/DriverEntryIdData";
 import { MatchEntryData } from "../generated/MatchEntryData";
-import { MatchEntryIdData } from "../generated/MatchEntryIdData";
 import { MatchInfo } from "../generated/MatchInfo";
 
 /**
- * Match Entry Page Component
+ * Driver scouting entry page
  */
-export function MatchEntry() {
+export function DriverEntry() {
 	const [matchId, setMatchId] = useState<number>();
 	const [teamId, setTeamId] = useState<number>();
 
@@ -26,11 +25,11 @@ export function MatchEntry() {
 
 	const scoutName = useAtomValue(scoutNameAtom);
 	const matchTeams = useAtomValue(matchListAtom);
-	const fields = useAtomValue(matchFieldsAtom);
+	const fields = useAtomValue(driverFieldsAtom);
 
 	useEffect(() => {
 		if (matchId && teamId && scoutName) {
-			const saveData: MatchEntryIdData = {
+			const saveData: DriverEntryIdData = {
 				match_id: matchId.toString(),
 				team_id: teamId.toString(),
 				data: {
@@ -39,16 +38,16 @@ export function MatchEntry() {
 				},
 			};
 			localStorage.setItem(
-				"match-" + matchId?.toString() + "-" + teamId?.toString(),
+				"drive-" + matchId?.toString() + "-" + teamId?.toString(),
 				JSON.stringify(saveData),
 			);
 		}
 	}, [data, scoutName]);
 	useEffect(() => {
 		if (matchId && teamId) {
-			const newData: MatchEntryIdData | null = JSON.parse(
+			const newData: DriverEntryIdData | null = JSON.parse(
 				localStorage.getItem(
-					"match-" + matchId?.toString() + "-" + teamId?.toString(),
+					"drive-" + matchId?.toString() + "-" + teamId?.toString(),
 				) ?? "null",
 			);
 			if (newData !== null) {
@@ -80,7 +79,12 @@ export function MatchEntry() {
 
 	return (
 		<Box>
-			<h1>Match Entry Page</h1>
+			<h1>Driver Entry Page</h1>
+			<p>
+				This page is for entry of feedback for teammates by the drive team.
+				For general scouting go <a href="/match_entry">here</a> and for pit
+				scouting go <a href="/pit_entry">here</a>.
+			</p>
 			<Box>
 				{
 					// @ts-expect-error Input seems to want a component for some reason?
