@@ -96,20 +96,25 @@ impl MatchEntryFields {
 			.categories
 			.keys()
 			.filter_map(|page| game_config.categories.get(page))
-			.map(|cat| (cat.order.unwrap_or(1000), MatchEntryPage {
-				title: cat.name.clone(),
-				description: None,
-				layout: cat
-					.metrics
-					.iter()
-					.filter(|(_, metric)| match entry_type {
-						EntryType::DriveTeam => metric.collect.collect_from_drive(),
-						EntryType::Match => metric.collect.collect_in_match(),
-						EntryType::Pit => metric.collect.collect_in_pit(),
-					})
-					.map(|(metric, _)| metric.clone())
-					.collect(),
-			}))
+			.map(|cat| {
+				(
+					cat.order.unwrap_or(1000),
+					MatchEntryPage {
+						title: cat.name.clone(),
+						description: None,
+						layout: cat
+							.metrics
+							.iter()
+							.filter(|(_, metric)| match entry_type {
+								EntryType::DriveTeam => metric.collect.collect_from_drive(),
+								EntryType::Match => metric.collect.collect_in_match(),
+								EntryType::Pit => metric.collect.collect_in_pit(),
+							})
+							.map(|(metric, _)| metric.clone())
+							.collect(),
+					},
+				)
+			})
 			.filter(|(_, page)| !page.layout.is_empty())
 			.collect::<Vec<_>>();
 		pages.sort_by_key(|(order, _)| *order);
@@ -138,10 +143,7 @@ impl MatchEntryFields {
 						})
 				})
 				.collect(),
-			pages: pages
-				.into_iter()
-				.map(|(_, page)| page)
-				.collect(),
+			pages: pages.into_iter().map(|(_, page)| page).collect(),
 		}
 	}
 }

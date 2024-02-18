@@ -92,8 +92,8 @@ pub struct ImagesEntry {
 	images: Vec<ImageData>,
 }
 
-fn get_pie_chart(data_points: &[&MatchEntryValue]) -> TeamInfoEntry {
-	let mut values = data_points
+fn get_pie_chart(data_points: &[&MatchEntryValue], option_values: &[(&str, f32)]) -> TeamInfoEntry {
+	let mut actual_values = data_points
 		.iter()
 		.map(|dp| match dp {
 			MatchEntryValue::Enum(ab) => ab.value.to_string(),
@@ -101,26 +101,43 @@ fn get_pie_chart(data_points: &[&MatchEntryValue]) -> TeamInfoEntry {
 				format!("{:?}", ab.value)
 			}
 			MatchEntryValue::Bool(bl) => {
-				format!("{:?}", bl.value)
+				if bl.value {
+					"Yes".to_string()
+				} else {
+					"No".to_string()
+				}
 			}
-			_ => {
-				panic!("AHHHhhhhhhhhhh")
+			value => {
+				panic!("Invalid MatchEntryValue type found: {:?}", value)
 			}
 		})
 		.collect::<Vec<_>>();
 
-	values.sort();
+	actual_values.sort();
 
-	let options = values
+	let options_map: HashMap<_, _> = actual_values
 		.group_by(|a, b| a == b)
-		.map(|group| PieChartOption {
-			label: group[0].to_string(),
-			value: group.len() as f32,
+		.map(|group| (group[0].to_string(), group.len() as f32))
+		.collect();
+	let sort_value = if actual_values.len() > 0 {
+		option_values
+			.iter()
+			.map(|(option, value)| *value * options_map.get(*option).unwrap_or(&0.0))
+			.sum::<f32>()
+			/ actual_values.len() as f32
+	} else {
+		0.0
+	};
+	let options = options_map
+		.into_iter()
+		.map(|(option, count)| PieChartOption {
+			label: option,
+			value: count,
 		})
 		.collect::<Vec<_>>();
 	TeamInfoEntry::PieChart(PieChartEntry {
 		options,
-		sort_value: 0.0,
+		sort_value,
 	})
 }
 
@@ -227,9 +244,23 @@ fn single_team_impl(
 						.as_ref()
 						.map(|e| &e.entry)
 					{
-						Some(MatchEntryType::Ability(_)) => get_pie_chart(&data_points),
-						Some(MatchEntryType::Enum(_)) => get_pie_chart(&data_points),
-						Some(MatchEntryType::Bool(_)) => get_pie_chart(&data_points),
+						Some(MatchEntryType::Ability(_)) => get_pie_chart(
+							&data_points,
+							&[("Nothing", 0.0), ("Attempted", 0.5), ("Succeeded", 1.0)],
+						),
+						Some(MatchEntryType::Enum(enum_metric)) => {
+							let count = enum_metric.options.len() as f32;
+							let thing = enum_metric
+								.options
+								.iter()
+								.enumerate()
+								.map(|(i, option)| (option.as_str(), (i as f32) / count))
+								.collect::<Vec<_>>();
+							get_pie_chart(&data_points, &thing)
+						}
+						Some(MatchEntryType::Bool(_)) => {
+							get_pie_chart(&data_points, &[("No", 0.0), ("Yes", 1.0)])
+						}
 						Some(MatchEntryType::Timer(_)) => {
 							let value = data_points
 								.iter()

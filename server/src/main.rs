@@ -37,7 +37,11 @@ async fn main() -> Result<()> {
 		}
 	});
 
-	let server = ScoutingServer::new(ConfigManager::new().unwrap(), Database::open("data").unwrap()).unwrap();
+	let server = ScoutingServer::new(
+		ConfigManager::new().unwrap(),
+		Database::open("data").unwrap(),
+	)
+	.unwrap();
 	let address = "0.0.0.0:4421";
 	info!("Starting server on '{address}'");
 	server.serve(address).await
