@@ -1,16 +1,16 @@
+import { Box } from "@mui/joy";
 import {
 	ArcElement,
 	Chart as ChartJS,
 	Legend,
-	Tooltip,
 	LinearScale,
+	Tooltip,
 } from "chart.js";
 import { WordCloudController, WordElement } from "chartjs-chart-wordcloud";
 import { useEffect } from "react";
 import { Chart, Pie } from "react-chartjs-2";
 
 import { TeamInfoEntry } from "../generated/TeamInfoEntry";
-import { Box } from "@mui/joy";
 
 interface DataValueProps {
 	value: TeamInfoEntry;
@@ -138,10 +138,10 @@ export function DataValue(props: DataValueProps) {
 									}
 								}
 							}
-							const labelsAndWordCounts: [string, number][] = [
-								...Object.entries(words),
-								["?", 1],
-							];
+							const labelsAndWordCounts = Object.entries(words);
+							if (labelsAndWordCounts.length === 0) {
+								return <></>;
+							}
 							labelsAndWordCounts.sort((a, b) => b[1] - a[1]);
 							labelsAndWordCounts.length = Math.min(
 								labelsAndWordCounts.length,
@@ -157,7 +157,6 @@ export function DataValue(props: DataValueProps) {
 									100,
 								);
 							}
-							console.log(labelsAndWordCounts);
 							return (
 								<Chart
 									type={WordCloudController.id}
