@@ -7,6 +7,8 @@ import {
 	Tooltip,
 } from "chart.js";
 import { WordCloudController, WordElement } from "chartjs-chart-wordcloud";
+import { atom, useAtom } from "jotai";
+import { atomWithDefault } from "jotai/utils";
 import { useEffect } from "react";
 import { Chart, Pie } from "react-chartjs-2";
 
@@ -59,20 +61,35 @@ const excludeWords = [
 	"s",
 ];
 
+const chartsReadyAtom = atom(false);
+
+/**
+ * Hook that returns true when charts can be used to ensure charts are not used before they are initialized.
+ */
+function useCharts(): boolean {
+	const [chartsReady, setChartsReady] = useAtom(chartsReadyAtom);
+	useEffect(() => {
+		if (!chartsReady) {
+			ChartJS.register(
+				ArcElement,
+				Tooltip,
+				Legend,
+				LinearScale,
+				WordCloudController,
+				WordElement,
+			);
+			setChartsReady(true);
+		}
+	}, [chartsReady, setChartsReady]);
+
+	return chartsReady;
+}
+
 /**
  * Displays a data value for analysis.
  */
 export function DataValue(props: DataValueProps) {
-	useEffect(() => {
-		ChartJS.register(
-			ArcElement,
-			Tooltip,
-			Legend,
-			LinearScale,
-			WordCloudController,
-			WordElement,
-		);
-	}, []);
+	const chartsReady = useCharts();
 	switch (props.value.type) {
 		case "team_name":
 			return (
@@ -93,7 +110,7 @@ export function DataValue(props: DataValueProps) {
 		case "pie_chart": {
 			return (
 				<td>
-					{
+					{chartsReady && (
 						<Pie
 							// @ts-expect-error style is missing from preact/compat, it seems
 							style={{ width: "100px", height: "100px" }}
@@ -120,7 +137,7 @@ export function DataValue(props: DataValueProps) {
 								plugins: { legend: { display: false, reverse: true } },
 							}}
 						/>
-					}
+					)}
 				</td>
 			);
 		}
