@@ -35,39 +35,39 @@ categories:
     name: Endgame
     order: 40
   impressions:
-      name: Impressions
-      order: 50
-      metrics:
-        speed:
-          name: Speed
-          description: Overall speed of the robot
-          collect: match_only
-          metric:
-            type: enum
-            options:
-              - Slow
-              - Normal
-              - Fast
-        stability:
-          name: Stability
-          description: How stable the robot is
-          collect: match_only
-          metric:
-            type: enum
-            options:
-              - Fell Over
-              - Almost Fell
-              - Normal
-        malfunction:
-          name: Malfunction
-          description: Did the robot malfunction?
-          collect: match_only
-          metric:
-            type: enum
-            options:
-              - Complete/stopped
-              - Minor
-              - Nothing
+    name: Impressions
+    order: 50
+    metrics:
+      speed:
+        name: Speed
+        description: Overall speed of the robot
+        collect: match_only
+        metric:
+          type: enum
+          options:
+            - Slow
+            - Normal
+            - Fast
+      stability:
+        name: Stability
+        description: How stable the robot is
+        collect: match_only
+        metric:
+          type: enum
+          options:
+            - Fell Over
+            - Almost Fell
+            - Normal
+      malfunction:
+        name: Malfunction
+        description: Did the robot malfunction?
+        collect: match_only
+        metric:
+          type: enum
+          options:
+            - Complete/stopped
+            - Minor
+            - Nothing
   team:
     name: Team
     order: 0
@@ -179,9 +179,12 @@ display:
     - source: single
       metric: stability
     - source: single
-      metric: broken
+      metric: malfunction
       display: true
     - source: single
-      metric: stopped
-      display: true
+      metric: match-notes
+    - source: single
+      metric: pit-notes
+    - source: single
+      metric: drive-notes
   pre_match:
