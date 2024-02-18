@@ -37,9 +37,6 @@ export function MatchPage(props: MatchPageProps) {
 				<MatchDetail
 					entry={props.entries[entryName]}
 					setValue={(value) => {
-						console.log(
-							`Setting ${entryName} to ${JSON.stringify(value)}`,
-						);
 						props.setEntry(entryName, value);
 					}}
 					value={props.allEntries[entryName]}
@@ -137,18 +134,25 @@ function EnumEntry(props: EnumEntryProps) {
 					: ""
 			}
 			onChange={(_, newValue) => {
-				if (!newValue) {
+				if (newValue === undefined || newValue === null) {
 					props.setValue(undefined);
 				} else {
-					props.setValue({
-						value: newValue,
-						type: props.entryType,
-					} as MatchEntryValue);
+					if (props.entryType === "bool") {
+						props.setValue({
+							value: newValue === "true",
+							type: props.entryType,
+						} as MatchEntryValue);
+					} else {
+						props.setValue({
+							value: newValue,
+							type: props.entryType,
+						} as MatchEntryValue);
+					}
 				}
 			}}
 		>
 			{props.options.map((options) => (
-				<Button value={options.id}>
+				<Button value={options.id.toString()}>
 					<p className="button-text">{options.display}</p>
 				</Button>
 			))}
@@ -369,8 +373,6 @@ function ImageEntry(props: ImageEntryProps) {
 						for (let f = 0; f < (files?.length ?? 0); f++) {
 							const file = (files ?? [])[f];
 							if (file !== null) {
-								console.log("File: ");
-								console.log(file);
 								saveImage(file).then((imageUuid) => {
 									props.setValue({
 										type: "image",
