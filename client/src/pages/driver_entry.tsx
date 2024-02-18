@@ -1,14 +1,14 @@
 import { Box, Input, Radio, RadioGroup, Stack, Typography } from "@mui/joy";
 import { useAtomValue } from "jotai/react";
 import { ChangeEvent } from "preact/compat";
-import { useEffect, useState } from "preact/hooks";
+import { useState } from "preact/hooks";
 
 import { MatchPage } from "../components/entry_components";
 import { GetScoutName } from "../components/get_scout_name";
 import { LoadIndicator } from "../components/load_indicator";
 import { driverFieldsAtom, matchListAtom, scoutNameAtom } from "../data/atoms";
+import { useEntries } from "../data/entries";
 import { DriverEntryIdData } from "../generated/DriverEntryIdData";
-import { MatchEntryData } from "../generated/MatchEntryData";
 import { MatchInfo } from "../generated/MatchInfo";
 
 /**
@@ -18,48 +18,19 @@ export function DriverEntry() {
 	const [matchId, setMatchId] = useState<number>();
 	const [teamId, setTeamId] = useState<number>();
 
-	const [data, setData] = useState<Omit<MatchEntryData, "scout">>({
-		entries: {},
-		timestamp_ms: 0,
-	});
-
 	const scoutName = useAtomValue(scoutNameAtom);
 	const matchTeams = useAtomValue(matchListAtom);
 	const fields = useAtomValue(driverFieldsAtom);
 
-	useEffect(() => {
-		if (matchId && teamId && scoutName) {
-			const saveData: DriverEntryIdData = {
-				match_id: matchId.toString(),
-				team_id: teamId.toString(),
-				data: {
-					...data,
-					scout: scoutName,
-				},
-			};
-			localStorage.setItem(
-				"driver-" + matchId?.toString() + "-" + teamId?.toString(),
-				JSON.stringify(saveData),
-			);
-		}
-	}, [data, scoutName]);
-	useEffect(() => {
-		if (matchId && teamId) {
-			const newData: DriverEntryIdData | null = JSON.parse(
-				localStorage.getItem(
-					"driver-" + matchId?.toString() + "-" + teamId?.toString(),
-				) ?? "null",
-			);
-			if (newData !== null) {
-				setData(newData.data);
-			} else {
-				setData({
-					entries: {},
-					timestamp_ms: 0,
-				});
-			}
-		}
-	}, [matchId, teamId]);
+	const [dataEntries, setEntry] = useEntries<DriverEntryIdData>(
+		scoutName,
+		matchId && teamId ? `driver-${matchId}-${teamId}` : null,
+		(data) => ({
+			match_id: matchId?.toString() ?? "",
+			team_id: teamId?.toString() ?? "",
+			data,
+		}),
+	);
 
 	if (!scoutName) {
 		return <GetScoutName></GetScoutName>;
@@ -132,19 +103,8 @@ export function DriverEntry() {
 						<MatchPage
 							page={page}
 							entries={fields.entries}
-							setEntry={(id, value) => {
-								const newEntries = { ...data.entries };
-								if (!value) {
-									delete newEntries[id];
-								} else {
-									newEntries[id] = value;
-								}
-								setData({
-									timestamp_ms: Date.now(),
-									entries: newEntries,
-								});
-							}}
-							allEntries={data.entries}
+							setEntry={setEntry}
+							allEntries={dataEntries}
 						></MatchPage>
 					))
 				) : (

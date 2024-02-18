@@ -1,14 +1,14 @@
 import { Box, Input, Radio, RadioGroup, Stack, Typography } from "@mui/joy";
 import { useAtomValue } from "jotai/react";
 import { ChangeEvent } from "preact/compat";
-import { useEffect, useState } from "preact/hooks";
+import { useState } from "preact/hooks";
 
 import { MatchPage } from "../components/entry_components";
 import { GetScoutName } from "../components/get_scout_name";
 import { LoadIndicator } from "../components/load_indicator";
 import { matchFieldsAtom, matchListAtom, scoutNameAtom } from "../data/atoms";
+import { useEntries } from "../data/entries";
 import { MatchEntry } from "../generated/MatchEntry";
-import { MatchEntryData } from "../generated/MatchEntryData";
 import { MatchEntryIdData } from "../generated/MatchEntryIdData";
 import { MatchInfo } from "../generated/MatchInfo";
 
@@ -19,48 +19,19 @@ export function MatchEntry() {
 	const [matchId, setMatchId] = useState<number>();
 	const [teamId, setTeamId] = useState<number>();
 
-	const [data, setData] = useState<Omit<MatchEntryData, "scout">>({
-		entries: {},
-		timestamp_ms: 0,
-	});
-
 	const scoutName = useAtomValue(scoutNameAtom);
 	const matchTeams = useAtomValue(matchListAtom);
 	const fields = useAtomValue(matchFieldsAtom);
 
-	useEffect(() => {
-		if (matchId && teamId && scoutName) {
-			const saveData: MatchEntryIdData = {
-				match_id: matchId.toString(),
-				team_id: teamId.toString(),
-				data: {
-					...data,
-					scout: scoutName,
-				},
-			};
-			localStorage.setItem(
-				"match-" + matchId?.toString() + "-" + teamId?.toString(),
-				JSON.stringify(saveData),
-			);
-		}
-	}, [data, scoutName]);
-	useEffect(() => {
-		if (matchId && teamId) {
-			const newData: MatchEntryIdData | null = JSON.parse(
-				localStorage.getItem(
-					"match-" + matchId?.toString() + "-" + teamId?.toString(),
-				) ?? "null",
-			);
-			if (newData !== null) {
-				setData(newData.data);
-			} else {
-				setData({
-					entries: {},
-					timestamp_ms: 0,
-				});
-			}
-		}
-	}, [matchId, teamId]);
+	const [dataEntries, setEntry] = useEntries<MatchEntryIdData>(
+		scoutName,
+		matchId && teamId ? `match-${matchId}-${teamId}` : null,
+		(data) => ({
+			match_id: matchId?.toString() ?? "",
+			team_id: teamId?.toString() ?? "",
+			data,
+		}),
+	);
 
 	if (!scoutName) {
 		return <GetScoutName></GetScoutName>;
@@ -128,19 +99,8 @@ export function MatchEntry() {
 						<MatchPage
 							page={page}
 							entries={fields.entries}
-							setEntry={(id, value) => {
-								const newEntries = { ...data.entries };
-								if (!value) {
-									delete newEntries[id];
-								} else {
-									newEntries[id] = value;
-								}
-								setData({
-									timestamp_ms: Date.now(),
-									entries: newEntries,
-								});
-							}}
-							allEntries={data.entries}
+							setEntry={setEntry}
+							allEntries={dataEntries}
 						></MatchPage>
 					))
 				) : (

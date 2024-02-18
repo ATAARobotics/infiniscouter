@@ -1,13 +1,12 @@
 import { Autocomplete, Box } from "@mui/joy";
 import { useAtomValue } from "jotai/react";
-import { useEffect, useState } from "preact/hooks";
+import { useState } from "preact/hooks";
 
 import { MatchPage } from "../components/entry_components";
 import { GetScoutName } from "../components/get_scout_name";
 import { LoadIndicator } from "../components/load_indicator";
 import { matchListAtom, pitFieldsAtom, scoutNameAtom } from "../data/atoms";
-import { MatchEntryData } from "../generated/MatchEntryData";
-import { MatchEntryIdData } from "../generated/MatchEntryIdData";
+import { useEntries } from "../data/entries";
 import { PitEntryIdData } from "../generated/PitEntryIdData";
 
 /**
@@ -16,42 +15,18 @@ import { PitEntryIdData } from "../generated/PitEntryIdData";
 export function PitEntry() {
 	const [teamId, setTeamId] = useState<number>();
 
-	const [data, setData] = useState<Omit<MatchEntryData, "scout">>({
-		entries: {},
-		timestamp_ms: 0,
-	});
-
 	const scoutName = useAtomValue(scoutNameAtom);
 	const event_info = useAtomValue(matchListAtom);
 	const fields = useAtomValue(pitFieldsAtom);
 
-	useEffect(() => {
-		if (teamId && scoutName) {
-			const saveData: PitEntryIdData = {
-				team_id: teamId.toString(),
-				data: {
-					...data,
-					scout: scoutName,
-				},
-			};
-			localStorage.setItem(
-				"team-" + teamId?.toString(),
-				JSON.stringify(saveData),
-			);
-		}
-	}, [data, scoutName]);
-	useEffect(() => {
-		if (teamId) {
-			const newData: MatchEntryIdData | null = JSON.parse(
-				localStorage.getItem("team-" + teamId?.toString()) ?? "null",
-			);
-			if (newData !== null) {
-				setData(newData.data);
-			} else {
-				setData({ entries: {}, timestamp_ms: 0 });
-			}
-		}
-	}, [teamId]);
+	const [dataEntries, setEntry] = useEntries<PitEntryIdData>(
+		scoutName,
+		teamId ? `team-${teamId}` : null,
+		(data) => ({
+			team_id: teamId?.toString() ?? "",
+			data,
+		}),
+	);
 
 	if (!scoutName) {
 		return <GetScoutName></GetScoutName>;
@@ -79,22 +54,8 @@ export function PitEntry() {
 							<MatchPage
 								page={page}
 								entries={fields.entries}
-								setEntry={(id, value) => {
-									if (!value) {
-										const tmp = {
-											entries: { ...data.entries },
-											timestamp_ms: Date.now(),
-										};
-										delete tmp.entries[id];
-										setData(tmp);
-									} else {
-										setData({
-											entries: { ...data.entries, [id]: value },
-											timestamp_ms: Date.now(),
-										});
-									}
-								}}
-								allEntries={data.entries}
+								setEntry={setEntry}
+								allEntries={dataEntries}
 							></MatchPage>
 						))
 					) : (
