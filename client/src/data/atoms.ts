@@ -21,3 +21,7 @@ export const pitFieldsAtom = atomWithStorage<MatchEntryFields | null>(
 );
 
 export const scoutNameAtom = atomWithStorage<string | null>("scoutName", null);
+
+export const lastMatchSaveAtom = atomWithStorage<number>("lastMatchSave", 0);
+export const lastPitSaveAtom = atomWithStorage<number>("lastPitSave", 0);
+export const lastDriverSaveAtom = atomWithStorage<number>("lastDriverSave", 0);

@@ -66,8 +66,8 @@ export function PitEntry() {
 			<Box>
 				<Autocomplete
 					placeholder={"Team Number"}
-					options={Object.entries(event_info?.team_infos).map((v, k) => {
-						return { label: `${v[1].name} (${v[1].num})`, num: k };
+					options={Object.values(event_info.team_infos).map((team) => {
+						return { label: `${team.name} (${team.num})`, num: team.num };
 					})}
 					onChange={(_ev, value) => {
 						setTeamId(value?.num ?? 0);

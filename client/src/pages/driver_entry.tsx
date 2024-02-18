@@ -38,7 +38,7 @@ export function DriverEntry() {
 				},
 			};
 			localStorage.setItem(
-				"drive-" + matchId?.toString() + "-" + teamId?.toString(),
+				"driver-" + matchId?.toString() + "-" + teamId?.toString(),
 				JSON.stringify(saveData),
 			);
 		}
@@ -47,7 +47,7 @@ export function DriverEntry() {
 		if (matchId && teamId) {
 			const newData: DriverEntryIdData | null = JSON.parse(
 				localStorage.getItem(
-					"drive-" + matchId?.toString() + "-" + teamId?.toString(),
+					"driver-" + matchId?.toString() + "-" + teamId?.toString(),
 				) ?? "null",
 			);
 			if (newData !== null) {
