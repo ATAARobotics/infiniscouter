@@ -65,9 +65,9 @@ categories:
         metric:
           type: enum
           options:
-            - Complete/stopped
-            - Minor
-            - Nothing
+            - Stopped / Complete Failure
+            - Minor Issue
+            - All Good
   team:
     name: Team
     order: 0
@@ -79,7 +79,7 @@ categories:
         metric:
           type: bool
       battery-count:
-        name: Amount of batteries
+        name: Battery Count
         description: How many batteries does the team have on hand?
         collect: pit_only
         metric:
@@ -182,9 +182,25 @@ display:
       metric: malfunction
       display: true
     - source: single
+      metric: exists
+    - source: single
+      metric: battery-count
+    - source: single
+      metric: reversable-bumpers
+    - source: single
+      metric: vision
+    - source: single
+      metric: drive-train
+    - source: single
+      metric: robot-picture
+    - source: single
+      metric: overpromised
+    - source: single
+      metric: teamwork
+    - source: single
       metric: match-notes
     - source: single
       metric: pit-notes
     - source: single
-      metric: drive-notes
+      metric: driver-notes
   pre_match:

@@ -92,6 +92,8 @@ pub struct ImagesEntry {
 	images: Vec<ImageData>,
 }
 
+const SB_PREFIX: &str = "statbotics-";
+
 fn get_pie_chart(data_points: &[&MatchEntryValue], option_values: &[(&str, f32)]) -> TeamInfoEntry {
 	let mut actual_values = data_points
 		.iter()
@@ -144,13 +146,12 @@ fn get_pie_chart(data_points: &[&MatchEntryValue], option_values: &[(&str, f32)]
 fn single_team_impl(
 	config: &GameConfigs,
 	match_entries: &[MatchEntryIdData],
-	_driver_entries: &[DriverEntryIdData],
+	driver_entries: &[DriverEntryIdData],
 	pit_entry: Option<&MatchEntryData>,
 	tba_data: &EventInfo,
 	statbotics: Option<&StatboticsTeam>,
 	team: u32,
 ) -> Vec<TeamInfoEntry> {
-	// TODO incorporate driver entries
 	config
 		.game_config
 		.display
@@ -158,7 +159,6 @@ fn single_team_impl(
 		.iter()
 		.map(|column| match column {
 			crate::config::DisplayColumn::Single(metric) => {
-				const SB_PREFIX: &str = "statbotics-";
 				if metric.metric.starts_with(SB_PREFIX) {
 					if let Some(sb) = statbotics {
 						let real_metric = metric.metric.strip_prefix(SB_PREFIX).unwrap();
@@ -236,6 +236,16 @@ fn single_team_impl(
 								.iter()
 								.copied(),
 						)
+						.chain(
+							driver_entries
+								.iter()
+								.filter(|match_entry| {
+									match_entry.team_id.parse::<u32>().unwrap() == team
+								})
+								.filter_map(|match_entry| {
+									match_entry.data.entries.get(&metric.metric)
+								}),
+						)
 						.collect();
 					match config
 						.match_entry_fields
@@ -243,7 +253,22 @@ fn single_team_impl(
 						.get(&metric.metric)
 						.as_ref()
 						.map(|e| &e.entry)
-					{
+						.or_else(|| {
+							config
+								.pit_entry_fields
+								.entries
+								.get(&metric.metric)
+								.as_ref()
+								.map(|e| &e.entry)
+						})
+						.or_else(|| {
+							config
+								.driver_entry_fields
+								.entries
+								.get(&metric.metric)
+								.as_ref()
+								.map(|e| &e.entry)
+						}) {
 						Some(MatchEntryType::Ability(_)) => get_pie_chart(
 							&data_points,
 							&[("Nothing", 0.0), ("Attempted", 0.5), ("Succeeded", 1.0)],
@@ -262,24 +287,37 @@ fn single_team_impl(
 							get_pie_chart(&data_points, &[("No", 0.0), ("Yes", 1.0)])
 						}
 						Some(MatchEntryType::Timer(_)) => {
-							let value = data_points
-								.iter()
-								.map(|dp| {
-									if let MatchEntryValue::Timer(tm) = dp {
-										tm.time_seconds
-									} else {
-										panic!("Timeer noooooo waaaaa")
-									}
+							if data_points.is_empty() {
+								TeamInfoEntry::Text(TeamInfoTextEntry {
+									sort_text: "".to_string(),
+									display_text: "".to_string(),
 								})
-								.sum::<f32>() / data_points.len() as f32;
-							TeamInfoEntry::Text(TeamInfoTextEntry {
-								sort_text: value.to_string(),
-								display_text: format!("{value:.1}s"),
-							})
+							} else {
+								let value =
+									data_points
+										.iter()
+										.map(|dp| {
+											if let MatchEntryValue::Timer(tm) = dp {
+												tm.time_seconds
+											} else {
+												panic!("Invalid data type of {dp:?} for timer match entry");
+											}
+										})
+										.sum::<f32>() / data_points.len() as f32;
+								TeamInfoEntry::Text(TeamInfoTextEntry {
+									sort_text: value.to_string(),
+									display_text: format!("{value:.1}s"),
+								})
+							}
 						}
 						Some(MatchEntryType::Counter(_)) => {
-							let average =
-								data_points
+							if data_points.is_empty() {
+								TeamInfoEntry::Text(TeamInfoTextEntry {
+									sort_text: "".to_string(),
+									display_text: "".to_string(),
+								})
+							} else {
+								let average = data_points
 									.iter()
 									.map(|dp| {
 										if let MatchEntryValue::Counter(cm) = dp {
@@ -289,10 +327,11 @@ fn single_team_impl(
 										}
 									})
 									.sum::<f32>() / data_points.len() as f32;
-							TeamInfoEntry::Text(TeamInfoTextEntry {
-								sort_text: average.to_string(),
-								display_text: format!("{average:.1}"),
-							})
+								TeamInfoEntry::Text(TeamInfoTextEntry {
+									sort_text: average.to_string(),
+									display_text: format!("{average:.1}"),
+								})
+							}
 						}
 						Some(MatchEntryType::TextEntry(_)) => {
 							let strings = data_points
@@ -361,8 +400,8 @@ fn table_labels(config: &GameConfigs) -> Vec<String> {
 		.iter()
 		.map(|column| match column {
 			crate::config::DisplayColumn::Single(metric) => {
-				if metric.metric.starts_with("statbotics-") {
-					match metric.metric.trim_start_matches("statbotics-") {
+				if metric.metric.starts_with(SB_PREFIX) {
+					match metric.metric.trim_start_matches(SB_PREFIX) {
 						"wlt-ratio" => "W/L/T",
 						"rps" => "Ranking Points",
 						"points" => "Total Points",
@@ -388,6 +427,14 @@ fn table_labels(config: &GameConfigs) -> Vec<String> {
 					title.clone()
 				} else if let Some(title) = config
 					.pit_entry_fields
+					.entries
+					.get(&metric.metric)
+					.as_ref()
+					.map(|m| &m.title)
+				{
+					title.clone()
+				} else if let Some(title) = config
+					.driver_entry_fields
 					.entries
 					.get(&metric.metric)
 					.as_ref()

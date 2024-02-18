@@ -131,7 +131,7 @@ impl Database {
 		team: &str,
 	) -> Result<Option<MatchEntryData>, DbError> {
 		let value = self
-			.match_entries
+			.pit_entries
 			.get(Self::pit_entry_key(year, event, team))?;
 		Ok(if let Some(val) = value {
 			Some(serde_json::from_slice(&val)?)
