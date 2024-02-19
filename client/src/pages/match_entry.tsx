@@ -5,9 +5,7 @@ import { useState } from "preact/hooks";
 
 import { MatchPage } from "../components/entry_components";
 import { LoadIndicator } from "../components/load_indicator";
-import {
-	ScoutNameRequired,
-} from "../components/scout_name_required";
+import { ScoutNameRequired } from "../components/scout_name_required";
 import { SyncRequired } from "../components/sync_required";
 import { matchFieldsAtom, matchListAtom, scoutNameAtom } from "../data/atoms";
 import { getMatchKey, useEntries } from "../data/entries";
@@ -16,7 +14,7 @@ import { MatchEntryIdData } from "../generated/MatchEntryIdData";
 import { MatchInfo } from "../generated/MatchInfo";
 
 /**
- * Match Entry Page Component
+ * The match entry page component.
  */
 export function MatchEntry() {
 	const [matchId, setMatchId] = useState<number>();
@@ -54,7 +52,7 @@ export function MatchEntry() {
 
 	return (
 		<Box>
-			<h1>Match Entry Page</h1>
+			<h1>Match Entry</h1>
 			<Box>
 				{
 					// @ts-expect-error Input seems to want a component for some reason?

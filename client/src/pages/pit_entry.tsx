@@ -4,16 +4,14 @@ import { useState } from "preact/hooks";
 
 import { MatchPage } from "../components/entry_components";
 import { LoadIndicator } from "../components/load_indicator";
-import {
-	ScoutNameRequired,
-} from "../components/scout_name_required";
+import { ScoutNameRequired } from "../components/scout_name_required";
 import { SyncRequired } from "../components/sync_required";
 import { matchListAtom, pitFieldsAtom, scoutNameAtom } from "../data/atoms";
 import { getPitKey, useEntries } from "../data/entries";
 import { PitEntryIdData } from "../generated/PitEntryIdData";
 
 /**
- * Pit Entry Page Component
+ * The pit scouting entry page component.
  */
 export function PitEntry() {
 	const [teamId, setTeamId] = useState<number>();
@@ -40,7 +38,7 @@ export function PitEntry() {
 
 	return (
 		<Box>
-			<h1>Pit Entry Page</h1>
+			<h1>Pit Entry</h1>
 			<Box>
 				<Autocomplete
 					placeholder={"Team Number"}

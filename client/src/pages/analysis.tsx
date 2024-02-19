@@ -28,6 +28,7 @@ export function Analysis() {
 
 	return (
 		<Box>
+			<caption>Analysis</caption>
 			<Stack
 				direction="row"
 				sx={{
@@ -66,8 +67,13 @@ export function Analysis() {
 					);
 				})}
 			</Stack>
-			<Table hoverRow borderAxis="y" stripe="even" sx={{ width: "auto" }}>
-				<caption>Data Output</caption>
+			<Table
+				stickyHeader
+				hoverRow
+				borderAxis="y"
+				stripe="even"
+				sx={{ width: "auto" }}
+			>
 				<thead>
 					{table.names
 						.filter((_, idx) => enabledColumns.includes(idx))

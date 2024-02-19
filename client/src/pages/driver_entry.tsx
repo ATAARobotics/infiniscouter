@@ -13,7 +13,7 @@ import { DriverEntryIdData } from "../generated/DriverEntryIdData";
 import { MatchInfo } from "../generated/MatchInfo";
 
 /**
- * Driver scouting entry page
+ * The driver scouting page component.
  */
 export function DriverEntry() {
 	const [matchId, setMatchId] = useState<number>();
@@ -51,7 +51,7 @@ export function DriverEntry() {
 
 	return (
 		<Box>
-			<h1>Driver Entry Page</h1>
+			<h1>Driver Entry</h1>
 			<p>
 				This page is for entry of feedback for teammates by the drive team.
 				For general scouting go <a href="/match_entry">here</a> and for pit

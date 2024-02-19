@@ -115,6 +115,27 @@ export function getAllDriverEntries(): Array<DriverEntryIdData> {
 }
 
 /**
+ * Get scout that scouted a team in a match (if there is scouting data for that match and team).
+ */
+export function getMatchScout(matchId: number, teamId: number): string | null {
+	const matchEntry = getMatchEntry(matchId, teamId);
+
+	return matchEntry ? matchEntry.data.scout : null;
+}
+
+/**
+ * Loads a single match entry from local storage.
+ */
+function getMatchEntry(
+	matchId: number,
+	teamId: number,
+): MatchEntryIdData | null {
+	return JSON.parse(
+		localStorage.getItem(getMatchKey(matchId, teamId)) ?? "null",
+	) as MatchEntryIdData;
+}
+
+/**
  * Get key used for a match entry.
  */
 export function getMatchKey(
