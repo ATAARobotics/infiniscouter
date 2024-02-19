@@ -7,7 +7,7 @@ import { MatchPage } from "../components/entry_components";
 import { GetScoutName } from "../components/get_scout_name";
 import { LoadIndicator } from "../components/load_indicator";
 import { matchFieldsAtom, matchListAtom, scoutNameAtom } from "../data/atoms";
-import { useEntries } from "../data/entries";
+import { getMatchKey, useEntries } from "../data/entries";
 import { MatchEntry } from "../generated/MatchEntry";
 import { MatchEntryIdData } from "../generated/MatchEntryIdData";
 import { MatchInfo } from "../generated/MatchInfo";
@@ -25,7 +25,7 @@ export function MatchEntry() {
 
 	const [dataEntries, setEntry] = useEntries<MatchEntryIdData>(
 		scoutName,
-		matchId && teamId ? `match-${matchId}-${teamId}` : null,
+		matchId && teamId ? getMatchKey(matchId, teamId) : null,
 		(data) => ({
 			match_id: matchId?.toString() ?? "",
 			team_id: teamId?.toString() ?? "",

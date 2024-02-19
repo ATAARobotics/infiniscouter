@@ -7,7 +7,7 @@ import { MatchPage } from "../components/entry_components";
 import { GetScoutName } from "../components/get_scout_name";
 import { LoadIndicator } from "../components/load_indicator";
 import { driverFieldsAtom, matchListAtom, scoutNameAtom } from "../data/atoms";
-import { useEntries } from "../data/entries";
+import { getDriverKey, useEntries } from "../data/entries";
 import { DriverEntryIdData } from "../generated/DriverEntryIdData";
 import { MatchInfo } from "../generated/MatchInfo";
 
@@ -24,7 +24,7 @@ export function DriverEntry() {
 
 	const [dataEntries, setEntry] = useEntries<DriverEntryIdData>(
 		scoutName,
-		matchId && teamId ? `driver-${matchId}-${teamId}` : null,
+		matchId && teamId ? getDriverKey(matchId, teamId) : null,
 		(data) => ({
 			match_id: matchId?.toString() ?? "",
 			team_id: teamId?.toString() ?? "",

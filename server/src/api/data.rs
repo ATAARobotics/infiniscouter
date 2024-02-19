@@ -13,6 +13,15 @@ pub struct DriverEntryIdData {
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
+pub struct DriverEntryTimedId {
+	pub match_id: String,
+	pub team_id: String,
+	#[ts(type = "number")]
+	pub timestamp_ms: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct MatchEntryIdData {
 	pub match_id: String,
 	pub team_id: String,
@@ -21,9 +30,26 @@ pub struct MatchEntryIdData {
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
+pub struct MatchEntryTimedId {
+	pub match_id: String,
+	pub team_id: String,
+	#[ts(type = "number")]
+	pub timestamp_ms: u64,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct PitEntryIdData {
 	pub team_id: String,
 	pub data: MatchEntryData,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct PitEntryTimedId {
+	pub team_id: String,
+	#[ts(type = "number")]
+	pub timestamp_ms: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]

@@ -121,7 +121,7 @@ fn get_pie_chart(data_points: &[&MatchEntryValue], option_values: &[(&str, f32)]
 		.group_by(|a, b| a == b)
 		.map(|group| (group[0].to_string(), group.len() as f32))
 		.collect();
-	let sort_value = if actual_values.len() > 0 {
+	let sort_value = if !actual_values.is_empty() {
 		option_values
 			.iter()
 			.map(|(option, value)| *value * options_map.get(*option).unwrap_or(&0.0))

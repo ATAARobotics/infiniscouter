@@ -6,7 +6,7 @@ import { MatchPage } from "../components/entry_components";
 import { GetScoutName } from "../components/get_scout_name";
 import { LoadIndicator } from "../components/load_indicator";
 import { matchListAtom, pitFieldsAtom, scoutNameAtom } from "../data/atoms";
-import { useEntries } from "../data/entries";
+import { getPitKey, useEntries } from "../data/entries";
 import { PitEntryIdData } from "../generated/PitEntryIdData";
 
 /**
@@ -21,7 +21,7 @@ export function PitEntry() {
 
 	const [dataEntries, setEntry] = useEntries<PitEntryIdData>(
 		scoutName,
-		teamId ? `team-${teamId}` : null,
+		teamId ? getPitKey(teamId) : null,
 		(data) => ({
 			team_id: teamId?.toString() ?? "",
 			data,

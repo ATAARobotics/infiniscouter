@@ -1,9 +1,12 @@
 pub mod data;
 
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use crate::analysis::{self, SingleTeamInfo, TeamInfoList};
-use crate::api::data::{DriverEntryIdData, MatchEntryData};
+use crate::api::data::{
+	DriverEntryIdData, DriverEntryTimedId, MatchEntryData, MatchEntryTimedId, PitEntryTimedId,
+};
 use crate::config::match_entry::MatchEntryFields;
 use crate::config::{ConfigManager, GameConfig, TeamConfig};
 use crate::data_validation::validate_match;
@@ -83,6 +86,35 @@ impl Api {
 		let fields = &self.config.get_current_game_config().match_entry_fields;
 		Ok(Json(data.map(|data| validate_match(data, fields))))
 	}
+	/// Get filtered scouting data. All matches that are not specified as known
+	/// or any that are newer than the known timestamp are returned.
+	#[oai(path = "/match_entry/data/filtered", method = "post")]
+	pub async fn match_entry_filtered_data(
+		&self,
+		data: Json<Vec<MatchEntryTimedId>>,
+	) -> poem::Result<Json<Vec<MatchEntryIdData>>> {
+		let known_timestamps = data
+			.0
+			.into_iter()
+			.map(|timed_id| ((timed_id.match_id, timed_id.team_id), timed_id.timestamp_ms))
+			.collect::<HashMap<_, _>>();
+		let data = self
+			.database
+			.get_all_match_entries(
+				self.config.get_server_config().current_year,
+				&self.config.get_server_config().current_event,
+			)
+			.into_iter()
+			.filter(|entry| {
+				match known_timestamps.get(&(entry.match_id.to_string(), entry.team_id.to_string()))
+				{
+					None => true,
+					Some(known_timestamp) => entry.data.timestamp_ms > *known_timestamp,
+				}
+			})
+			.collect::<Vec<_>>();
+		Ok(Json(data))
+	}
 	fn match_entry_set_data_inner(
 		&self,
 		match_id: &str,
@@ -152,6 +184,35 @@ impl Api {
 		let fields = &self.config.get_current_game_config().driver_entry_fields;
 		Ok(Json(data.map(|data| validate_match(data, fields))))
 	}
+	/// Get filtered driver data. All matches that are not specified as known
+	/// or any that are newer than the known timestamp are returned.
+	#[oai(path = "/driver_entry/data/filtered", method = "post")]
+	pub async fn driver_entry_filtered_data(
+		&self,
+		data: Json<Vec<DriverEntryTimedId>>,
+	) -> poem::Result<Json<Vec<DriverEntryIdData>>> {
+		let known_timestamps = data
+			.0
+			.into_iter()
+			.map(|timed_id| ((timed_id.match_id, timed_id.team_id), timed_id.timestamp_ms))
+			.collect::<HashMap<_, _>>();
+		let data = self
+			.database
+			.get_all_driver_entries(
+				self.config.get_server_config().current_year,
+				&self.config.get_server_config().current_event,
+			)
+			.into_iter()
+			.filter(|entry| {
+				match known_timestamps.get(&(entry.match_id.to_string(), entry.team_id.to_string()))
+				{
+					None => true,
+					Some(known_timestamp) => entry.data.timestamp_ms > *known_timestamp,
+				}
+			})
+			.collect::<Vec<_>>();
+		Ok(Json(data))
+	}
 	fn driver_entry_set_data_inner(
 		&self,
 		match_id: &str,
@@ -218,6 +279,42 @@ impl Api {
 			.map_err(|e| poem::Error::new(e, StatusCode::INTERNAL_SERVER_ERROR))?;
 		let fields = &self.config.get_current_game_config().pit_entry_fields;
 		Ok(Json(data.map(|data| validate_match(data, fields))))
+	}
+	/// Get filtered driver data. All matches that are not specified as known
+	/// or any that are newer than the known timestamp are returned.
+	#[oai(path = "/pit_entry/data/filtered", method = "post")]
+	pub async fn pit_entry_filtered_data(
+		&self,
+		data: Json<Vec<PitEntryTimedId>>,
+	) -> poem::Result<Json<Vec<PitEntryIdData>>> {
+		let known_timestamps = data
+			.0
+			.into_iter()
+			.map(|timed_id| (timed_id.team_id, timed_id.timestamp_ms))
+			.collect::<HashMap<_, _>>();
+		let data = self
+			.database
+			.get_all_pit_entries(
+				self.config.get_server_config().current_year,
+				&self.config.get_server_config().current_event,
+			)
+			.into_iter()
+			.filter_map(|(team, data)| {
+				let unknown = match known_timestamps.get(&team) {
+					None => true,
+					Some(known_timestamp) => data.timestamp_ms > *known_timestamp,
+				};
+				if unknown {
+					Some(PitEntryIdData {
+						team_id: team,
+						data,
+					})
+				} else {
+					None
+				}
+			})
+			.collect::<Vec<_>>();
+		Ok(Json(data))
 	}
 	fn pit_entry_set_data_inner(&self, team: &str, data: MatchEntryData) -> poem::Result<()> {
 		let fields = &self.config.get_current_game_config().pit_entry_fields;
