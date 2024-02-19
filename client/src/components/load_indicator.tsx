@@ -5,16 +5,14 @@ import { CircularProgress } from "@mui/joy";
  */
 export function LoadIndicator() {
 	return (
-		<div>
+		<div style={{ padding: "10px" }}>
 			<CircularProgress
-				color="danger"
+				color="neutral"
 				determinate={false}
-				size="sm"
-				value={25}
+				size="lg"
 				variant="solid"
-				thickness={7}
+				thickness={18}
 			/>
-			{"  "}Loading...
 		</div>
 	);
 }

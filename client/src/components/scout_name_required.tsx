@@ -3,9 +3,9 @@ import { useLocation } from "preact-iso";
 import { useEffect } from "react";
 
 /**
- * A simple component to use when we need a scout name.	.
+ * A simple component to use to indicate to the user that a scout name is required.
  */
-export function GetScoutName() {
+export function ScoutNameRequired() {
 	const { route } = useLocation();
 	useEffect(() => {
 		const timeoutId = setTimeout(() => route("/config"), 5000);

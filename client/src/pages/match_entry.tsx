@@ -4,8 +4,11 @@ import { ChangeEvent } from "preact/compat";
 import { useState } from "preact/hooks";
 
 import { MatchPage } from "../components/entry_components";
-import { GetScoutName } from "../components/get_scout_name";
 import { LoadIndicator } from "../components/load_indicator";
+import {
+	ScoutNameRequired,
+} from "../components/scout_name_required";
+import { SyncRequired } from "../components/sync_required";
 import { matchFieldsAtom, matchListAtom, scoutNameAtom } from "../data/atoms";
 import { getMatchKey, useEntries } from "../data/entries";
 import { MatchEntry } from "../generated/MatchEntry";
@@ -20,7 +23,7 @@ export function MatchEntry() {
 	const [teamId, setTeamId] = useState<number>();
 
 	const scoutName = useAtomValue(scoutNameAtom);
-	const matchTeams = useAtomValue(matchListAtom);
+	const matchList = useAtomValue(matchListAtom);
 	const fields = useAtomValue(matchFieldsAtom);
 
 	const [dataEntries, setEntry] = useEntries<MatchEntryIdData>(
@@ -34,15 +37,15 @@ export function MatchEntry() {
 	);
 
 	if (!scoutName) {
-		return <GetScoutName></GetScoutName>;
+		return <ScoutNameRequired></ScoutNameRequired>;
 	}
-	if (!matchTeams) {
-		return <LoadIndicator></LoadIndicator>;
+	if (!matchList) {
+		return <SyncRequired></SyncRequired>;
 	}
 
 	const teamsForMatch: MatchInfo | undefined | 0 =
 		matchId !== undefined
-			? matchTeams.match_infos.filter(
+			? matchList.match_infos.filter(
 					(match) =>
 						match.id.match_type === "qualification" &&
 						match.id.num === matchId,

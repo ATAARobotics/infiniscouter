@@ -43,14 +43,10 @@ export function SyncButton() {
 	const setDriverFields = useSetAtom(driverFieldsAtom);
 	const setPitFields = useSetAtom(pitFieldsAtom);
 
+	// On load ensure we have all of the fields.
 	useEffect(() => {
 		const controller = new AbortController();
 
-		fetch("/api/event/matches", { signal: controller.signal })
-			.then((matchesResponse) => matchesResponse.json())
-			.then((matchList) => {
-				setMatchList(matchList);
-			});
 		fetch("/api/driver_entry/fields", { signal: controller.signal })
 			.then((driverFieldsResponse) => driverFieldsResponse.json())
 			.then((driverFields) => {
@@ -71,7 +67,8 @@ export function SyncButton() {
 	}, []);
 
 	/**
-	 * Sync data by loading event and game info from the server, sending local data, and fetching remote data.
+	 * Sync data by loading the match list, saving all new entries to the
+	 * server and then loading all any entries that we do not have locally.
 	 */
 	async function doSync() {
 		if (loadingState === "saving") {
@@ -84,17 +81,22 @@ export function SyncButton() {
 		const matchesToSave = matchArray.filter(
 			(entry) => entry.data.timestamp_ms > lastMatchSave,
 		);
-		addImageData(matchesToSave);
 		if (matchesToSave.length > 0) {
-			await fetch("/api/match_entry/data/all", {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(matchesToSave),
-			}).then((response) => {
-				if (response.ok) {
-					setLastMatchSave(matchSaveTime);
-				}
-			});
+			await addImageData(matchesToSave)
+				.then(() =>
+					fetch("/api/match_entry/data/all", {
+						method: "PUT",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify(matchesToSave),
+					}),
+				)
+				.then((response) => {
+					if (response.ok) {
+						setLastMatchSave(matchSaveTime);
+					}
+				});
+		} else {
+			setLastMatchSave(matchSaveTime);
 		}
 
 		const pitSaveTime = Date.now();
@@ -102,17 +104,22 @@ export function SyncButton() {
 		const pitEntriesToSave = pitArray.filter(
 			(entry) => entry.data.timestamp_ms > lastPitSave,
 		);
-		addImageData(pitEntriesToSave);
 		if (pitEntriesToSave.length > 0) {
-			await fetch("/api/pit_entry/data/all", {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(pitEntriesToSave),
-			}).then((response) => {
-				if (response.ok) {
-					setLastPitSave(pitSaveTime);
-				}
-			});
+			await addImageData(pitEntriesToSave)
+				.then(() =>
+					fetch("/api/pit_entry/data/all", {
+						method: "PUT",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify(pitEntriesToSave),
+					}),
+				)
+				.then((response) => {
+					if (response.ok) {
+						setLastPitSave(pitSaveTime);
+					}
+				});
+		} else {
+			setLastPitSave(pitSaveTime);
 		}
 
 		const driverSaveTime = Date.now();
@@ -120,17 +127,22 @@ export function SyncButton() {
 		const driverEntriesToSave = driverArray.filter(
 			(entry) => entry.data.timestamp_ms > lastDriverSave,
 		);
-		addImageData(driverEntriesToSave);
 		if (driverEntriesToSave.length > 0) {
-			await fetch("/api/driver_entry/data/all", {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(driverEntriesToSave),
-			}).then((response) => {
-				if (response.ok) {
-					setLastDriverSave(driverSaveTime);
-				}
-			});
+			await addImageData(driverEntriesToSave)
+				.then(() =>
+					fetch("/api/driver_entry/data/all", {
+						method: "PUT",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify(driverEntriesToSave),
+					}),
+				)
+				.then((response) => {
+					if (response.ok) {
+						setLastDriverSave(driverSaveTime);
+					}
+				});
+		} else {
+			setLastDriverSave(driverSaveTime);
 		}
 
 		const knownMatchEntries = matchArray.map<MatchEntryTimedId>((entry) => ({
@@ -185,6 +197,12 @@ export function SyncButton() {
 				for (const driver_entry of newDriveres) {
 					saveDriverEntry(driver_entry);
 				}
+			});
+
+		await fetch("/api/event/matches")
+			.then((matchesResponse) => matchesResponse.json())
+			.then((matchList) => {
+				setMatchList(matchList);
 			});
 
 		setLoadingState("saved");
