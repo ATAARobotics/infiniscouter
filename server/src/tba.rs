@@ -25,6 +25,8 @@ pub struct Tba {
 pub struct EventInfo {
 	pub match_infos: Vec<MatchInfo>,
 	pub team_infos: HashMap<u32, TeamInfo>,
+	pub event: String,
+	pub year: u32,
 }
 
 impl EventInfo {
@@ -33,6 +35,7 @@ impl EventInfo {
 		team_infos: Vec<RawTbaTeam>,
 		client: &Client,
 		year: u32,
+		event: &str,
 	) -> EventInfo {
 		let team_infos: HashMap<_, _> =
 			future::join_all(team_infos.into_iter().map(|team_info| async move {
@@ -76,6 +79,8 @@ impl EventInfo {
 		EventInfo {
 			match_infos,
 			team_infos,
+			event: event.to_string(),
+			year,
 		}
 	}
 }
@@ -92,7 +97,7 @@ impl Tba {
 				.build()?,
 		})
 	}
-	pub async fn get_event(&self, event: &str) -> Option<Arc<EventInfo>> {
+	pub async fn get_event(&self, year: u32, event: &str) -> Option<Arc<EventInfo>> {
 		Some(
 			match self.event_cache.lock().await.entry(event.to_string()) {
 				Entry::Occupied(entry) => entry.into_mut(),
@@ -110,7 +115,7 @@ impl Tba {
 						.ok()?;
 					teams.retain(|t| !(9990..=9999).contains(&t.team_number));
 					EventInfo::new(
-						self.client // TODO: Use the right event
+						self.client
 							.get(format!(
 								"https://www.thebluealliance.com/api/v3/event/{event}/matches"
 							))
@@ -122,7 +127,8 @@ impl Tba {
 							.ok()?,
 						teams,
 						&self.client,
-						event[0..4].parse::<u32>().unwrap(), // TODO: Pass year to this function instead
+						year,
+						event,
 					)
 					.await
 				})),

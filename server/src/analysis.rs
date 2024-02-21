@@ -570,7 +570,10 @@ pub async fn single_team(
 		database.get_all_match_entries(team_config.current_year, &team_config.current_event);
 	let driver_entries =
 		database.get_all_driver_entries(team_config.current_year, &team_config.current_event);
-	let tba_data = tba.get_event(&team_config.current_event).await.unwrap();
+	let tba_data = tba
+		.get_event(team_config.current_year, &team_config.current_event)
+		.await
+		.unwrap();
 	SingleTeamInfo {
 		team_number: team,
 		team_name: tba_data.team_infos[&team].name.clone(),
@@ -622,7 +625,10 @@ pub async fn list(
 		database.get_all_driver_entries(team_config.current_year, &team_config.current_event);
 	let pit_entries =
 		database.get_all_pit_entries(team_config.current_year, &team_config.current_event);
-	let tba_data = tba.get_event(&team_config.current_event).await.unwrap();
+	let tba_data = tba
+		.get_event(team_config.current_year, &team_config.current_event)
+		.await
+		.unwrap();
 	let tba_teams = future::join_all(
 		tba_data
 			.team_infos

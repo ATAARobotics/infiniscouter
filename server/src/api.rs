@@ -349,12 +349,16 @@ impl Api {
 		}
 		Ok(())
 	}
+
 	/// Get a list of all matches for the current event (as well as any teams involved)
 	#[oai(path = "/event/matches", method = "get")]
 	pub async fn event_list_matches(&self) -> Json<Option<Arc<EventInfo>>> {
 		Json(
 			self.tba
-				.get_event(&self.config.get_server_config().current_event)
+				.get_event(
+					self.config.get_server_config().current_year,
+					&self.config.get_server_config().current_event,
+				)
 				.await,
 		)
 	}
