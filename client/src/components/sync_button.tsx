@@ -43,38 +43,32 @@ export function SyncButton() {
 	const setDriverFields = useSetAtom(driverFieldsAtom);
 	const setPitFields = useSetAtom(pitFieldsAtom);
 
-	// On load ensure we have all of the fields.
-	useEffect(() => {
-		const controller = new AbortController();
-
-		fetch("/api/driver_entry/fields", { signal: controller.signal })
-			.then((driverFieldsResponse) => driverFieldsResponse.json())
-			.then((driverFields) => {
-				setDriverFields(driverFields);
-			});
-		fetch("/api/match_entry/fields", { signal: controller.signal })
-			.then((matchFieldsResponse) => matchFieldsResponse.json())
-			.then((matchFields) => {
-				setMatchFields(matchFields);
-			});
-		fetch("/api/pit_entry/fields", { signal: controller.signal })
-			.then((pitFieldsResponse) => pitFieldsResponse.json())
-			.then((pitFields) => {
-				setPitFields(pitFields);
-			});
-
-		return () => controller.abort();
-	}, []);
-
 	/**
-	 * Sync data by loading the match list, saving all new entries to the
-	 * server and then loading all any entries that we do not have locally.
+	 * Sync data by loading the field lists, saving all new entries to the
+	 * server, loading all any entries that we do not have locally and then
+	 * getting the latest match list.
 	 */
 	async function doSync() {
 		if (loadingState === "saving") {
 			return;
 		}
 		setLoadingState("saving");
+
+		await fetch("/api/driver_entry/fields")
+			.then((driverFieldsResponse) => driverFieldsResponse.json())
+			.then((driverFields) => {
+				setDriverFields(driverFields);
+			});
+		await fetch("/api/match_entry/fields")
+			.then((matchFieldsResponse) => matchFieldsResponse.json())
+			.then((matchFields) => {
+				setMatchFields(matchFields);
+			});
+		await fetch("/api/pit_entry/fields")
+			.then((pitFieldsResponse) => pitFieldsResponse.json())
+			.then((pitFields) => {
+				setPitFields(pitFields);
+			});
 
 		const matchSaveTime = Date.now();
 		const matchArray = getAllMatchEntries();
