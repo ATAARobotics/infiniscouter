@@ -464,21 +464,30 @@ fn table_labels(config: &GameConfigs) -> Vec<NameAndSource> {
 				if metric.metric.starts_with(SB_PREFIX) {
 					NameAndSource {
 						name: match metric.metric.trim_start_matches(SB_PREFIX) {
-							"wlt-ratio" => "W/L/T",
-							"rps" => "Ranking Points",
-							"points" => "Total Points",
-							"auto-points" => "Auto Points",
-							"teleop-points" => "Teleop Points",
-							"endgame-points" => "Endgame Points",
-							"wins" => "Wins",
-							"losses" => "Losses",
-							"ties" => "Ties",
-							"games" => "Games",
-							"rp1" => "RP 1",
-							"rp2" => "RP 2",
-							_ => "Unknown Statbotics",
-						}
-						.to_string(),
+							"wlt-ratio" => "W/L/T".to_string(),
+							"rps" => "Ranking Points".to_string(),
+							"points" => "Total Points".to_string(),
+							"auto-points" => "Auto Points".to_string(),
+							"teleop-points" => "Teleop Points".to_string(),
+							"endgame-points" => "Endgame Points".to_string(),
+							"wins" => "Wins".to_string(),
+							"losses" => "Losses".to_string(),
+							"ties" => "Ties".to_string(),
+							"games" => "Games".to_string(),
+							"rp-1" => config
+								.game_config
+								.ranking_points
+								.first()
+								.cloned()
+								.unwrap_or("RP 1".to_string()),
+							"rp-2" => config
+								.game_config
+								.ranking_points
+								.get(1)
+								.cloned()
+								.unwrap_or("RP 2".to_string()),
+							_ => "Unknown Statbotics".to_string(),
+						},
 						source: DataSource::Statbotics,
 					}
 				} else if let Some(title) = config
