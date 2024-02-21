@@ -4,7 +4,7 @@
 3. [x] Finish Pit & Driver Page - Jason - Today
 4. [ ] Make pre-match page - Jason - Probably not today
 5. [x] Fix yes/no boolean things - Jason - tomorrow
-6. [ ] Send zeros for pie charts and don't average in "Nothing"
+6. [x] Send zeros for pie charts and don't average in "Nothing"
 7. [ ] Organize single team analysis page
 8. [ ] Send notes to ChatGPT
 9. [x] Fix counter double click
@@ -20,3 +20,4 @@
 19. [x] Update match scouting for did not show
 20. [ ] Analysis client pinning rows and columns
 21. [x] Only allow pit/match as combo
+22. [ ] Refresh TBA data periodically
