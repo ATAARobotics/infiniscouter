@@ -47,14 +47,14 @@ export function TeamInfo(props: TeamInfoProps) {
 			</Card>
 			{data !== undefined ? (
 				Object.entries(data.data)
-					.filter((entry) => entry[1].type !== "team_name")
+					.filter((entry) => entry[1].entry.type !== "team_name")
 					.map((entry) => {
 						return (
 							<Card sx={{ width: 320 }}>
 								<Typography level="title-lg">{entry[0]}</Typography>
 								<DataValue
 									listView={false}
-									value={entry[1]}
+									value={entry[1].entry}
 								></DataValue>
 							</Card>
 						);

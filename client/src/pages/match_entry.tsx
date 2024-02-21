@@ -1,4 +1,13 @@
-import { Box, Button, Input, Radio, RadioGroup, Stack, ToggleButtonGroup, Typography } from "@mui/joy";
+import {
+	Box,
+	Button,
+	Input,
+	Radio,
+	RadioGroup,
+	Stack,
+	ToggleButtonGroup,
+	Typography,
+} from "@mui/joy";
 import { useAtomValue } from "jotai/react";
 import { ChangeEvent } from "preact/compat";
 import { useState } from "preact/hooks";
@@ -44,10 +53,10 @@ export function MatchEntry() {
 	const teamsForMatch: MatchInfo | undefined | 0 =
 		matchId !== undefined
 			? matchList.match_infos.filter(
-				(match) =>
-					match.id.match_type === "qualification" &&
-					match.id.num === matchId,
-			)[0]
+					(match) =>
+						match.id.match_type === "qualification" &&
+						match.id.num === matchId,
+			  )[0]
 			: undefined;
 
 	return (
@@ -79,17 +88,32 @@ export function MatchEntry() {
 						}
 						value={teamId ?? null}
 					>
-						<Stack direction={{ xs: "column", md: "row" }} sx={{ border: "none !important" }}>
+						<Stack
+							direction={{ xs: "column", md: "row" }}
+							sx={{ border: "none !important" }}
+						>
 							<Stack direction="row">
-								<Typography level="h2" color="danger" marginX="0.5em">RED</Typography>
+								<Typography level="h2" color="danger" marginX="0.5em">
+									RED
+								</Typography>
 								{teamsForMatch?.teams_red.map((team) => (
-									<Button value={team} color="danger" label={team.toString()}>{team.toString()}</Button>
+									<Button
+										value={team}
+										color="danger"
+										label={team.toString()}
+									>
+										{team.toString()}
+									</Button>
 								))}
 							</Stack>
 							<Stack direction="row">
-								<Typography level="h2" color="primary" marginX="0.5em">BLUE</Typography>
+								<Typography level="h2" color="primary" marginX="0.5em">
+									BLUE
+								</Typography>
 								{teamsForMatch?.teams_blue.map((team) => (
-									<Button value={team} color="primary">{team.toString()}</Button>
+									<Button value={team} color="primary">
+										{team.toString()}
+									</Button>
 								))}
 							</Stack>
 						</Stack>

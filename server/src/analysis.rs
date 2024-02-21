@@ -408,7 +408,11 @@ fn single_team_impl(
 										.unwrap_or_default() as f32
 								})
 								.sum();
-							TeamInfoEntry::MultiText(MultiTextEntry { strings, sentiment, sort_value: sentiment })
+							TeamInfoEntry::MultiText(MultiTextEntry {
+								strings,
+								sentiment,
+								sort_value: sentiment,
+							})
 						}
 						Some(MatchEntryType::Image(_)) => {
 							let images = data_points

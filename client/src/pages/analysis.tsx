@@ -90,7 +90,16 @@ export function Analysis() {
 					{table.heading
 						.filter((_, idx) => enabledColumns.includes(idx))
 						.map((title, idx) => (
-							<th aria-sort={sortBy === idx ? (sortReverse ? "descending" : "ascending") : undefined} style={{ width: "100px" }}>
+							<th
+								aria-sort={
+									sortBy === idx
+										? sortReverse
+											? "descending"
+											: "ascending"
+										: undefined
+								}
+								style={{ width: "100px" }}
+							>
 								<Typography
 									level="h3"
 									color={sortBy === idx ? "primary" : "neutral"}
@@ -101,38 +110,49 @@ export function Analysis() {
 											setSortReverse(true);
 										}
 										setSortBy(idx);
-									}}>
-									<Typography sx={{
-										display: "inline-block",
-										opacity: sortBy === idx ? 1 : 0,
-										transition: "0.2s",
-										transform: sortReverse ? "rotate(90deg)" : "rotate(-90deg)",
-									}}>➜</Typography>
+									}}
+								>
+									<Typography
+										sx={{
+											display: "inline-block",
+											opacity: sortBy === idx ? 1 : 0,
+											transition: "0.2s",
+											transform: sortReverse
+												? "rotate(90deg)"
+												: "rotate(-90deg)",
+										}}
+									>
+										➜
+									</Typography>
 									{title.name}
 								</Typography>
 							</th>
 						))}
 				</thead>
 				<tbody>
-					{table.list.sort((a, b) => {
-						const val = a.info[sortBy].sort_value - b.info[sortBy].sort_value;
-						return sortReverse ? -val : val;
-					}).map((row) => (
-						<tr style={{ height: "100px" }}>
-							{row.info
-								.map(
-									(val, idx) => [val, idx] as [TeamInfoEntry, number],
-								)
-								.filter((_, idx) => enabledColumns.includes(idx))
-								.map(([val, idx]) => (
-									<DataValue
-										listView={true}
-										value={val}
-										forceColorScheme={colours[idx] ?? 0}
-									/>
-								))}
-						</tr>
-					))}
+					{table.list
+						.sort((a, b) => {
+							const val =
+								a.info[sortBy].sort_value - b.info[sortBy].sort_value;
+							return sortReverse ? -val : val;
+						})
+						.map((row) => (
+							<tr style={{ height: "100px" }}>
+								{row.info
+									.map(
+										(val, idx) =>
+											[val, idx] as [TeamInfoEntry, number],
+									)
+									.filter((_, idx) => enabledColumns.includes(idx))
+									.map(([val, idx]) => (
+										<DataValue
+											listView={true}
+											value={val}
+											forceColorScheme={colours[idx] ?? 0}
+										/>
+									))}
+							</tr>
+						))}
 				</tbody>
 			</Table>
 		</Box>

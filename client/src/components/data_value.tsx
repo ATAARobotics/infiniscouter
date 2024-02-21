@@ -112,12 +112,9 @@ export function DataValue(props: DataValueProps) {
 			return (
 				<td>
 					<a href={`/team/${props.value.number}`}>
-						<Typography level="h2">
-							{props.value.name}
-						</Typography><br/>
-						<Typography level="h3">
-							({props.value.number})
-						</Typography>
+						<Typography level="h2">{props.value.name}</Typography>
+						<br />
+						<Typography level="h3">({props.value.number})</Typography>
 					</a>
 				</td>
 			);
@@ -146,10 +143,10 @@ export function DataValue(props: DataValueProps) {
 											.map((op) => op.value),
 										backgroundColor:
 											colorSchemes[
-											(props.forceColorScheme ??
-												Math.floor(
-													Math.random() * colorSchemes.length,
-												)) % colorSchemes.length
+												(props.forceColorScheme ??
+													Math.floor(
+														Math.random() * colorSchemes.length,
+													)) % colorSchemes.length
 											],
 									},
 								],
@@ -206,15 +203,17 @@ export function DataValue(props: DataValueProps) {
 												data: labelsAndWordCounts.map(
 													(lw) => lw[1],
 												),
-												color: `rgb(${Math.min(
-													Math.max(-props.value.sentiment, 0),
-													2,
-												) * 128
-													}, 128, ${Math.min(
+												color: `rgb(${
+													Math.min(
+														Math.max(-props.value.sentiment, 0),
+														2,
+													) * 128
+												}, 128, ${
+													Math.min(
 														Math.max(props.value.sentiment, 0),
 														2,
 													) * 128
-													})`,
+												})`,
 											},
 										],
 									}}
@@ -270,14 +269,27 @@ export function DataValue(props: DataValueProps) {
 			}
 		}
 		case "numeric": {
-			const mma = props.value.min_max_avg ?? { avg: props.value.number, min: props.value.number - 1, max: props.value.number + 1 };
+			const mma = props.value.min_max_avg ?? {
+				avg: props.value.number,
+				min: props.value.number - 1,
+				max: props.value.number + 1,
+			};
 			const spread = (mma.avg - mma.min) / 2 + (mma.max - mma.avg) / 2;
 			const goodness = (props.value.number - mma.avg) / spread;
-			return <td>
-				<Typography level="h1" style={{ color: `rgb(${Math.min(1 - goodness, 1) * 255}, ${Math.min(goodness + 1, 1) * 255}, ${(1 - Math.abs(goodness)) * 255})` }}>
-					{props.value.number.toFixed(2)}
-				</Typography>
-			</td>;
+			return (
+				<td>
+					<Typography
+						level="h1"
+						style={{
+							color: `rgb(${Math.min(1 - goodness, 1) * 255}, ${
+								Math.min(goodness + 1, 1) * 255
+							}, ${(1 - Math.abs(goodness)) * 255})`,
+						}}
+					>
+						{props.value.number.toFixed(2)}
+					</Typography>
+				</td>
+			);
 		}
 	}
 }
