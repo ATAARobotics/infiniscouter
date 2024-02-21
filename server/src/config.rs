@@ -61,15 +61,13 @@ pub struct CollectedMetric {
 #[serde(rename_all = "snake_case")]
 #[oai(rename_all = "snake_case")]
 pub enum CollectionOption {
-	/// Collect in the match and the pits, the default
+	/// Only collect in the match, the default
 	#[default]
-	MatchPit,
-	/// Only collect in the match
 	MatchOnly,
+	/// Collect in the match and the pits
+	MatchPit,
 	/// Only collect in the pits
 	PitOnly,
-	/// Collect in pits and from the drivers
-	PitDrive,
 	/// Only collect from the drivers
 	DriveOnly,
 	/// Not collected (for values gathered from the internet)
@@ -78,10 +76,7 @@ pub enum CollectionOption {
 
 impl CollectionOption {
 	pub fn collect_from_drive(&self) -> bool {
-		matches!(
-			self,
-			CollectionOption::PitDrive | CollectionOption::DriveOnly
-		)
+		matches!(self, CollectionOption::DriveOnly)
 	}
 	pub fn collect_in_match(&self) -> bool {
 		matches!(
@@ -90,10 +85,7 @@ impl CollectionOption {
 		)
 	}
 	pub fn collect_in_pit(&self) -> bool {
-		matches!(
-			self,
-			CollectionOption::PitOnly | CollectionOption::MatchPit | CollectionOption::PitDrive
-		)
+		matches!(self, CollectionOption::PitOnly | CollectionOption::MatchPit)
 	}
 }
 

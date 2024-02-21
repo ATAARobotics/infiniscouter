@@ -169,15 +169,20 @@ display:
       display: true
     - source: single
       metric: statbotics-auto-points
+      display: true
     - source: single
       metric: statbotics-teleop-points
+      display: true
     - source: single
       metric: statbotics-endgame-points
+      display: true
     - source: _YEAR_SPECIFIC
     - source: single
       metric: speed
+      display: true
     - source: single
       metric: stability
+      display: true
     - source: single
       metric: malfunction
       display: true
@@ -192,11 +197,11 @@ display:
     - source: single
       metric: drive-train
     - source: single
-      metric: robot-picture
-    - source: single
       metric: overpromised
+      display: true
     - source: single
       metric: teamwork
+      display: true
     - source: single
       metric: match-notes
     - source: single

@@ -5,7 +5,7 @@ categories:
     name: Auto
     metrics:
       moved:
-        name: Moved
+        name: Taxi
         description: Moved from the starting line in the auto period
         collect: match_only
         metric:
@@ -13,6 +13,7 @@ categories:
       auto-notes:
         name: Auto Notes
         description: Number of notes picked up in auto period
+        collect: match_pit
         metric:
           type: counter
           limit_range:
@@ -37,17 +38,20 @@ categories:
     metrics:
       teleop-amp:
         name: Teleop Amp
-        description: Scored in the amp
+        description: Scored in the amp in teleop
+        collect: match_pit
         metric:
           type: ability
       teleop-speaker:
         name: Teleop Speaker
-        description: Scored in the speaker
+        description: Scored in the speaker in teleop
+        collect: match_pit
         metric:
           type: ability
       note-pickup:
         name: Note Pickup
-        description: Can pick up notes from various sources
+        description: Can pick up notes from various sources?
+        collect: match_pit
         metric:
           type: enum
           options:
@@ -59,26 +63,35 @@ categories:
     metrics:
       climb:
         name: Climb
-        description: Can they climb
+        description: Can they climb?
+        collect: match_pit
         metric:
           type: ability
       trap:
         name: Trap
         description: Scored in the trap
+        collect: match_pit
         metric:
           type: ability
       harmony:
         name: Harmony
         description: Can climb with others
+        collect: match_pit
         metric:
           type: ability
           implies: [climb]
   team:
     name: Team
     metrics:
+      present:
+        name: Present
+        description: Was this team at the match?
+        collect: match_only
+        metric:
+          type: bool
       human-player:
         name: Human Player
-        description: Was this team's human player the active human player for this match
+        description: Was this team's human player the active human player for this match?
         collect: match_only
         metric:
           type: bool
@@ -91,6 +104,7 @@ display:
       metric: moved
     - source: single
       metric: auto-notes
+      display: true
     - source: single
       metric: auto-amp
     - source: single
@@ -101,14 +115,21 @@ display:
       metric: teleop-speaker
     - source: single
       metric: note-pickup
+      display: true
     - source: single
       metric: climb
+      display: true
     - source: single
       metric: trap
+      display: true
     - source: single
       metric: harmony
+      display: true
     - source: single
       metric: human-player
+    - source: single
+      metric: present
+      display: true
   pre_match:
     score: statbotics-points
     graph:

@@ -7,17 +7,20 @@ categories:
       taxi:
         name: Taxi
         description: Moved from the starting line in the auto period
+        collect: match_pit
         metric:
           type: ability
       auto-score:
-        name: Scoring
+        name: Auto Scoring
         description: Deposited balls in the auto period
+        collect: match_pit
         metric:
           type: ability
           implies: [taxi]
       auto-collect:
-        name: Collecting
+        name: Auto Collecting
         description: Gathered additional balls in the auto period
+        collect: match_pit
         metric:
           type: ability
           implies: [auto-score]
@@ -26,17 +29,20 @@ categories:
     metrics:
       low-goal:
         name: Low Goal
-        description: Scored in the low goal
+        collect: match_pit
+        description: Scored in the low goal in teleop
         metric:
           type: ability
       high-goal:
         name: High Goal
-        description: Scored in the high goal
+        collect: match_pit
+        description: Scored in the high goal in teleop
         metric:
           type: ability
       field-pickups:
         name: Field Pickups
-        description: Picked up a ball from the ground
+        collect: match_pit
+        description: Can they pick up a ball from the ground?
         metric:
           type: ability
   endgame:
@@ -44,6 +50,7 @@ categories:
     metrics:
       climb-height:
         name: Climb Height
+        collect: match_pit
         description: How high the robot climbed
         metric:
           type: enum
@@ -112,8 +119,6 @@ display:
     - source: single
       metric: test-multiline-text-field
     - source: single
-      metric: test-image
-    - source: single
       metric: taxi
     - source: single
       metric: auto-score
@@ -133,6 +138,7 @@ display:
       display: true
     - source: single
       metric: climb-time
+      display: true
   pre_match:
     score: statbotics-points
     graph:
