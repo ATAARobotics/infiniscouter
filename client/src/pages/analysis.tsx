@@ -23,7 +23,7 @@ export function Analysis() {
 				setTable(data2);
 				setEnabledColumns(data2.default_display);
 				setColours(
-					data2.names.map(() =>
+					data2.heading.map(() =>
 						Math.floor(Math.random() * 64 * 54 * 25 * 13 * 7),
 					),
 				);
@@ -46,7 +46,7 @@ export function Analysis() {
 					gap: "12px",
 				}}
 			>
-				{table.names.map((column, idx) => {
+				{table.heading.map((column, idx) => {
 					const checked = enabledColumns.includes(idx);
 					return (
 						<Chip
@@ -60,7 +60,7 @@ export function Analysis() {
 								color={checked ? "primary" : "neutral"}
 								disableIcon
 								overlay
-								label={column}
+								label={column.name}
 								checked={checked}
 								onchange={(ev: InputEvent) => {
 									setEnabledColumns(
@@ -83,10 +83,10 @@ export function Analysis() {
 				sx={{ width: "auto" }}
 			>
 				<thead>
-					{table.names
+					{table.heading
 						.filter((_, idx) => enabledColumns.includes(idx))
-						.map((title) => (
-							<th style={{ width: "150px" }}>{title}</th>
+						.map(title => (
+							<th style={{ width: "150px" }}>{title.name}</th>
 						))}
 				</thead>
 				<tbody>

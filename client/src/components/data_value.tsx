@@ -111,11 +111,11 @@ export function DataValue(props: DataValueProps) {
 		case "team_name":
 			return (
 				<td>
-					<p>
+					<h1>
 						<a href={`/team/${props.value.number}`}>
 							{props.value.name} ({props.value.number})
 						</a>
-					</p>
+					</h1>
 				</td>
 			);
 		case "text":
@@ -143,10 +143,10 @@ export function DataValue(props: DataValueProps) {
 											.map((op) => op.value),
 										backgroundColor:
 											colorSchemes[
-												(props.forceColorScheme ??
-													Math.floor(
-														Math.random() * colorSchemes.length,
-													)) % colorSchemes.length
+											(props.forceColorScheme ??
+												Math.floor(
+													Math.random() * colorSchemes.length,
+												)) % colorSchemes.length
 											],
 									},
 								],
@@ -203,17 +203,15 @@ export function DataValue(props: DataValueProps) {
 												data: labelsAndWordCounts.map(
 													(lw) => lw[1],
 												),
-												color: `rgb(${
-													Math.min(
-														Math.max(-props.value.sentiment, 0),
-														2,
-													) * 128
-												}, 128, ${
-													Math.min(
+												color: `rgb(${Math.min(
+													Math.max(-props.value.sentiment, 0),
+													2,
+												) * 128
+													}, 128, ${Math.min(
 														Math.max(props.value.sentiment, 0),
 														2,
 													) * 128
-												})`,
+													})`,
 											},
 										],
 									}}
@@ -267,6 +265,16 @@ export function DataValue(props: DataValueProps) {
 					</td>
 				);
 			}
+		}
+		case "numeric": {
+			const mma = props.value.min_max_avg ?? { avg: props.value.number, min: props.value.number - 1, max: props.value.number + 1 };
+			const spread = (mma.avg-mma.min)/2 + (mma.max-mma.avg)/2;
+			const goodness = (props.value.number-mma.avg)/spread;
+			return <td>
+				<h1 style={{color: `rgb(${Math.min(1-goodness, 1)*255}, ${Math.min(goodness+1, 1)*255}, ${(1-Math.abs(goodness))*255})`}}>
+					{props.value.number.toFixed(2)}
+				</h1>
+			</td>;
 		}
 	}
 }
