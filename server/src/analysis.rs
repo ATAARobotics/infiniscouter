@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use futures_util::future;
+use log::info;
 use poem_openapi::{Enum, Object, Union};
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
@@ -10,7 +11,7 @@ use crate::{
 	config::{match_entry::MatchEntryType, GameConfigs, SingleMetric, TeamConfig, TeamNameMetric},
 	database::Database,
 	statbotics::{StatboticsCache, StatboticsTeam},
-	tba::{EventInfo, Tba},
+	tba::{EventInfo, MatchId, Tba},
 };
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -100,6 +101,32 @@ pub struct SingleTeamInfo {
 pub struct NameAndSource {
 	name: String,
 	source: DataSource,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct MatchAnalysisInfo {
+	red_teams: Vec<MatchAnalysisTeamInfo>,
+	blue_teams: Vec<MatchAnalysisTeamInfo>,
+	other_data_names: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct MatchAnalysisTeamInfo {
+	team_number: u32,
+	team_name: String,
+	team_icon_uri: Option<String>,
+	expected_score: f32,
+	expected_score_parts: Vec<MatchAnalysisScorePart>,
+	other_data: Vec<TeamInfoEntry>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct MatchAnalysisScorePart {
+	name: String,
+	score: f32,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -672,4 +699,196 @@ pub async fn list(
 		}
 	}
 	til
+}
+
+pub fn get_match_analysis(
+	_tba: &Tba,
+	_statbotics: &StatboticsCache,
+	_database: &Database,
+	_team_config: &TeamConfig,
+	_config: &GameConfigs,
+	match_id: MatchId,
+) -> MatchAnalysisInfo {
+	info!("Loading fake data for match {match_id:?}");
+	MatchAnalysisInfo {
+		red_teams: vec![
+			MatchAnalysisTeamInfo {
+				team_number: 4421,
+				team_name: "FORGE Robotics".to_string(),
+				team_icon_uri: None,
+				expected_score: 50.0,
+				expected_score_parts: vec![
+					MatchAnalysisScorePart {
+						name: "Auto".to_string(),
+						score: 23.0,
+					},
+					MatchAnalysisScorePart {
+						name: "Teleop".to_string(),
+						score: 15.6,
+					},
+					MatchAnalysisScorePart {
+						name: "Endgame".to_string(),
+						score: 11.4,
+					},
+				],
+				other_data: vec![TeamInfoEntry::PieChart(PieChartEntry {
+					options: vec![PieChartOption {
+						label: "Yes".to_string(),
+						value: 2.0,
+					}],
+					sort_value: 1.0,
+				})],
+			},
+			MatchAnalysisTeamInfo {
+				team_number: 1234,
+				team_name: "Team A".to_string(),
+				team_icon_uri: None,
+				expected_score: 10.0,
+				expected_score_parts: vec![
+					MatchAnalysisScorePart {
+						name: "Auto".to_string(),
+						score: 0.5,
+					},
+					MatchAnalysisScorePart {
+						name: "Teleop".to_string(),
+						score: 8.9,
+					},
+					MatchAnalysisScorePart {
+						name: "Endgame".to_string(),
+						score: 0.6,
+					},
+				],
+				other_data: vec![TeamInfoEntry::PieChart(PieChartEntry {
+					options: vec![PieChartOption {
+						label: "No".to_string(),
+						value: 2.0,
+					}],
+					sort_value: 0.0,
+				})],
+			},
+			MatchAnalysisTeamInfo {
+				team_number: 5678,
+				team_name: "Team A".to_string(),
+				team_icon_uri: None,
+				expected_score: 18.0,
+				expected_score_parts: vec![
+					MatchAnalysisScorePart {
+						name: "Auto".to_string(),
+						score: 10.5,
+					},
+					MatchAnalysisScorePart {
+						name: "Teleop".to_string(),
+						score: 5.0,
+					},
+					MatchAnalysisScorePart {
+						name: "Endgame".to_string(),
+						score: 2.5,
+					},
+				],
+				other_data: vec![TeamInfoEntry::PieChart(PieChartEntry {
+					options: vec![
+						PieChartOption {
+							label: "Yes".to_string(),
+							value: 1.0,
+						},
+						PieChartOption {
+							label: "No".to_string(),
+							value: 1.0,
+						},
+					],
+					sort_value: 0.5,
+				})],
+			},
+		],
+		blue_teams: vec![
+			MatchAnalysisTeamInfo {
+				team_number: 4421,
+				team_name: "FORGE Robotics".to_string(),
+				team_icon_uri: None,
+				expected_score: 50.0,
+				expected_score_parts: vec![
+					MatchAnalysisScorePart {
+						name: "Auto".to_string(),
+						score: 23.0,
+					},
+					MatchAnalysisScorePart {
+						name: "Teleop".to_string(),
+						score: 15.6,
+					},
+					MatchAnalysisScorePart {
+						name: "Endgame".to_string(),
+						score: 11.4,
+					},
+				],
+				other_data: vec![TeamInfoEntry::PieChart(PieChartEntry {
+					options: vec![PieChartOption {
+						label: "Yes".to_string(),
+						value: 2.0,
+					}],
+					sort_value: 1.0,
+				})],
+			},
+			MatchAnalysisTeamInfo {
+				team_number: 1234,
+				team_name: "Team A".to_string(),
+				team_icon_uri: None,
+				expected_score: 10.0,
+				expected_score_parts: vec![
+					MatchAnalysisScorePart {
+						name: "Auto".to_string(),
+						score: 0.5,
+					},
+					MatchAnalysisScorePart {
+						name: "Teleop".to_string(),
+						score: 8.9,
+					},
+					MatchAnalysisScorePart {
+						name: "Endgame".to_string(),
+						score: 0.6,
+					},
+				],
+				other_data: vec![TeamInfoEntry::PieChart(PieChartEntry {
+					options: vec![PieChartOption {
+						label: "No".to_string(),
+						value: 2.0,
+					}],
+					sort_value: 0.0,
+				})],
+			},
+			MatchAnalysisTeamInfo {
+				team_number: 5678,
+				team_name: "Team A".to_string(),
+				team_icon_uri: None,
+				expected_score: 18.0,
+				expected_score_parts: vec![
+					MatchAnalysisScorePart {
+						name: "Auto".to_string(),
+						score: 10.5,
+					},
+					MatchAnalysisScorePart {
+						name: "Teleop".to_string(),
+						score: 5.0,
+					},
+					MatchAnalysisScorePart {
+						name: "Endgame".to_string(),
+						score: 2.5,
+					},
+				],
+				other_data: vec![TeamInfoEntry::PieChart(PieChartEntry {
+					options: vec![
+						PieChartOption {
+							label: "Yes".to_string(),
+							value: 1.0,
+						},
+						PieChartOption {
+							label: "No".to_string(),
+							value: 1.0,
+						},
+					],
+					sort_value: 0.5,
+				})],
+			},
+		],
+		other_data_names: vec!["Did it?".to_string()],
+	}
 }

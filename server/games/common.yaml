@@ -204,3 +204,12 @@ display:
     - source: single
       metric: driver-notes
   pre_match:
+    score: statbotics-points
+    graph:
+    - name: Auto
+      metric: statbotics-auto-points
+    - name: Teleop
+      metric: statbotics-teleop-points
+    - name: Endgame
+      metric: statbotics-endgame-points
+    metrics:

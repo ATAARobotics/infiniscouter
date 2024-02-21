@@ -134,4 +134,12 @@ display:
     - source: single
       metric: climb-time
   pre_match:
-    # TODO
+    score: statbotics-points
+    graph:
+    - name: Auto
+      metric: statbotics-auto-points
+    - name: Teleop
+      metric: statbotics-teleop-points
+    - name: Endgame
+      metric: statbotics-endgame-points
+    metrics:

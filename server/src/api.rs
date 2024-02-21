@@ -3,7 +3,7 @@ pub mod data;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::analysis::{self, SingleTeamInfo, TeamInfoList};
+use crate::analysis::{self, MatchAnalysisInfo, SingleTeamInfo, TeamInfoList};
 use crate::api::data::{
 	DriverEntryIdData, DriverEntryTimedId, MatchEntryData, MatchEntryTimedId, PitEntryTimedId,
 };
@@ -12,7 +12,7 @@ use crate::config::{ConfigManager, GameConfig, TeamConfig};
 use crate::data_validation::validate_match;
 use crate::database::Database;
 use crate::statbotics::StatboticsCache;
-use crate::tba::{EventInfo, Tba};
+use crate::tba::{EventInfo, MatchId, SetMatch, Tba};
 use poem::http::StatusCode;
 use poem_openapi::param::Path;
 use poem_openapi::payload::Json;
@@ -388,5 +388,46 @@ impl Api {
 			)
 			.await,
 		)
+	}
+	#[oai(path = "/analysis/match/:match_type/:num/:set", method = "get")]
+	pub async fn analysis_match(
+		&self,
+		match_type: Path<String>,
+		num: Path<u32>,
+		set: Path<u32>,
+	) -> poem::Result<Json<MatchAnalysisInfo>> {
+		let match_id = match match_type.as_str() {
+			"practice" => MatchId::Practice(SetMatch {
+				set: *set,
+				num: *num,
+			}),
+			"qualification" => MatchId::Qualification(SetMatch {
+				set: *set,
+				num: *num,
+			}),
+			"quarterfinal" => MatchId::Quarterfinal(SetMatch {
+				set: *set,
+				num: *num,
+			}),
+			"semifinal" => MatchId::Semifinal(SetMatch {
+				set: *set,
+				num: *num,
+			}),
+			"final" => MatchId::Final(SetMatch {
+				set: *set,
+				num: *num,
+			}),
+			_ => {
+				return Err(poem::Error::from_status(StatusCode::BAD_REQUEST));
+			}
+		};
+		Ok(Json(analysis::get_match_analysis(
+			&self.tba,
+			&self.statbotics,
+			&self.database,
+			self.config.get_server_config(),
+			self.config.get_current_game_config(),
+			match_id,
+		)))
 	}
 }

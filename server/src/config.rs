@@ -229,7 +229,24 @@ pub struct CommonYearSpecificMetrics {}
 /// Configuration for the pre-match display
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
-pub struct PreMatchDisplay {}
+pub struct PreMatchDisplay {
+	/// The metric to use for the score
+	score: String,
+	/// The definition of the score bar graph
+	graph: Vec<PreMatchGraphElement>,
+	/// The metrics to also show on the page
+	metrics: Vec<String>,
+}
+
+/// Configuration for the pre-match display
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct PreMatchGraphElement {
+	// The name of the bar graph component
+	name: String,
+	// The metric to use for the bar graph component
+	metric: String,
+}
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]

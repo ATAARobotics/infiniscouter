@@ -254,8 +254,8 @@ pub struct TeamInfo {
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct SetMatch {
-	set: u32,
-	num: u32,
+	pub set: u32,
+	pub num: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]
