@@ -73,10 +73,13 @@ pub enum MatchEntryType {
 	Timer(TimerMetric),
 }
 
-impl From<&CollectedMetricType> for MatchEntryType {
-	fn from(value: &CollectedMetricType) -> Self {
+impl MatchEntryType {
+	fn from(value: &CollectedMetricType, entry_type: EntryType) -> Self {
 		match value {
-			CollectedMetricType::Ability(a) => Self::Ability(a.clone()),
+			CollectedMetricType::Ability(a) => match entry_type {
+				EntryType::Pit => Self::Bool(BoolMetric {}),
+				EntryType::DriveTeam | EntryType::Match => Self::Ability(a.clone()),
+			},
 			CollectedMetricType::Enum(e) => Self::Enum(e.clone()),
 			CollectedMetricType::Bool(b) => Self::Bool(b.clone()),
 			CollectedMetricType::Timer(t) => Self::Timer(t.clone()),
@@ -137,7 +140,7 @@ impl MatchEntryFields {
 								MatchEntry {
 									title: metric.name.clone(),
 									description: metric.description.clone(),
-									entry: (&metric.metric).into(),
+									entry: MatchEntryType::from(&metric.metric, entry_type),
 								},
 							)
 						})
