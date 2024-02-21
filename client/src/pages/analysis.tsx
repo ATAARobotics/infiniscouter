@@ -1,4 +1,5 @@
-import { Box, Checkbox, Chip, Stack, Table } from "@mui/joy";
+import { Box, Checkbox, Chip, Stack, Table, Typography } from "@mui/joy";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { useEffect, useState } from "preact/compat";
 
 import { DataValue } from "../components/data_value";
@@ -14,6 +15,9 @@ export function Analysis() {
 	const [enabledColumns, setEnabledColumns] = useState<number[]>([0]);
 
 	const [colours, setColours] = useState<number[]>([]);
+
+	const [sortBy, setSortBy] = useState<number>(0);
+	const [sortReverse, setSortReverse] = useState<boolean>(false);
 
 	useEffect(() => {
 		// TODO: Fetch in the sync and store in local storage.
@@ -36,7 +40,7 @@ export function Analysis() {
 
 	return (
 		<Box>
-			<caption>Analysis</caption>
+			<Typography level="h1">Analysis</Typography>
 			<Stack
 				direction="row"
 				sx={{
@@ -85,12 +89,35 @@ export function Analysis() {
 				<thead>
 					{table.heading
 						.filter((_, idx) => enabledColumns.includes(idx))
-						.map(title => (
-							<th style={{ width: "150px" }}>{title.name}</th>
+						.map((title, idx) => (
+							<th aria-sort={sortBy === idx ? (sortReverse ? "descending" : "ascending") : undefined} style={{ width: "100px" }}>
+								<Typography
+									level="h3"
+									color={sortBy === idx ? "primary" : "neutral"}
+									onClick={() => {
+										if (sortBy === idx) {
+											setSortReverse(!sortReverse);
+										} else {
+											setSortReverse(true);
+										}
+										setSortBy(idx);
+									}}>
+									<Typography sx={{
+										display: "inline-block",
+										opacity: sortBy === idx ? 1 : 0,
+										transition: "0.2s",
+										transform: sortReverse ? "rotate(90deg)" : "rotate(-90deg)",
+									}}>➜</Typography>
+									{title.name}
+								</Typography>
+							</th>
 						))}
 				</thead>
 				<tbody>
-					{table.list.map((row) => (
+					{table.list.sort((a, b) => {
+						const val = a.info[sortBy].sort_value - b.info[sortBy].sort_value;
+						return sortReverse ? -val : val;
+					}).map((row) => (
 						<tr style={{ height: "100px" }}>
 							{row.info
 								.map(

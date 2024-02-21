@@ -1,4 +1,4 @@
-import { Box } from "@mui/joy";
+import { Box, Typography } from "@mui/joy";
 import {
 	ArcElement,
 	Chart as ChartJS,
@@ -111,11 +111,14 @@ export function DataValue(props: DataValueProps) {
 		case "team_name":
 			return (
 				<td>
-					<h1>
-						<a href={`/team/${props.value.number}`}>
-							{props.value.name} ({props.value.number})
-						</a>
-					</h1>
+					<a href={`/team/${props.value.number}`}>
+						<Typography level="h2">
+							{props.value.name}
+						</Typography><br/>
+						<Typography level="h3">
+							({props.value.number})
+						</Typography>
+					</a>
 				</td>
 			);
 		case "text":
@@ -268,12 +271,12 @@ export function DataValue(props: DataValueProps) {
 		}
 		case "numeric": {
 			const mma = props.value.min_max_avg ?? { avg: props.value.number, min: props.value.number - 1, max: props.value.number + 1 };
-			const spread = (mma.avg-mma.min)/2 + (mma.max-mma.avg)/2;
-			const goodness = (props.value.number-mma.avg)/spread;
+			const spread = (mma.avg - mma.min) / 2 + (mma.max - mma.avg) / 2;
+			const goodness = (props.value.number - mma.avg) / spread;
 			return <td>
-				<h1 style={{color: `rgb(${Math.min(1-goodness, 1)*255}, ${Math.min(goodness+1, 1)*255}, ${(1-Math.abs(goodness))*255})`}}>
+				<Typography level="h1" style={{ color: `rgb(${Math.min(1 - goodness, 1) * 255}, ${Math.min(goodness + 1, 1) * 255}, ${(1 - Math.abs(goodness)) * 255})` }}>
 					{props.value.number.toFixed(2)}
-				</h1>
+				</Typography>
 			</td>;
 		}
 	}

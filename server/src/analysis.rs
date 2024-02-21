@@ -52,19 +52,20 @@ pub struct TeamNameEntry {
 	pub number: u32,
 	pub name: String,
 	pub icon_uri: Option<String>,
+	pub sort_value: f32,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct TeamInfoTextEntry {
-	pub sort_text: String,
+	pub sort_value: f32,
 	pub display_text: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct TeamInfoNumericEntry {
-	pub sort_text: String,
+	pub sort_value: f32,
 	pub number: f32,
 	pub min_max_avg: Option<MinMaxAvg>,
 	pub is_time: bool,
@@ -128,12 +129,14 @@ pub struct PieChartOption {
 pub struct MultiTextEntry {
 	strings: Vec<String>,
 	sentiment: f32,
+	sort_value: f32,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct ImagesEntry {
 	images: Vec<ImageData>,
+	sort_value: f32,
 }
 
 const SB_PREFIX: &str = "statbotics-";
@@ -259,7 +262,7 @@ fn single_team_impl(
 								_ => panic!("That's not a statbotics thing bruh"),
 							};
 							TeamInfoEntry::Numeric(TeamInfoNumericEntry {
-								sort_text: format!("{value:09.4}"),
+								sort_value: value,
 								number: value,
 								min_max_avg: None,
 								is_time: false,
@@ -267,7 +270,7 @@ fn single_team_impl(
 						}
 					} else {
 						TeamInfoEntry::Text(TeamInfoTextEntry {
-							sort_text: "zzzzzz".to_string(),
+							sort_value: 9999999.0,
 							display_text: "ERROR: No statbotics for team".to_string(),
 						})
 					}
@@ -335,7 +338,7 @@ fn single_team_impl(
 						Some(MatchEntryType::Timer(_)) => {
 							if data_points.is_empty() {
 								TeamInfoEntry::Text(TeamInfoTextEntry {
-									sort_text: "".to_string(),
+									sort_value: 0.0,
 									display_text: "".to_string(),
 								})
 							} else {
@@ -351,7 +354,7 @@ fn single_team_impl(
 										})
 										.sum::<f32>() / data_points.len() as f32;
 								TeamInfoEntry::Numeric(TeamInfoNumericEntry {
-									sort_text: value.to_string(),
+									sort_value: value,
 									number: value,
 									min_max_avg: None,
 									is_time: true,
@@ -361,7 +364,7 @@ fn single_team_impl(
 						Some(MatchEntryType::Counter(_)) => {
 							if data_points.is_empty() {
 								TeamInfoEntry::Text(TeamInfoTextEntry {
-									sort_text: "".to_string(),
+									sort_value: 0.0,
 									display_text: "".to_string(),
 								})
 							} else {
@@ -376,7 +379,7 @@ fn single_team_impl(
 									})
 									.sum::<f32>() / data_points.len() as f32;
 								TeamInfoEntry::Numeric(TeamInfoNumericEntry {
-									sort_text: average.to_string(),
+									sort_value: average,
 									number: average,
 									min_max_avg: None,
 									is_time: false,
@@ -405,7 +408,7 @@ fn single_team_impl(
 										.unwrap_or_default() as f32
 								})
 								.sum();
-							TeamInfoEntry::MultiText(MultiTextEntry { strings, sentiment })
+							TeamInfoEntry::MultiText(MultiTextEntry { strings, sentiment, sort_value: sentiment })
 						}
 						Some(MatchEntryType::Image(_)) => {
 							let images = data_points
@@ -418,10 +421,13 @@ fn single_team_impl(
 									}
 								})
 								.collect::<Vec<_>>();
-							TeamInfoEntry::Images(ImagesEntry { images })
+							TeamInfoEntry::Images(ImagesEntry {
+								sort_value: -(images.len() as f32),
+								images,
+							})
 						}
 						_ => TeamInfoEntry::Text(TeamInfoTextEntry {
-							sort_text: "zzzzzz".to_string(),
+							sort_value: 999999.0,
 							display_text: format!("TODO: {}", metric.metric),
 						}),
 					}
@@ -431,10 +437,11 @@ fn single_team_impl(
 				number: tba_data.team_infos[&team].num,
 				name: tba_data.team_infos[&team].name.clone(),
 				icon_uri: tba_data.team_infos[&team].icon_uri.clone(),
+				sort_value: tba_data.team_infos[&team].num as f32,
 			}),
 			crate::config::DisplayColumn::CommonYearSpecific(_) => {
 				TeamInfoEntry::Text(TeamInfoTextEntry {
-					sort_text: "zzzzzzzz".to_string(),
+					sort_value: 999999.0,
 					display_text: "ERROR".to_string(),
 				})
 			}
@@ -577,7 +584,13 @@ pub async fn single_team(
 				.into_iter(),
 			)
 			.map(|(name_and_source, entry)| {
-				(name_and_source.name, InfoEntryWithSource { entry, source: name_and_source.source })
+				(
+					name_and_source.name,
+					InfoEntryWithSource {
+						entry,
+						source: name_and_source.source,
+					},
+				)
 			})
 			.collect(),
 	}
