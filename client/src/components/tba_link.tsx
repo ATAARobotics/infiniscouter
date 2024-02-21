@@ -1,8 +1,10 @@
+import { JSXInternal } from "preact/src/jsx";
 import { MatchId } from "../generated/MatchId";
 
 export interface TbaLinkProps {
 	event: string;
 	matchId: MatchId;
+	style?: JSXInternal.CSSProperties;
 }
 
 /**
@@ -24,11 +26,7 @@ export function TbaLink(props: TbaLinkProps) {
 	const linkUrl = `https://www.thebluealliance.com/match/${props.event}_${matchPart}`;
 
 	return (
-		<a
-			href={linkUrl}
-			title="The Blue Alliance"
-			style={{ position: "relative", bottom: "-4px" }}
-		>
+		<a href={linkUrl} title="The Blue Alliance" style={props.style}>
 			<svg
 				width="18px"
 				height="18px"

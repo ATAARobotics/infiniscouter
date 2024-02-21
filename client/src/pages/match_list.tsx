@@ -1,4 +1,4 @@
-import { Box, Table } from "@mui/joy";
+import { Box, Stack, Table } from "@mui/joy";
 import { useAtomValue } from "jotai/react";
 
 import { LoadIndicator } from "../components/load_indicator";
@@ -12,21 +12,21 @@ import { MatchInfo } from "../generated/MatchInfo";
 /**
  * Format a match ID for display.
  */
-function formatMatchId(matchId: MatchId): string {
+function formatMatchId(matchId: MatchId, year: number): string {
 	if (matchId.match_type === "practice") {
-		return `Practice ${matchId.num}`;
+		return `Practice\u00A0${matchId.num}`;
 	} else if (matchId.match_type === "qualification") {
-		return `Quals ${matchId.num}`;
+		return `Quals\u00A0${matchId.num}`;
 	} else if (matchId.match_type === "quarterfinal") {
-		return `Quarters ${matchId.num} ${
-			matchId.set > 1 ? ` (Round ${matchId.set}})` : ""
-		}`;
+		return year >= 2023
+			? `Quarters\u00A0${matchId.set}`
+			: `Quarters\u00A0${matchId.num} Match\u00A0${matchId.set}`;
 	} else if (matchId.match_type === "semifinal") {
-		return `Semis ${matchId.num} ${
-			matchId.set > 1 ? ` (Round ${matchId.set}})` : ""
-		}`;
+		return year >= 2023
+			? `Semis\u00A0${matchId.set}`
+			: `Semis\u00A0${matchId.num} Match\u00A0${matchId.set}`;
 	} else if (matchId.match_type === "final") {
-		return `Finals ${matchId.num}`;
+		return `Finals\u00A0${matchId.num}`;
 	}
 	return "";
 }
@@ -46,20 +46,29 @@ function TeamCell(props: TeamCellProps) {
 	const scout = isQuals ? getMatchScout(props.match.id.num, props.team) : null;
 	return (
 		<td>
-			{team_info ? (
-				<a href={`/team/${team_info.num}`} title={team_info.name}>
-					{team_info.num}
-				</a>
-			) : (
-				props.team
-			)}{" "}
-			{isQuals &&
-				props.match.result !== "Tbd" &&
-				(scout ? (
-					<a title={`Scouted by ${scout}`}>✅</a>
+			<Stack direction="row">
+				{team_info ? (
+					<a href={`/team/${team_info.num}`} title={team_info.name}>
+						{team_info.num}
+					</a>
 				) : (
-					<a title="No scouting data">❌</a>
-				))}
+					props.team
+				)}{" "}
+				{isQuals &&
+					props.match.result !== "Tbd" &&
+					(scout ? (
+						<a
+							title={`Scouted by ${scout}`}
+							style={{ marginLeft: "auto" }}
+						>
+							✅
+						</a>
+					) : (
+						<a title="No scouting data" style={{ marginLeft: "auto" }}>
+							❌
+						</a>
+					))}
+			</Stack>
 		</td>
 	);
 }
@@ -80,21 +89,29 @@ export function MatchList() {
 			<Table hoverRow stickyHeader borderAxis="y" stripe="even">
 				<thead>
 					<th style={{ width: "150px" }}>Match</th>
-					<th colSpan={4}>Red Alliance</th>
-					<th colSpan={4}>Blue Alliance</th>
+					<th colSpan={3}>Red Alliance</th>
+					<th style={{ width: "50px" }}></th>
+					<th colSpan={3}>Blue Alliance</th>
+					<th style={{ width: "50px" }}></th>
 					<th style={{ width: "100px" }}>Winner</th>
 				</thead>
 				<tbody>
 					{matchList.match_infos.map((match) => (
 						<tr>
 							<td>
-								<a
-									href={`/match/${match.id.match_type}/${match.id.num}/${match.id.set}`}
-									title="Match Preview"
-								>
-									{formatMatchId(match.id)}
-								</a>{" "}
-								<TbaLink matchId={match.id} event="2022bcvi"></TbaLink>
+								<Stack direction="row">
+									<a
+										href={`/match/${match.id.match_type}/${match.id.num}/${match.id.set}`}
+										title="Match Preview"
+									>
+										{formatMatchId(match.id, matchList.year)}
+									</a>{" "}
+									<TbaLink
+										matchId={match.id}
+										event={matchList.event}
+										style={{ marginLeft: "auto" }}
+									></TbaLink>
+								</Stack>
 							</td>
 							<TeamCell
 								team={match.teams_red[0]}
@@ -111,7 +128,7 @@ export function MatchList() {
 								match={match}
 								matchList={matchList}
 							></TeamCell>
-							<td>
+							<td style={{ textAlign: "right" }}>
 								{match.result === "Red" ? (
 									<b>{match.score_red}</b>
 								) : match.result === "Blue" ? (
@@ -135,7 +152,7 @@ export function MatchList() {
 								match={match}
 								matchList={matchList}
 							></TeamCell>
-							<td>
+							<td style={{ textAlign: "right" }}>
 								{match.result === "Blue" ? (
 									<b>{match.score_blue}</b>
 								) : match.result === "Red" ? (
