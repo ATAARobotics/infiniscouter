@@ -256,12 +256,14 @@ function CounterEntry(props: CounterEntryProps) {
 									value <= props.entry.limit_range.end_inclusive))
 						) {
 							props.setValue({ type: "counter", count: value });
+						} else {
+							props.setValue(undefined);
 						}
 					}}
 					value={
 						props.value && props.value.type === "counter"
 							? props.value.count
-							: props.entry.limit_range?.start ?? 0
+							: ""
 					}
 				/>
 			}

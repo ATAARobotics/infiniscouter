@@ -9,8 +9,6 @@ mod server;
 mod statbotics;
 mod tba;
 
-use std::process;
-
 use color_eyre::Result;
 use log::info;
 use simplelog::{Config, LevelFilter, SimpleLogger};
@@ -33,7 +31,7 @@ async fn main() -> Result<()> {
 		let mut signals = Signals::new([SIGINT, SIGTERM]).unwrap();
 		if signals.forever().next().is_some() {
 			info!("Shutting down due to SIGINT or SIGTERM");
-			process::exit(0);
+			std::process::exit(0);
 		}
 	});
 

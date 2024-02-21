@@ -7,7 +7,7 @@
 6. [ ] Send zeros for pie charts and don't average in "Nothing"
 7. [ ] Organize single team analysis page
 8. [ ] Send notes to ChatGPT
-9. [ ] Fix counter double click
+9. [x] Fix counter double click
 10. [ ] Show pit things as non-pie chart things
 11. [ ] Show some number values differently (max, distribution, etc)
 12. [ ] Scout scheduling
