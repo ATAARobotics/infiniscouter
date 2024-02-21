@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use futures_util::future;
-use poem_openapi::{Object, Union};
+use poem_openapi::{Enum, Object, Union};
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
@@ -17,8 +17,6 @@ use crate::{
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct TeamInfoDisplay {
 	pub info: Vec<TeamInfoEntry>,
-	pub pin_right_count: usize,
-	pub pin_left_count: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]
@@ -28,9 +26,24 @@ pub struct TeamInfoDisplay {
 pub enum TeamInfoEntry {
 	TeamName(TeamNameEntry),
 	Text(TeamInfoTextEntry),
+	Numeric(TeamInfoNumericEntry),
 	PieChart(PieChartEntry),
 	MultiText(MultiTextEntry),
 	Images(ImagesEntry),
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Enum, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+#[serde(rename_all = "camelCase")]
+#[oai(rename_all = "camelCase")]
+pub enum DataSource {
+	Match,
+	Pit,
+	Driver,
+	Statbotics,
+	Tba,
+	Unknown,
+	System,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -50,17 +63,48 @@ pub struct TeamInfoTextEntry {
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
+pub struct TeamInfoNumericEntry {
+	pub sort_text: String,
+	pub number: f32,
+	pub min_max_avg: Option<MinMaxAvg>,
+	pub is_time: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct MinMaxAvg {
+	min: f32,
+	max: f32,
+	avg: f32,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct InfoEntryWithSource {
+	entry: TeamInfoEntry,
+	source: DataSource,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct SingleTeamInfo {
 	team_number: u32,
 	team_name: String,
 	team_icon_uri: Option<String>,
-	data: HashMap<String, TeamInfoEntry>,
+	data: HashMap<String, InfoEntryWithSource>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct NameAndSource {
+	name: String,
+	source: DataSource,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct TeamInfoList {
-	names: Vec<String>,
+	heading: Vec<NameAndSource>,
 	list: Vec<TeamInfoDisplay>,
 	default_display: Vec<usize>,
 }
@@ -214,9 +258,11 @@ fn single_team_impl(
 								"rp-2" => sb.rp_2_epa_end,
 								_ => panic!("That's not a statbotics thing bruh"),
 							};
-							TeamInfoEntry::Text(TeamInfoTextEntry {
+							TeamInfoEntry::Numeric(TeamInfoNumericEntry {
 								sort_text: format!("{value:09.4}"),
-								display_text: format!("{value:.2}"),
+								number: value,
+								min_max_avg: None,
+								is_time: false,
 							})
 						}
 					} else {
@@ -304,9 +350,11 @@ fn single_team_impl(
 											}
 										})
 										.sum::<f32>() / data_points.len() as f32;
-								TeamInfoEntry::Text(TeamInfoTextEntry {
+								TeamInfoEntry::Numeric(TeamInfoNumericEntry {
 									sort_text: value.to_string(),
-									display_text: format!("{value:.1}s"),
+									number: value,
+									min_max_avg: None,
+									is_time: true,
 								})
 							}
 						}
@@ -327,9 +375,11 @@ fn single_team_impl(
 										}
 									})
 									.sum::<f32>() / data_points.len() as f32;
-								TeamInfoEntry::Text(TeamInfoTextEntry {
+								TeamInfoEntry::Numeric(TeamInfoNumericEntry {
 									sort_text: average.to_string(),
-									display_text: format!("{average:.1}"),
+									number: average,
+									min_max_avg: None,
+									is_time: false,
 								})
 							}
 						}
@@ -392,7 +442,7 @@ fn single_team_impl(
 		.collect()
 }
 
-fn table_labels(config: &GameConfigs) -> Vec<String> {
+fn table_labels(config: &GameConfigs) -> Vec<NameAndSource> {
 	config
 		.game_config
 		.display
@@ -401,22 +451,25 @@ fn table_labels(config: &GameConfigs) -> Vec<String> {
 		.map(|column| match column {
 			crate::config::DisplayColumn::Single(metric) => {
 				if metric.metric.starts_with(SB_PREFIX) {
-					match metric.metric.trim_start_matches(SB_PREFIX) {
-						"wlt-ratio" => "W/L/T",
-						"rps" => "Ranking Points",
-						"points" => "Total Points",
-						"auto-points" => "Auto Points",
-						"teleop-points" => "Teleop Points",
-						"endgame-points" => "Endgame Points",
-						"wins" => "Wins",
-						"losses" => "Losses",
-						"ties" => "Ties",
-						"games" => "Games",
-						"rp1" => "RP 1",
-						"rp2" => "RP 2",
-						_ => "Unknown Statbotics",
+					NameAndSource {
+						name: match metric.metric.trim_start_matches(SB_PREFIX) {
+							"wlt-ratio" => "W/L/T",
+							"rps" => "Ranking Points",
+							"points" => "Total Points",
+							"auto-points" => "Auto Points",
+							"teleop-points" => "Teleop Points",
+							"endgame-points" => "Endgame Points",
+							"wins" => "Wins",
+							"losses" => "Losses",
+							"ties" => "Ties",
+							"games" => "Games",
+							"rp1" => "RP 1",
+							"rp2" => "RP 2",
+							_ => "Unknown Statbotics",
+						}
+						.to_string(),
+						source: DataSource::Statbotics,
 					}
-					.to_string()
 				} else if let Some(title) = config
 					.match_entry_fields
 					.entries
@@ -424,7 +477,10 @@ fn table_labels(config: &GameConfigs) -> Vec<String> {
 					.as_ref()
 					.map(|m| &m.title)
 				{
-					title.clone()
+					NameAndSource {
+						name: title.clone(),
+						source: DataSource::Match,
+					}
 				} else if let Some(title) = config
 					.pit_entry_fields
 					.entries
@@ -432,7 +488,10 @@ fn table_labels(config: &GameConfigs) -> Vec<String> {
 					.as_ref()
 					.map(|m| &m.title)
 				{
-					title.clone()
+					NameAndSource {
+						name: title.clone(),
+						source: DataSource::Pit,
+					}
 				} else if let Some(title) = config
 					.driver_entry_fields
 					.entries
@@ -440,13 +499,25 @@ fn table_labels(config: &GameConfigs) -> Vec<String> {
 					.as_ref()
 					.map(|m| &m.title)
 				{
-					title.clone()
+					NameAndSource {
+						name: title.clone(),
+						source: DataSource::Driver,
+					}
 				} else {
-					metric.metric.clone()
+					NameAndSource {
+						name: metric.metric.clone(),
+						source: DataSource::Unknown,
+					}
 				}
 			}
-			crate::config::DisplayColumn::TeamName(_) => "Team Name".to_string(),
-			crate::config::DisplayColumn::CommonYearSpecific(_) => "INVALID".to_string(),
+			crate::config::DisplayColumn::TeamName(_) => NameAndSource {
+				name: "Team Name".to_string(),
+				source: DataSource::System,
+			},
+			crate::config::DisplayColumn::CommonYearSpecific(_) => NameAndSource {
+				name: "INVALID".to_string(),
+				source: DataSource::System,
+			},
 		})
 		.collect()
 }
@@ -505,6 +576,9 @@ pub async fn single_team(
 				)
 				.into_iter(),
 			)
+			.map(|(name_and_source, entry)| {
+				(name_and_source.name, InfoEntryWithSource { entry, source: name_and_source.source })
+			})
 			.collect(),
 	}
 }
@@ -530,8 +604,8 @@ pub async fn list(
 			.map(|team| async move { (team, statbotics.get(*team).await) }),
 	)
 	.await;
-	TeamInfoList {
-		names: table_labels(config),
+	let mut til = TeamInfoList {
+		heading: table_labels(config),
 		list: tba_teams
 			.into_iter()
 			.map(|(team, sb)| TeamInfoDisplay {
@@ -544,10 +618,26 @@ pub async fn list(
 					sb.as_deref(),
 					*team,
 				),
-				pin_right_count: 5,
-				pin_left_count: 4,
 			})
 			.collect(),
 		default_display: default_display(config),
+	};
+	for row in 0..til.heading.len() {
+		let (mut min, mut max, mut avg, mut cnt) = (f32::MAX, f32::MIN, 0.0, 0.0);
+		for team in &til.list {
+			if let TeamInfoEntry::Numeric(TeamInfoNumericEntry { number, .. }) = &team.info[row] {
+				min = min.min(*number);
+				max = max.max(*number);
+				avg += *number;
+				cnt += 1.0;
+			}
+		}
+		avg /= cnt;
+		for team in &mut til.list {
+			if let TeamInfoEntry::Numeric(entry) = &mut team.info[row] {
+				entry.min_max_avg = Some(MinMaxAvg { min, max, avg });
+			}
+		}
 	}
+	til
 }
