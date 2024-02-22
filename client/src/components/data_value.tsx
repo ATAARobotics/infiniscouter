@@ -8,7 +8,6 @@ import {
 } from "chart.js";
 import { WordCloudController, WordElement } from "chartjs-chart-wordcloud";
 import { atom, useAtom } from "jotai";
-import { atomWithDefault } from "jotai/utils";
 import { useEffect } from "react";
 import { Chart, Pie } from "react-chartjs-2";
 
@@ -110,37 +109,27 @@ export function DataValue(props: DataValueProps) {
 	switch (props.value.type) {
 		case "team_name":
 			return (
-				<td>
-					<a href={`/team/${props.value.number}`}>
-						<Typography level="h2">{props.value.name}</Typography>
-						<br />
-						<Typography level="h3">({props.value.number})</Typography>
-					</a>
-				</td>
+				<a href={`/team/${props.value.number}`}>
+					<Typography level="h2">{props.value.name}</Typography>
+					<br />
+					<Typography level="h3">({props.value.number})</Typography>
+				</a>
 			);
 		case "text":
-			return (
-				<td>
-					<p>{props.value.display_text}</p>
-				</td>
-			);
+			return <p>{props.value.display_text}</p>;
 		case "pie_chart": {
 			return (
-				<td>
+				<>
 					{chartsReady && (
 						<Pie
 							// @ts-expect-error style is missing from preact/compat, it seems
 							style={{ width: "100px", height: "100px" }}
 							data={{
-								labels: props.value.options
-									.reverse()
-									.map((op) => op.label),
+								labels: props.value.options.map((op) => op.label),
 								datasets: [
 									{
 										label: "Data",
-										data: props.value.options
-											.reverse()
-											.map((op) => op.value),
+										data: props.value.options.map((op) => op.value),
 										backgroundColor:
 											colorSchemes[
 												(props.forceColorScheme ??
@@ -156,13 +145,13 @@ export function DataValue(props: DataValueProps) {
 							}}
 						/>
 					)}
-				</td>
+				</>
 			);
 		}
 		case "multi_text": {
 			if (props.listView) {
 				return (
-					<td>
+					<>
 						{(() => {
 							const words: { [word: string]: number } = {};
 							for (const string of props.value.strings) {
@@ -225,22 +214,22 @@ export function DataValue(props: DataValueProps) {
 								/>
 							);
 						})()}
-					</td>
+					</>
 				);
 			} else {
 				return (
-					<td>
+					<>
 						{props.value.strings.map((text) => (
 							<Box>{text}</Box>
 						))}
-					</td>
+					</>
 				);
 			}
 		}
 		case "images": {
 			if (props.listView) {
 				return (
-					<td>
+					<>
 						{
 							props.value.images.map((image) => (
 								<img
@@ -251,11 +240,11 @@ export function DataValue(props: DataValueProps) {
 								/>
 							))[0]
 						}
-					</td>
+					</>
 				);
 			} else {
 				return (
-					<td>
+					<>
 						{props.value.images.map((image) => (
 							<img
 								width={256}
@@ -264,7 +253,7 @@ export function DataValue(props: DataValueProps) {
 								)}`}
 							/>
 						))}
-					</td>
+					</>
 				);
 			}
 		}
@@ -277,18 +266,16 @@ export function DataValue(props: DataValueProps) {
 			const spread = (mma.avg - mma.min) / 2 + (mma.max - mma.avg) / 2;
 			const goodness = (props.value.number - mma.avg) / spread;
 			return (
-				<td>
-					<Typography
-						level="h1"
-						style={{
-							color: `rgb(${Math.min(1 - goodness, 1) * 255}, ${
-								Math.min(goodness + 1, 1) * 255
-							}, ${(1 - Math.abs(goodness)) * 255})`,
-						}}
-					>
-						{props.value.number.toFixed(2)}
-					</Typography>
-				</td>
+				<Typography
+					level="h1"
+					style={{
+						color: `rgb(${Math.min(1 - goodness, 1) * 255}, ${
+							Math.min(goodness + 1, 1) * 255
+						}, ${(1 - Math.abs(goodness)) * 255})`,
+					}}
+				>
+					{props.value.number.toFixed(2)}
+				</Typography>
 			);
 		}
 	}

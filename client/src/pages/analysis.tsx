@@ -1,11 +1,10 @@
 import { Box, Checkbox, Chip, Stack, Table, Typography } from "@mui/joy";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { useEffect, useState } from "preact/compat";
+import { TeamInfoEntry } from "src/generated/TeamInfoEntry";
 
 import { DataValue } from "../components/data_value";
 import { LoadIndicator } from "../components/load_indicator";
 import { TeamInfoList } from "../generated/TeamInfoList";
-import { TeamInfoEntry } from "src/generated/TeamInfoEntry";
 
 /**
  * Analysis Page Component
@@ -145,11 +144,13 @@ export function Analysis() {
 									)
 									.filter((_, idx) => enabledColumns.includes(idx))
 									.map(([val, idx]) => (
-										<DataValue
-											listView={true}
-											value={val}
-											forceColorScheme={colours[idx] ?? 0}
-										/>
+										<td>
+											<DataValue
+												listView={true}
+												value={val}
+												forceColorScheme={colours[idx] ?? 0}
+											/>
+										</td>
 									))}
 							</tr>
 						))}
