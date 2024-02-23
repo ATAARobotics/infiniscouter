@@ -1,4 +1,4 @@
-import { AspectRatio, Card, Stack, Typography } from "@mui/joy";
+import { Card, Stack, Typography } from "@mui/joy";
 import { useEffect, useState } from "react";
 
 import { DataValue } from "../components/data_value";
@@ -35,15 +35,17 @@ export function TeamInfo(props: TeamInfoProps) {
 		>
 			<Card sx={{ width: 320 }}>
 				<Typography level="title-lg">
+					{data?.team_icon_uri !== null && (
+						<img
+							width={40}
+							height={40}
+							src={"data:image/png;base64, " + data?.team_icon_uri}
+						/>
+					)}
 					{data?.team_number}
 					<br />
 					{data?.team_name}
 				</Typography>
-				{data?.team_icon_uri !== null && (
-					<AspectRatio minHeight="120px" maxHeight="200px">
-						<img src={data?.team_icon_uri} />
-					</AspectRatio>
-				)}
 			</Card>
 			{data !== undefined ? (
 				Object.entries(data.data)

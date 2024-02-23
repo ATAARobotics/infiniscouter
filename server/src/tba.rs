@@ -39,9 +39,9 @@ impl EventInfo {
 	) -> EventInfo {
 		let team_infos: HashMap<_, _> =
 			future::join_all(team_infos.into_iter().map(|team_info| async move {
-				let image = client // TODO: Use the right event
+				let image = client
 					.get(format!(
-						"https://www.thebluealliance.com/api/v3/team/{}/media/{year}",
+						"https://www.thebluealliance.com/api/v3/team/frc{}/media/{year}",
 						team_info.team_number
 					))
 					.send()
@@ -53,7 +53,7 @@ impl EventInfo {
 					.and_then(|media| {
 						media
 							.into_iter()
-							.filter(|i| i.ty == "avatar")
+							.filter(|i| i.image_type == "avatar")
 							.find_map(|i| i.details.and_then(|d| d.base64_image))
 					});
 				(
@@ -233,7 +233,8 @@ struct RawTbaTeam {
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 struct RawTbaImage {
-	ty: String,
+	#[serde(rename = "type")]
+	image_type: String,
 	details: Option<RawTbaImageDetails>,
 }
 
