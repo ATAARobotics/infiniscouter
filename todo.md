@@ -15,9 +15,9 @@
 14. [x] Update config with default values for anlysis page
 15. [ ] Send all values for single team analysis page
 16. [ ] Add attempts/success for scout boredom
-17. [ ] Add order to config file entries within pages
+17. [x] Add order to config file entries within pages
 18. [ ] Get stuff from TBA
 19. [x] Update match scouting for did not show
 20. [ ] Analysis client pinning rows and columns
 21. [x] Only allow pit/match as combo
-22. [ ] Refresh TBA data periodically
+22. [x] Refresh TBA data periodically

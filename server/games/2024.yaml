@@ -5,12 +5,14 @@ categories:
     name: Auto
     metrics:
       moved:
+        order: 20
         name: Taxi
         description: Moved from the starting line in the auto period
         collect: match_only
         metric:
           type: ability
       auto-notes:
+        order: 30
         name: Auto Notes
         description: Number of notes picked up in auto period
         collect: match_pit
@@ -20,6 +22,7 @@ categories:
             start: 0
             end_inclusive: 8
       auto-amp:
+        order: 40
         name: Auto Amp
         description: Scored in the amp in the auto period
         collect: match_only
@@ -27,6 +30,7 @@ categories:
           type: ability
           implies: [moved]
       auto-speaker:
+        order: 50
         name: Auto Speaker
         description: Scored in speaker in the auto period
         collect: match_only
@@ -37,18 +41,21 @@ categories:
     name: Teleop
     metrics:
       teleop-amp:
+        order: 20
         name: Teleop Amp
         description: Scored in the amp in teleop
         collect: match_pit
         metric:
           type: ability
       teleop-speaker:
+        order: 30
         name: Teleop Speaker
         description: Scored in the speaker in teleop
         collect: match_pit
         metric:
           type: ability
       note-pickup:
+        order: 40
         name: Note Pickup
         description: Can pick up notes from various sources?
         collect: match_pit
@@ -62,18 +69,21 @@ categories:
     name: Endgame
     metrics:
       climb:
+        order: 20
         name: Climb
         description: Can they climb?
         collect: match_pit
         metric:
           type: ability
       trap:
+        order: 30
         name: Trap
         description: Scored in the trap
         collect: match_pit
         metric:
           type: ability
       harmony:
+        order: 40
         name: Harmony
         description: Can climb with others
         collect: match_pit
@@ -83,13 +93,8 @@ categories:
   team:
     name: Team
     metrics:
-      present:
-        name: Present
-        description: Was this team at the match?
-        collect: match_only
-        metric:
-          type: bool
       human-player:
+        order: 20
         name: Human Player
         description: Was this team's human player the active human player for this match?
         collect: match_only

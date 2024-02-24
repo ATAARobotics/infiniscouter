@@ -100,20 +100,24 @@ impl MatchEntryFields {
 			.keys()
 			.filter_map(|page| game_config.categories.get(page))
 			.map(|cat| {
+				let mut metrics = cat
+					.metrics
+					.iter()
+					.filter(|(_, metric)| match entry_type {
+						EntryType::DriveTeam => metric.collect.collect_from_drive(),
+						EntryType::Match => metric.collect.collect_in_match(),
+						EntryType::Pit => metric.collect.collect_in_pit(),
+					})
+					.collect::<Vec<_>>();
+				metrics.sort_by_key(|(_, metric)| metric.order);
 				(
 					cat.order.unwrap_or(1000),
 					MatchEntryPage {
 						title: cat.name.clone(),
 						description: None,
-						layout: cat
-							.metrics
+						layout: metrics
 							.iter()
-							.filter(|(_, metric)| match entry_type {
-								EntryType::DriveTeam => metric.collect.collect_from_drive(),
-								EntryType::Match => metric.collect.collect_in_match(),
-								EntryType::Pit => metric.collect.collect_in_pit(),
-							})
-							.map(|(metric, _)| metric.clone())
+							.map(|(metric, _)| metric.to_string())
 							.collect(),
 					},
 				)

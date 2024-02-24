@@ -5,12 +5,14 @@ categories:
     name: Auto
     metrics:
       taxi:
+        order: 10
         name: Taxi
         description: Moved from the starting line in the auto period
         collect: match_pit
         metric:
           type: ability
       auto-score:
+        order: 20
         name: Auto Scoring
         description: Deposited balls in the auto period
         collect: match_pit
@@ -18,6 +20,7 @@ categories:
           type: ability
           implies: [taxi]
       auto-collect:
+        order: 30
         name: Auto Collecting
         description: Gathered additional balls in the auto period
         collect: match_pit
@@ -28,18 +31,21 @@ categories:
     name: Scoring (Teleop)
     metrics:
       low-goal:
+        order: 10
         name: Low Goal
         collect: match_pit
         description: Scored in the low goal in teleop
         metric:
           type: ability
       high-goal:
+        order: 20
         name: High Goal
         collect: match_pit
         description: Scored in the high goal in teleop
         metric:
           type: ability
       field-pickups:
+        order: 30
         name: Field Pickups
         collect: match_pit
         description: Can they pick up a ball from the ground?
@@ -49,6 +55,7 @@ categories:
     name: Endgame
     metrics:
       climb-height:
+        order: 10
         name: Climb Height
         collect: match_pit
         description: How high the robot climbed
@@ -61,6 +68,7 @@ categories:
             - High
             - Traversal
       climb-time:
+        order: 10
         name: Climb Timer
         description: How long the robot took to climb
         collect: match_only
@@ -70,12 +78,14 @@ categories:
     name: Team
     metrics:
       test-counter-metric:
+        order: 10
         name: Test Counter
         description: You better get ready to get tested uwu
         collect: match_only
         metric:
           type: counter
       test-counter-metric-with-range:
+        order: 20
         name: Test Limited Counter
         description: Really gonna test you now
         collect: match_only
@@ -85,6 +95,7 @@ categories:
             start: 2
             end_inclusive: 5
       test-text-field:
+        order: 30
         name: Test Text Field
         description: Please write nothing in this box or I will murder you
         collect: match_only
@@ -92,6 +103,7 @@ categories:
           type: text_entry
           multiline: false
       test-multiline-text-field:
+        order: 40
         name: Test Multiline Text Field
         description: UwU the testing is going so hard right now
         collect: match_only
@@ -99,6 +111,7 @@ categories:
           type: text_entry
           multiline: true
       test-image:
+        order: 50
         name: Test Images
         description: ":eyes:"
         collect: match_only

@@ -46,6 +46,8 @@ pub struct MetricCategory {
 pub struct CollectedMetric {
 	/// The name of this metric
 	pub name: String,
+	/// The relative position of this metric in the UI; lower comes before higher
+	pub order: u32,
 	/// A lengthy description for this metric
 	pub description: String,
 	/// What data gathering stages to collect from

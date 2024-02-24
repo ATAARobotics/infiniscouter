@@ -6,6 +6,7 @@ categories:
     order: 10
     metrics:
       total-points:
+        order: 10
         name: Total Points
         description: Total average points scored
         metric:
@@ -16,7 +17,8 @@ categories:
     order: 20
     metrics:
       auto-points:
-        name: Points
+        order: 10
+        name: Auto Points
         description: Points scored in auto
         metric:
           type: statbotics_team
@@ -26,19 +28,29 @@ categories:
     order: 30
     metrics:
       teleop-points:
-        name: Points
+        order: 10
+        name: Teleop Points
         description: Points scored in teleop
         metric:
           type: statbotics_team
-          prop: auto_epa_end
+          prop: teleop_epa_end
   endgame:
     name: Endgame
     order: 40
+    metrics:
+      teleop-points:
+        order: 10
+        name: Endgame Points
+        description: Points scored in endgame
+        metric:
+          type: statbotics_team
+          prop: endgame_epa_end
   impressions:
     name: Impressions
     order: 50
     metrics:
       speed:
+        order: 10
         name: Speed
         description: Overall speed of the robot
         collect: match_only
@@ -49,6 +61,7 @@ categories:
             - Normal
             - Fast
       stability:
+        order: 20
         name: Stability
         description: How stable the robot is
         collect: match_only
@@ -59,6 +72,7 @@ categories:
             - Almost Fell
             - Normal
       malfunction:
+        order: 30
         name: Malfunction
         description: Did the robot malfunction?
         collect: match_only
@@ -72,13 +86,22 @@ categories:
     name: Team
     order: 0
     metrics:
+      present:
+        order: 10
+        name: Present
+        description: Was this team at the match?
+        collect: match_only
+        metric:
+          type: bool
       exists:
+        order: 20
         name: Exists
         description: Can we find the pit crew?
         collect: pit_only
         metric:
           type: bool
       battery-count:
+        order: 30
         name: Battery Count
         description: How many batteries does the team have on hand?
         collect: pit_only
@@ -88,12 +111,14 @@ categories:
             start: 1
             end_inclusive: 12
       overpromised:
+        order: 40
         name: Overpromised
         description: Did the team overpromise things/underdeliver?
         collect: drive_only
         metric:
           type: bool
       teamwork:
+        order: 50
         name: Teamwork
         description: How was it to work together with this team
         collect: drive_only
@@ -109,18 +134,21 @@ categories:
     order: 100
     metrics:
       reversable-bumpers:
+        order: 10
         name: Reversable Bumpers
         description: Are the bumpers reversable
         collect: pit_only
         metric:
           type: bool
       vision:
+        order: 20
         name: Has Vision
         description: Does the robot use vision in any way?
         collect: pit_only
         metric:
           type: bool
       drive-train:
+        order: 30
         name: Drive Train Type
         description: No Description
         collect: pit_only
@@ -128,6 +156,7 @@ categories:
           type: enum
           options: ["Other", "Tank", "Swerve"]
       robot-picture:
+        order: 40
         name: Robot Pictures
         description: Take some pictures of their robot pls
         collect: pit_only
@@ -139,6 +168,7 @@ categories:
     order: 1000
     metrics:
       match-notes:
+        order: 10
         name: Match Notes
         description: Notes from scouting matches
         collect: match_only
@@ -146,6 +176,7 @@ categories:
           type: text_entry
           multiline: true
       pit-notes:
+        order: 20
         name: Pit Notes
         description: Notes from pit scouting
         collect: pit_only
@@ -153,6 +184,7 @@ categories:
           type: text_entry
           multiline: true
       driver-notes:
+        order: 30
         name: Driver Notes
         description: Notes from driver scouting
         collect: drive_only
