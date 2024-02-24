@@ -216,7 +216,7 @@ fn get_pie_chart(
 			.sum::<f32>()
 			/ count
 	} else {
-		0.0
+		-420.0
 	};
 	let options = option_values
 		.iter()
@@ -252,6 +252,7 @@ fn single_team_impl(
 				if metric.metric.starts_with(SB_PREFIX) {
 					if let Some(sb) = statbotics {
 						let real_metric = metric.metric.strip_prefix(SB_PREFIX).unwrap();
+						let total_matches = sb.wins as f32 + sb.losses as f32 + sb.ties as f32;
 						if let Some(pie_values) = match real_metric {
 							"wlt-ratio" => Some(PieChartEntry {
 								options: vec![
@@ -268,7 +269,11 @@ fn single_team_impl(
 										value: sb.ties as f32,
 									},
 								],
-								sort_value: sb.wins as f32 - sb.losses as f32,
+								sort_value: if total_matches == 0.0 {
+									-420.0
+								} else {
+									(sb.wins as f32 + sb.ties as f32 * 0.5) / total_matches
+								},
 							}),
 							"rps-ratio" => Some(PieChartEntry {
 								options: vec![
@@ -386,7 +391,7 @@ fn single_team_impl(
 						Some(MatchEntryType::Timer(_)) => {
 							if data_points.is_empty() {
 								TeamInfoEntry::Text(TeamInfoTextEntry {
-									sort_value: 0.0,
+									sort_value: -420.0,
 									display_text: "".to_string(),
 								})
 							} else {
@@ -412,7 +417,7 @@ fn single_team_impl(
 						Some(MatchEntryType::Counter(_)) => {
 							if data_points.is_empty() {
 								TeamInfoEntry::Text(TeamInfoTextEntry {
-									sort_value: 0.0,
+									sort_value: -420.0,
 									display_text: "".to_string(),
 								})
 							} else {
@@ -457,9 +462,13 @@ fn single_team_impl(
 								})
 								.sum();
 							TeamInfoEntry::MultiText(MultiTextEntry {
-								strings,
 								sentiment,
-								sort_value: sentiment,
+								sort_value: if strings.is_empty() {
+									-420.0
+								} else {
+									sentiment
+								},
+								strings,
 							})
 						}
 						Some(MatchEntryType::Image(_)) => {

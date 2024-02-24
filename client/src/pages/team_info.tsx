@@ -1,9 +1,10 @@
-import { Card, Stack, Typography } from "@mui/joy";
+import { Box, Card, Stack, Typography } from "@mui/joy";
 import { useEffect, useState } from "react";
 
 import { DataValue } from "../components/data_value";
 import { LoadIndicator } from "../components/load_indicator";
 import { SingleTeamInfo } from "../generated/SingleTeamInfo";
+import { Navbar } from "src/components/navbar";
 
 interface TeamInfoProps {
 	team: number;
@@ -26,7 +27,8 @@ export function TeamInfo(props: TeamInfoProps) {
 		return <LoadIndicator></LoadIndicator>;
 	}
 
-	return (
+	return <Box>
+		<Navbar title={"Team Info"} />
 		<Stack
 			direction="row"
 			flexWrap={"wrap"}
@@ -61,5 +63,5 @@ export function TeamInfo(props: TeamInfoProps) {
 				<></>
 			)}
 		</Stack>
-	);
+	</Box>;
 }

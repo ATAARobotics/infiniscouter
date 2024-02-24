@@ -9,6 +9,7 @@ import { SyncRequired } from "../components/sync_required";
 import { matchListAtom, pitFieldsAtom, scoutNameAtom } from "../data/atoms";
 import { getPitKey, useEntries } from "../data/entries";
 import { PitEntryIdData } from "../generated/PitEntryIdData";
+import { Navbar } from "src/components/navbar";
 
 /**
  * The pit scouting entry page component.
@@ -38,7 +39,7 @@ export function PitEntry() {
 
 	return (
 		<Box>
-			<h1>Pit Entry</h1>
+			<Navbar title={"Pit Entry"} />
 			<Box>
 				<Autocomplete
 					placeholder={"Team Number"}

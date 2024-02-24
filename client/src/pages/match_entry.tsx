@@ -10,6 +10,7 @@ import { matchFieldsAtom, matchListAtom, scoutNameAtom } from "../data/atoms";
 import { getMatchKey, useEntries } from "../data/entries";
 import { MatchEntry } from "../generated/MatchEntry";
 import { MatchEntryIdData } from "../generated/MatchEntryIdData";
+import { Navbar } from "src/components/navbar";
 
 /**
  * The match entry page component.
@@ -35,13 +36,13 @@ export function MatchEntry() {
 	if (!scoutName) {
 		return <ScoutNameRequired></ScoutNameRequired>;
 	}
-	if (!matchList) {
+	if (!matchList || !fields) {
 		return <SyncRequired></SyncRequired>;
 	}
 
 	return (
 		<Box>
-			<h1>Match Entry</h1>
+			<Navbar title={"Match Entry"} />
 			<MatchAndTeamSelector
 				matchList={matchList}
 				matchId={matchId}
@@ -50,18 +51,15 @@ export function MatchEntry() {
 				setTeamId={setTeamId}
 			></MatchAndTeamSelector>
 			{teamId &&
-				(fields ? (
-					fields.pages.map((page) => (
-						<MatchPage
-							page={page}
-							entries={fields.entries}
-							setEntry={setEntry}
-							allEntries={dataEntries}
-						></MatchPage>
-					))
-				) : (
-					<SyncRequired></SyncRequired>
-				))}
+				fields.pages.map((page) => (
+					<MatchPage
+						page={page}
+						entries={fields.entries}
+						setEntry={setEntry}
+						allEntries={dataEntries}
+					></MatchPage>
+				))
+			}
 		</Box>
 	);
 }

@@ -3,7 +3,6 @@ import { CssVarsProvider } from "@mui/joy/styles";
 import { render } from "preact";
 import { LocationProvider, Route, Router } from "preact-iso";
 
-import { Navbar } from "./components/navbar";
 import { Analysis } from "./pages/analysis";
 import { Configuration } from "./pages/configuration";
 import { DriverEntry } from "./pages/driver_entry";
@@ -24,7 +23,6 @@ function App() {
 		<CssVarsProvider defaultMode="dark">
 			<CssBaseline />
 			<LocationProvider>
-				<Navbar />
 				<main>
 					<Router>
 						<Route path="/" component={Home} />

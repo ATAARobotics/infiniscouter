@@ -6,6 +6,8 @@ import {
 	List,
 	ListItem,
 	ListItemButton,
+    Stack,
+    Typography,
 } from "@mui/joy";
 import { useLocation } from "preact-iso";
 import * as React from "react";
@@ -34,10 +36,15 @@ function NavbarItem(props: NavbarItemProps) {
 	);
 }
 
+interface NavbarProps {
+	title: string,
+	component?: React.JSX.Element,
+}
+
 /**
  * Displays a colapsable nav bar.
  */
-export function Navbar() {
+export function Navbar(props: NavbarProps) {
 	const [navbarOpen, setNavbarOpen] = React.useState(false);
 
 	const toggleDrawer = (inOpen: boolean) => () => {
@@ -45,7 +52,7 @@ export function Navbar() {
 	};
 
 	return (
-		<Box sx={{ display: "flex" }}>
+		<Stack direction="row" gap={2} paddingX={2} paddingY={1} height="4rem" boxSizing="border-box">
 			<Button variant="soft" color="neutral" onClick={toggleDrawer(true)}>
 				Menu
 			</Button>
@@ -99,6 +106,8 @@ export function Navbar() {
 				</Box>
 			</Drawer>
 			<SyncButton></SyncButton>
-		</Box>
+			<Typography level="h1">{props.title}</Typography>
+			{props.component === undefined ? <></> : props.component}
+		</Stack>
 	);
 }

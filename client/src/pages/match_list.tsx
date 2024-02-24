@@ -9,6 +9,7 @@ import { EventInfo } from "../generated/EventInfo";
 import { MatchId } from "../generated/MatchId";
 import { MatchInfo } from "../generated/MatchInfo";
 import { SyncRequired } from "../components/sync_required";
+import { Navbar } from "src/components/navbar";
 
 /**
  * Format a match ID for display.
@@ -86,7 +87,7 @@ export function MatchList() {
 
 	return (
 		<Box>
-			<h1>Match List</h1>
+			<Navbar title={"Match List"} />
 			<Table hoverRow stickyHeader borderAxis="y" stripe="even">
 				<thead>
 					<th style={{ width: "150px" }}>Match</th>

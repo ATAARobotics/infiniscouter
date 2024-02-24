@@ -1,6 +1,7 @@
 import { Box } from "@mui/joy";
 import { useLocation } from "preact-iso";
 import { useEffect } from "react";
+import { Navbar } from "./navbar";
 
 /**
  * A simple component to use to indicate to the user that a scout name is required.
@@ -17,6 +18,7 @@ export function ScoutNameRequired() {
 
 	return (
 		<Box>
+			<Navbar title={"Scout Name Required"} />
 			<p>
 				You must set your scouting name before scouting. Click{" "}
 				<a href="/config">here</a> or wait a few seconds to go to the

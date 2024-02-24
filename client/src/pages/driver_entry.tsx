@@ -9,6 +9,7 @@ import { SyncRequired } from "../components/sync_required";
 import { driverFieldsAtom, matchListAtom, scoutNameAtom } from "../data/atoms";
 import { getDriverKey, useEntries } from "../data/entries";
 import { DriverEntryIdData } from "../generated/DriverEntryIdData";
+import { Navbar } from "src/components/navbar";
 
 /**
  * The driver scouting page component.
@@ -40,7 +41,7 @@ export function DriverEntry() {
 
 	return (
 		<Box>
-			<h1>Driver Entry</h1>
+			<Navbar title={"Driver Entry"} />
 			<p>
 				This page is for entry of feedback for teammates by the drive team.
 				For general scouting go <a href="/match_entry">here</a> and for pit

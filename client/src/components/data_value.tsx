@@ -90,11 +90,9 @@ export function DataValue(props: DataValueProps) {
 			return <p>{props.value.display_text}</p>;
 		case "pie_chart": {
 			return (
-				<>
+				<Box sx={{ width: "100px", height: "100px" }}>
 					{chartsReady && (
 						<Pie
-							// @ts-expect-error style is missing from preact/compat, it seems
-							style={{ width: "100px", height: "100px" }}
 							data={{
 								labels: props.value.options.map((op) => op.label),
 								datasets: [
@@ -116,7 +114,7 @@ export function DataValue(props: DataValueProps) {
 							}}
 						/>
 					)}
-				</>
+				</Box>
 			);
 		}
 		case "multi_text": {
