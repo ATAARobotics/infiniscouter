@@ -8,11 +8,12 @@ import { getMatchScout } from "../data/entries";
 import { EventInfo } from "../generated/EventInfo";
 import { MatchId } from "../generated/MatchId";
 import { MatchInfo } from "../generated/MatchInfo";
+import { SyncRequired } from "../components/sync_required";
 
 /**
  * Format a match ID for display.
  */
-function formatMatchId(matchId: MatchId, year: number): string {
+export function formatMatchId(matchId: MatchId, year: number): string {
 	if (matchId.match_type === "practice") {
 		return `Practice\u00A0${matchId.num}`;
 	} else if (matchId.match_type === "qualification") {
@@ -80,7 +81,7 @@ export function MatchList() {
 	const matchList = useAtomValue(matchListAtom);
 
 	if (!matchList) {
-		return <LoadIndicator></LoadIndicator>;
+		return <SyncRequired></SyncRequired>;
 	}
 
 	return (

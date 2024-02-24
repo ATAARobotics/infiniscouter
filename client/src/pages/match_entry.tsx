@@ -3,9 +3,9 @@ import { useAtomValue } from "jotai/react";
 import { useState } from "preact/hooks";
 
 import { MatchPage } from "../components/entry_components";
+import { MatchAndTeamSelector } from "../components/match_and_team_selector";
 import { ScoutNameRequired } from "../components/scout_name_required";
 import { SyncRequired } from "../components/sync_required";
-import { MatchAndTeamSelector } from "../components/match_and_team_selector";
 import { matchFieldsAtom, matchListAtom, scoutNameAtom } from "../data/atoms";
 import { getMatchKey, useEntries } from "../data/entries";
 import { MatchEntry } from "../generated/MatchEntry";

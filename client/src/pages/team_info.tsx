@@ -35,7 +35,7 @@ export function TeamInfo(props: TeamInfoProps) {
 		>
 			<Card sx={{ width: 320 }}>
 				<Typography level="title-lg">
-					{data?.team_icon_uri !== null && (
+					{data?.team_icon_uri && (
 						<img width={40} height={40} src={data?.team_icon_uri} />
 					)}
 					{data?.team_number}

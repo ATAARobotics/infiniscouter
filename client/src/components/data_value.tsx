@@ -1,16 +1,8 @@
 import { Box, Typography } from "@mui/joy";
-import {
-	ArcElement,
-	Chart as ChartJS,
-	Legend,
-	LinearScale,
-	Tooltip,
-} from "chart.js";
-import { WordCloudController, WordElement } from "chartjs-chart-wordcloud";
-import { atom, useAtom } from "jotai";
-import { useEffect } from "react";
+import { WordCloudController } from "chartjs-chart-wordcloud";
 import { Chart, Pie } from "react-chartjs-2";
 
+import { useCharts } from "../data/atoms";
 import { TeamInfoEntry } from "../generated/TeamInfoEntry";
 
 interface DataValueProps {
@@ -76,30 +68,6 @@ const excludeWords = [
 	// s is a word now because contractions
 	"s",
 ];
-
-const chartsReadyAtom = atom(false);
-
-/**
- * Hook that returns true when charts can be used to ensure charts are not used before they are initialized.
- */
-function useCharts(): boolean {
-	const [chartsReady, setChartsReady] = useAtom(chartsReadyAtom);
-	useEffect(() => {
-		if (!chartsReady) {
-			ChartJS.register(
-				ArcElement,
-				Tooltip,
-				Legend,
-				LinearScale,
-				WordCloudController,
-				WordElement,
-			);
-			setChartsReady(true);
-		}
-	}, [chartsReady, setChartsReady]);
-
-	return chartsReady;
-}
 
 /**
  * Displays a data value for analysis.
