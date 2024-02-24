@@ -421,13 +421,16 @@ impl Api {
 				return Err(poem::Error::from_status(StatusCode::BAD_REQUEST));
 			}
 		};
-		Ok(Json(analysis::get_match_analysis(
-			&self.tba,
-			&self.statbotics,
-			&self.database,
-			self.config.get_server_config(),
-			self.config.get_current_game_config(),
-			match_id,
-		)))
+		Ok(Json(
+			analysis::get_match_analysis(
+				&self.tba,
+				&self.statbotics,
+				&self.database,
+				self.config.get_server_config(),
+				self.config.get_current_game_config(),
+				match_id,
+			)
+			.await,
+		))
 	}
 }

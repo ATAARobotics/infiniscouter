@@ -33,7 +33,14 @@ interface MatchPageProps {
 export function MatchPage(props: MatchPageProps) {
 	return (
 		<>
-			<Typography level="h2" textAlign={{ xs: "center", md: "start" }} margin={1} marginTop={2}>{props.page.title}</Typography>
+			<Typography
+				level="h2"
+				textAlign={{ xs: "center", md: "start" }}
+				margin={1}
+				marginTop={2}
+			>
+				{props.page.title}
+			</Typography>
 			{props.page.layout.map((entryName) => (
 				<MatchDetail
 					entry={props.entries[entryName]}
@@ -58,7 +65,7 @@ interface MatchDetailProps {
  */
 function MatchDetail(props: MatchDetailProps) {
 	return (
-		<Box margin={{xs: "0 2rem 1.5rem 2rem", md: "1rem 1rem 1rem 2rem"}}>
+		<Box margin={{ xs: "0 2rem 1.5rem 2rem", md: "1rem 1rem 1rem 2rem" }}>
 			<Typography level="h3">{props.entry.title}</Typography>
 			{props.entry.entry.type === "ability" ? (
 				<AbilityEntry
@@ -128,9 +135,9 @@ function EnumEntry(props: EnumEntryProps) {
 		<ToggleButtonGroup
 			value={
 				props.value &&
-					(props.value.type === "enum" ||
-						props.value.type === "ability" ||
-						props.value.type === "bool")
+				(props.value.type === "enum" ||
+					props.value.type === "ability" ||
+					props.value.type === "bool")
 					? props.value.value.toString()
 					: ""
 			}
@@ -152,12 +159,16 @@ function EnumEntry(props: EnumEntryProps) {
 				}
 			}}
 		>
-			{props.options.map(option => (
+			{props.options.map((option) => (
 				<Box
 					width={{ xs: `${100 / props.options.length}%`, md: "auto" }}
 					height={{ xs: "6rem", md: "auto" }}
 				>
-					<Button fullWidth sx={{ height: "100%" }} value={option.id.toString()}>
+					<Button
+						fullWidth
+						sx={{ height: "100%" }}
+						value={option.id.toString()}
+					>
 						<p className="button-text">{option.display}</p>
 					</Button>
 				</Box>
@@ -223,7 +234,12 @@ interface CounterEntryProps {
  *	An entry for counter / number up down thingies
  */
 function CounterEntry(props: CounterEntryProps) {
-	const buttonStyle = { height: "100%", borderRadius: "1rem 0 0 1rem", fontSize: "2rem", fontWeight: "bold" };
+	const buttonStyle = {
+		height: "100%",
+		borderRadius: "1rem 0 0 1rem",
+		fontSize: "2rem",
+		fontWeight: "bold",
+	};
 	return (
 		<Stack direction="row" height={{ xs: "6rem", md: "4rem" }}>
 			<Box width={{ xs: "6rem", md: "4rem" }}>
@@ -256,7 +272,10 @@ function CounterEntry(props: CounterEntryProps) {
 				// @ts-expect-error Input seems to want a component for some reason?
 				<Input
 					type="number"
-					sx={{ borderRadius: "0", fontSize: { xs: "2rem", md: "1.5rem" } }}
+					sx={{
+						borderRadius: "0",
+						fontSize: { xs: "2rem", md: "1.5rem" },
+					}}
 					placeholder={"Enter a number uwu..."}
 					onChange={(ev: InputEvent) => {
 						const value = parseInt((ev.target as HTMLInputElement).value);

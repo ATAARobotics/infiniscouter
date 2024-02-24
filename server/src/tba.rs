@@ -350,6 +350,12 @@ pub struct TeamInfo {
 	pub has_avatar: bool,
 }
 
+impl TeamInfo {
+	pub fn get_icon_url(&self) -> Option<String> {
+		self.has_avatar.then(|| format!("/avatar/{}", self.num))
+	}
+}
+
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct SetMatch {

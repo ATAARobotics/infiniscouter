@@ -27,41 +27,43 @@ export function TeamInfo(props: TeamInfoProps) {
 		return <LoadIndicator></LoadIndicator>;
 	}
 
-	return <Box>
-		<Navbar title={"Team Info"} />
-		<Stack
-			direction="row"
-			flexWrap={"wrap"}
-			gap={"25px"}
-			justifyContent={"space-evenly"}
-		>
-			<Card sx={{ width: 320 }}>
-				<Typography level="title-lg">
-					{data?.team_icon_uri && (
-						<img width={40} height={40} src={data?.team_icon_uri} />
-					)}
-					{data?.team_number}
-					<br />
-					{data?.team_name}
-				</Typography>
-			</Card>
-			{data !== undefined ? (
-				Object.entries(data.data)
-					.filter((entry) => entry[1].entry.type !== "team_name")
-					.map((entry) => {
-						return (
-							<Card sx={{ width: 320 }}>
-								<Typography level="title-lg">{entry[0]}</Typography>
-								<DataValue
-									listView={false}
-									value={entry[1].entry}
-								></DataValue>
-							</Card>
-						);
-					})
-			) : (
-				<></>
-			)}
-		</Stack>
-	</Box>;
+	return (
+		<Box>
+			<Navbar title={"Team Info"} />
+			<Stack
+				direction="row"
+				flexWrap={"wrap"}
+				gap={"25px"}
+				justifyContent={"space-evenly"}
+			>
+				<Card sx={{ width: 320 }}>
+					<Typography level="title-lg">
+						{data?.team_icon_uri && (
+							<img width={40} height={40} src={data?.team_icon_uri} />
+						)}
+						{data?.team_number}
+						<br />
+						{data?.team_name}
+					</Typography>
+				</Card>
+				{data !== undefined ? (
+					Object.entries(data.data)
+						.filter((entry) => entry[1].entry.type !== "team_name")
+						.map((entry) => {
+							return (
+								<Card sx={{ width: 320 }}>
+									<Typography level="title-lg">{entry[0]}</Typography>
+									<DataValue
+										listView={false}
+										value={entry[1].entry}
+									></DataValue>
+								</Card>
+							);
+						})
+				) : (
+					<></>
+				)}
+			</Stack>
+		</Box>
+	);
 }

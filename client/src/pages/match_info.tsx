@@ -78,14 +78,16 @@ function AlliancePreview(props: AlliancePreviewProps) {
 	);
 
 	return (
-		<Stack direction="column" sx={{ width: 600 }}>
+		<Stack direction="column" sx={{ width: "auto" }}>
 			<Typography
 				level="h2"
 				color={props.alliance === "red" ? "danger" : "primary"}
 			>
 				{props.alliance === "red" ? "RED" : "BLUE"}
 			</Typography>
-			<Typography level="h2">Expected Score {totalScore}</Typography>
+			<Typography level="h2">
+				Expected Score {totalScore.toFixed(2)}
+			</Typography>
 			{chartsReady && (
 				<Bar
 					data={{

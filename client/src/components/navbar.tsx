@@ -6,8 +6,8 @@ import {
 	List,
 	ListItem,
 	ListItemButton,
-    Stack,
-    Typography,
+	Stack,
+	Typography,
 } from "@mui/joy";
 import { useLocation } from "preact-iso";
 import * as React from "react";
@@ -37,8 +37,8 @@ function NavbarItem(props: NavbarItemProps) {
 }
 
 interface NavbarProps {
-	title: string,
-	component?: React.JSX.Element,
+	title: string;
+	component?: React.JSX.Element;
 }
 
 /**
@@ -52,7 +52,14 @@ export function Navbar(props: NavbarProps) {
 	};
 
 	return (
-		<Stack direction="row" gap={2} paddingX={2} paddingY={1} height="4rem" boxSizing="border-box">
+		<Stack
+			direction="row"
+			gap={2}
+			paddingX={2}
+			paddingY={1}
+			height="4rem"
+			boxSizing="border-box"
+		>
 			<Button variant="soft" color="neutral" onClick={toggleDrawer(true)}>
 				Menu
 			</Button>

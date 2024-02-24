@@ -58,8 +58,7 @@ export function MatchEntry() {
 						setEntry={setEntry}
 						allEntries={dataEntries}
 					></MatchPage>
-				))
-			}
+				))}
 		</Box>
 	);
 }

@@ -2,7 +2,7 @@
 1. [x] UI Overhaul - Veda - Today/probably will take more than a day
 2. [x] Finalize Scouting Configuration pre week 0 - Today
 3. [x] Finish Pit & Driver Page - Jason - Today
-4. [ ] Make pre-match page - Jason - Probably not today
+4. [x] Make pre-match page - Jason - Probably not today
 5. [x] Fix yes/no boolean things - Jason - tomorrow
 6. [x] Send zeros for pie charts and don't average in "Nothing"
 7. [ ] Organize single team analysis page

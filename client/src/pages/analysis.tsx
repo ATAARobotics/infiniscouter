@@ -13,7 +13,11 @@ import { Navbar } from "src/components/navbar";
 /**
  * Return the sort value for a table based on index
  */
-function sortValue(sortBy: number, sortReverse: boolean, entries: TeamInfoDisplay): number {
+function sortValue(
+	sortBy: number,
+	sortReverse: boolean,
+	entries: TeamInfoDisplay,
+): number {
 	let value = entries.info[sortBy].sort_value;
 	if (value === -420.0 && !sortReverse) {
 		value = 420.0;
@@ -52,8 +56,8 @@ export function Analysis() {
 		return <LoadIndicator></LoadIndicator>;
 	}
 
-	const enabledColsPicker =
-		(<Stack
+	const enabledColsPicker = (
+		<Stack
 			direction="row"
 			sx={{
 				width: "100%",
@@ -80,8 +84,7 @@ export function Analysis() {
 							checked={checked}
 							onchange={(ev: InputEvent) => {
 								setEnabledColumns(
-									!((ev.target as HTMLInputElement)
-										.checked as boolean)
+									!((ev.target as HTMLInputElement).checked as boolean)
 										? enabledColumns.filter((n) => n !== idx)
 										: [...enabledColumns, idx],
 								);
@@ -90,14 +93,17 @@ export function Analysis() {
 					</Chip>
 				);
 			})}
-		</Stack>);
+		</Stack>
+	);
 
 	return (
 		<Box>
 			<Box sx={{ position: "fixed", top: "0", zIndex: -1 }}>
 				<Navbar title="Analysis" component={enabledColsPicker} />
 			</Box>
-			<Box sx={{ width: "100vw", marginTop: "4rem", backgroundColor: "black" }}>
+			<Box
+				sx={{ width: "100vw", marginTop: "4rem", backgroundColor: "black" }}
+			>
 				<Table
 					stickyHeader
 					hoverRow
@@ -107,7 +113,9 @@ export function Analysis() {
 				>
 					<thead style={{ cursor: "pointer" }}>
 						{table.heading
-							.map((title, idx) => [title, idx] as [NameAndSource, number])
+							.map(
+								(title, idx) => [title, idx] as [NameAndSource, number],
+							)
 							.filter((_, idx) => enabledColumns.includes(idx))
 							.map(([title, idx]) => (
 								<th
@@ -152,17 +160,24 @@ export function Analysis() {
 					<FlipMove typeName="tbody" duration={150} easing="ease-out">
 						{table.list
 							.sort((a, b) => {
-								const val = sortValue(sortBy, sortReverse, a) - sortValue(sortBy, sortReverse, b);
+								const val =
+									sortValue(sortBy, sortReverse, a) -
+									sortValue(sortBy, sortReverse, b);
 								return sortReverse ? -val : val;
 							})
-							.map(row => (
-								<tr style={{ height: "100px" }} key={row.info[0].sort_value}>
+							.map((row) => (
+								<tr
+									style={{ height: "100px" }}
+									key={row.info[0].sort_value}
+								>
 									{row.info
 										.map(
 											(val, idx2) =>
 												[val, idx2] as [TeamInfoEntry, number],
 										)
-										.filter((_, idx2) => enabledColumns.includes(idx2))
+										.filter((_, idx2) =>
+											enabledColumns.includes(idx2),
+										)
 										.map(([val, idx2]) => (
 											<td style={{ height: "100px" }} key={val}>
 												<DataValue
