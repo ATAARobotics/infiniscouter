@@ -25,6 +25,7 @@ pub struct StatboticsTeam {
 	pub wins: u32,
 	pub losses: u32,
 	pub ties: u32,
+	pub rps: u32,
 	#[serde(skip)]
 	#[ts(skip)]
 	#[oai(skip)]
@@ -36,11 +37,11 @@ pub struct StatboticsCache {
 	client: Client,
 	teams: Arc<RwLock<HashMap<u32, Arc<StatboticsTeam>>>>,
 	teams_loading: Arc<Mutex<HashSet<u32>>>,
-	year: u32,
+	event: String,
 }
 
 impl StatboticsCache {
-	pub fn new(year: u32) -> Self {
+	pub fn new(event: &str) -> Self {
 		Self {
 			teams: Arc::new(RwLock::new(HashMap::new())),
 			teams_loading: Arc::new(Mutex::new(HashSet::new())),
@@ -48,14 +49,14 @@ impl StatboticsCache {
 				.user_agent(env!("CARGO_PKG_NAME"))
 				.build()
 				.unwrap(),
-			year,
+			event: event.to_string(),
 		}
 	}
 	pub async fn get(&self, team: u32) -> Option<Arc<StatboticsTeam>> {
 		let team_stats = self.teams.read().await.get(&team).cloned();
 
 		match team_stats {
-			None => match Self::load_team(&self.client, self.year, team).await {
+			None => match Self::load_team(&self.client, team, &self.event).await {
 				Ok(team_stats) => {
 					info!("Statbotics ({team}): load complete");
 					self.teams.write().await.insert(team, team_stats.clone());
@@ -75,14 +76,13 @@ impl StatboticsCache {
 			}
 		}
 	}
-	async fn load_team(client: &Client, year: u32, team: u32) -> Result<Arc<StatboticsTeam>> {
+	async fn load_team(client: &Client, team: u32, event: &str) -> Result<Arc<StatboticsTeam>> {
 		info!("Statbotics ({team}): Loading data");
 
 		Ok(Arc::new(
 			client
 				.get(format!(
-					"https://api.statbotics.io/v2/team_year/{team}/{}",
-					year
+					"https://api.statbotics.io/v2/team_event/{team}/{event}",
 				))
 				.send()
 				.await?
@@ -100,9 +100,9 @@ impl StatboticsCache {
 			let client_clone = self.client.clone();
 			let teams_clone = self.teams.clone();
 			let teams_loading_clone = self.teams_loading.clone();
-			let year = self.year;
+			let event = self.event.clone();
 			spawn(async move {
-				match Self::load_team(&client_clone, year, team).await {
+				match Self::load_team(&client_clone, team, &event).await {
 					Ok(data) => {
 						info!("Statbotics ({team}): background load complete");
 						teams_clone.write().await.insert(team, data);

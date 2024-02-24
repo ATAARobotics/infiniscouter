@@ -197,6 +197,18 @@ display:
     - source: team_name
       display: true
     - source: single
+      metric: statbotics-wlt-ratio
+      display: true
+    - source: single
+      metric: statbotics-wins
+    - source: single
+      metric: statbotics-losses
+    - source: single
+      metric: statbotics-ties
+    - source: single
+      metric: statbotics-rps
+      display: true
+    - source: single
       metric: statbotics-points
       display: true
     - source: single

@@ -42,7 +42,7 @@ impl ScoutingServer {
 		Ok(Self {
 			api: Api::new(
 				tba.clone(),
-				StatboticsCache::new(config.get_server_config().current_year),
+				StatboticsCache::new(&config.get_server_config().current_event),
 				config.clone(),
 				database,
 			),

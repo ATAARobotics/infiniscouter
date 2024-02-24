@@ -219,10 +219,10 @@ fn get_pie_chart(
 	};
 	let options = option_values
 		.iter()
-		.map(|(option, _)| PieChartOption {
+		.filter_map(|(option, value)| value.map(|_| PieChartOption {
 			label: option.to_string(),
 			value: options_map.get(*option).copied().unwrap_or(0.0),
-		})
+		}))
 		.collect::<Vec<_>>();
 	TeamInfoEntry::PieChart(PieChartEntry {
 		options,
@@ -267,7 +267,7 @@ fn single_team_impl(
 								],
 								sort_value: sb.wins as f32 - sb.losses as f32,
 							}),
-							"rps" => Some(PieChartEntry {
+							"rps-ratio" => Some(PieChartEntry {
 								options: vec![
 									PieChartOption {
 										label: "None".to_string(),
@@ -296,6 +296,7 @@ fn single_team_impl(
 								"wins" => sb.wins as f32,
 								"losses" => sb.losses as f32,
 								"ties" => sb.ties as f32,
+								"rps" => sb.rps as f32,
 								"games" => (sb.wins + sb.losses + sb.ties) as f32,
 								"rp-1" => sb.rp_1_epa_end,
 								"rp-2" => sb.rp_2_epa_end,
@@ -511,7 +512,7 @@ fn table_labels(config: &GameConfigs) -> Vec<NameAndSource> {
 					NameAndSource {
 						name: match metric.metric.trim_start_matches(SB_PREFIX) {
 							"wlt-ratio" => "W/L/T".to_string(),
-							"rps" => "Ranking Points".to_string(),
+							"rps-ratio" => "Ranking Points".to_string(),
 							"points" => "Total Points".to_string(),
 							"auto-points" => "Auto Points".to_string(),
 							"teleop-points" => "Teleop Points".to_string(),
@@ -519,6 +520,7 @@ fn table_labels(config: &GameConfigs) -> Vec<NameAndSource> {
 							"wins" => "Wins".to_string(),
 							"losses" => "Losses".to_string(),
 							"ties" => "Ties".to_string(),
+							"rps" => "RPs".to_string(),
 							"games" => "Games".to_string(),
 							"rp-1" => config
 								.game_config
