@@ -1,5 +1,5 @@
 # TODO:
-1. [ ] UI Overhaul - Veda - Today/probably will take more than a day
+1. [x] UI Overhaul - Veda - Today/probably will take more than a day
 2. [x] Finalize Scouting Configuration pre week 0 - Today
 3. [x] Finish Pit & Driver Page - Jason - Today
 4. [ ] Make pre-match page - Jason - Probably not today
@@ -16,7 +16,7 @@
 15. [ ] Send all values for single team analysis page
 16. [ ] Add attempts/success for scout boredom
 17. [x] Add order to config file entries within pages
-18. [ ] Get stuff from TBA
+18. [ ] Get stuff from TBA !important
 19. [x] Update match scouting for did not show
 20. [ ] Analysis client pinning rows and columns
 21. [x] Only allow pit/match as combo
