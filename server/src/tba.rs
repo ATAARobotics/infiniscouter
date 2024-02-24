@@ -1,8 +1,10 @@
+use base64::Engine;
 use std::{
 	collections::{btree_map::Entry, BTreeMap, HashMap},
 	sync::Arc,
 };
 
+use base64::engine::general_purpose::STANDARD;
 use color_eyre::{eyre::bail, Result};
 use futures_util::future;
 use log::error;
@@ -10,13 +12,15 @@ use poem::http::{HeaderMap, HeaderValue};
 use poem_openapi::{Enum, Object, Union};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, RwLock};
 use ts_rs::TS;
 
 /// A struct to manage and cache information from the blue alliance
 #[derive(Debug)]
 pub struct Tba {
 	event_cache: Mutex<BTreeMap<String, Arc<EventInfo>>>,
+	#[allow(clippy::type_complexity)]
+	avatar_cache: RwLock<HashMap<(u32, u32), Option<Vec<u8>>>>,
 	client: Client,
 }
 
@@ -32,45 +36,10 @@ pub struct EventInfo {
 impl EventInfo {
 	async fn new(
 		match_infos: Vec<RawTbaMatch>,
-		team_infos: Vec<RawTbaTeam>,
-		client: &Client,
+		team_infos: Vec<TeamInfo>,
 		year: u32,
 		event: &str,
 	) -> EventInfo {
-		let team_infos: HashMap<_, _> =
-			future::join_all(team_infos.into_iter().map(|team_info| async move {
-				let image = client
-					.get(format!(
-						"https://www.thebluealliance.com/api/v3/team/frc{}/media/{year}",
-						team_info.team_number
-					))
-					.send()
-					.await
-					.unwrap()
-					.json::<Vec<RawTbaImage>>()
-					.await
-					.ok()
-					.and_then(|media| {
-						media
-							.into_iter()
-							.filter(|i| i.image_type == "avatar")
-							.find_map(|i| i.details.and_then(|d| d.base64_image))
-					});
-				(
-					team_info.team_number,
-					TeamInfo {
-						num: team_info.team_number,
-						name: team_info
-							.nickname
-							.or(team_info.name)
-							.unwrap_or_else(|| "unknown".to_string()),
-						icon_uri: image,
-					},
-				)
-			}))
-			.await
-			.into_iter()
-			.collect();
 		let mut match_infos: Vec<_> = match_infos
 			.into_iter()
 			.filter_map(|m| m.into_match().ok())
@@ -78,7 +47,10 @@ impl EventInfo {
 		match_infos.sort_by_key(|m| m.start_time);
 		EventInfo {
 			match_infos,
-			team_infos,
+			team_infos: team_infos
+				.into_iter()
+				.map(|team_info| (team_info.num, team_info))
+				.collect(),
 			event: event.to_string(),
 			year,
 		}
@@ -90,6 +62,7 @@ impl Tba {
 		let mut headers = HeaderMap::new();
 		headers.insert("X-TBA-Auth-Key", HeaderValue::from_str(&key)?);
 		Ok(Tba {
+			avatar_cache: RwLock::new(HashMap::new()),
 			event_cache: Mutex::new(BTreeMap::new()),
 			client: Client::builder()
 				.user_agent(env!("CARGO_PKG_NAME"))
@@ -97,6 +70,39 @@ impl Tba {
 				.build()?,
 		})
 	}
+
+	pub async fn get_avatar(&self, team: u32, year: u32) -> Option<Vec<u8>> {
+		if let Some(data) = self.avatar_cache.read().await.get(&(team, year)) {
+			return data.clone();
+		}
+
+		let image = self
+			.client
+			.get(format!(
+				"https://www.thebluealliance.com/api/v3/team/frc{team}/media/{year}",
+			))
+			.send()
+			.await
+			.unwrap()
+			.json::<Vec<RawTbaImage>>()
+			.await
+			.ok()
+			.and_then(|media| {
+				media
+					.into_iter()
+					.filter(|i| i.image_type == "avatar")
+					.find_map(|i| i.details.and_then(|d| d.base64_image))
+			})
+			.and_then(|image_base64| STANDARD.decode(image_base64).ok());
+
+		self.avatar_cache
+			.write()
+			.await
+			.insert((team, year), image.clone());
+
+		image
+	}
+
 	pub async fn get_event(&self, year: u32, event: &str) -> Option<Arc<EventInfo>> {
 		Some(
 			match self.event_cache.lock().await.entry(event.to_string()) {
@@ -114,6 +120,23 @@ impl Tba {
 						.await
 						.ok()?;
 					teams.retain(|t| !(9990..=9999).contains(&t.team_number));
+					let team_infos: Vec<_> =
+						future::join_all(teams.into_iter().map(|raw_team| async move {
+							TeamInfo {
+								num: raw_team.team_number,
+								name: raw_team
+									.nickname
+									.or(raw_team.name)
+									.unwrap_or_else(|| "unknown".to_string()),
+								has_avatar: self
+									.get_avatar(raw_team.team_number, year)
+									.await
+									.is_some(),
+							}
+						}))
+						.await
+						.into_iter()
+						.collect();
 					EventInfo::new(
 						self.client
 							.get(format!(
@@ -125,8 +148,7 @@ impl Tba {
 							.json::<Vec<RawTbaMatch>>()
 							.await
 							.ok()?,
-						teams,
-						&self.client,
+						team_infos,
 						year,
 						event,
 					)
@@ -249,7 +271,7 @@ struct RawTbaImageDetails {
 pub struct TeamInfo {
 	pub num: u32,
 	pub name: String,
-	pub icon_uri: Option<String>,
+	pub has_avatar: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]

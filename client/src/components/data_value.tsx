@@ -112,11 +112,7 @@ export function DataValue(props: DataValueProps) {
 				<a href={`/team/${props.value.number}`}>
 					<Typography level="h3">
 						{props.value.icon_uri !== null && (
-							<img
-								width={40}
-								height={40}
-								src={"data:image/png;base64, " + props.value.icon_uri}
-							/>
+							<img width={40} height={40} src={props.value.icon_uri} />
 						)}{" "}
 						{props.value.number} {props.value.name}
 					</Typography>

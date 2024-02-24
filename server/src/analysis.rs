@@ -484,7 +484,9 @@ fn single_team_impl(
 			crate::config::DisplayColumn::TeamName(_) => TeamInfoEntry::TeamName(TeamNameEntry {
 				number: tba_data.team_infos[&team].num,
 				name: tba_data.team_infos[&team].name.clone(),
-				icon_uri: tba_data.team_infos[&team].icon_uri.clone(),
+				icon_uri: tba_data.team_infos[&team]
+					.has_avatar
+					.then(|| format!("/avatar/{team}")),
 				sort_value: tba_data.team_infos[&team].num as f32,
 			}),
 			crate::config::DisplayColumn::CommonYearSpecific(_) => {
@@ -621,7 +623,9 @@ pub async fn single_team(
 	SingleTeamInfo {
 		team_number: team,
 		team_name: tba_data.team_infos[&team].name.clone(),
-		team_icon_uri: tba_data.team_infos[&team].icon_uri.clone(),
+		team_icon_uri: tba_data.team_infos[&team]
+			.has_avatar
+			.then(|| format!("/avatar/{team}")),
 		data: table_labels(config)
 			.into_iter()
 			.zip(

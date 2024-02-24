@@ -24,13 +24,13 @@ use self::data::{MatchEntryIdData, PitEntryIdData};
 pub struct Api {
 	config: ConfigManager,
 	database: Database,
-	tba: Tba,
+	tba: Arc<Tba>,
 	statbotics: StatboticsCache,
 }
 
 impl Api {
 	pub fn new(
-		tba: Tba,
+		tba: Arc<Tba>,
 		statbotics: StatboticsCache,
 		config: ConfigManager,
 		database: Database,

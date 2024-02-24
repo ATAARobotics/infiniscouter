@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 async-openai = "0.18"
+base64 = "0.21"
 color-eyre = "0.6"
 futures-util = "0.3"
 log = "0.4"
