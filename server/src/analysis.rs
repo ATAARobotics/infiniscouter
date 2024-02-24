@@ -100,6 +100,7 @@ pub struct SingleTeamInfo {
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct NameAndSource {
 	name: String,
+	page: String,
 	source: DataSource,
 }
 
@@ -219,10 +220,12 @@ fn get_pie_chart(
 	};
 	let options = option_values
 		.iter()
-		.filter_map(|(option, value)| value.map(|_| PieChartOption {
-			label: option.to_string(),
-			value: options_map.get(*option).copied().unwrap_or(0.0),
-		}))
+		.filter_map(|(option, value)| {
+			value.map(|_| PieChartOption {
+				label: option.to_string(),
+				value: options_map.get(*option).copied().unwrap_or(0.0),
+			})
+		})
 		.collect::<Vec<_>>();
 	TeamInfoEntry::PieChart(PieChartEntry {
 		options,
@@ -536,55 +539,56 @@ fn table_labels(config: &GameConfigs) -> Vec<NameAndSource> {
 								.unwrap_or("RP 2".to_string()),
 							_ => "Unknown Statbotics".to_string(),
 						},
+						page: "Data".to_string(),
 						source: DataSource::Statbotics,
 					}
-				} else if let Some(title) = config
+				} else if let Some(match_entry) = config
 					.match_entry_fields
 					.entries
 					.get(&metric.metric)
 					.as_ref()
-					.map(|m| &m.title)
 				{
 					NameAndSource {
-						name: title.clone(),
+						name: match_entry.title.clone(),
+						page: match_entry.page.clone(),
 						source: DataSource::Match,
 					}
-				} else if let Some(title) = config
-					.pit_entry_fields
-					.entries
-					.get(&metric.metric)
-					.as_ref()
-					.map(|m| &m.title)
+				} else if let Some(pit_entry) =
+					config.pit_entry_fields.entries.get(&metric.metric).as_ref()
 				{
 					NameAndSource {
-						name: title.clone(),
+						name: pit_entry.title.clone(),
+						page: pit_entry.page.clone(),
 						source: DataSource::Pit,
 					}
-				} else if let Some(title) = config
+				} else if let Some(driver_entry) = config
 					.driver_entry_fields
 					.entries
 					.get(&metric.metric)
 					.as_ref()
-					.map(|m| &m.title)
 				{
 					NameAndSource {
-						name: title.clone(),
+						name: driver_entry.title.clone(),
+						page: driver_entry.page.clone(),
 						source: DataSource::Driver,
 					}
 				} else {
 					NameAndSource {
 						name: metric.metric.clone(),
+						page: "Unknown".to_string(),
 						source: DataSource::Unknown,
 					}
 				}
 			}
 			crate::config::DisplayColumn::TeamName(_) => NameAndSource {
 				name: "Team Name".to_string(),
+				page: "N/A".to_string(),
 				source: DataSource::System,
 			},
 			crate::config::DisplayColumn::CommonYearSpecific(_) => NameAndSource {
 				name: "INVALID".to_string(),
-				source: DataSource::System,
+				page: "Unknown".to_string(),
+				source: DataSource::Unknown,
 			},
 		})
 		.collect()

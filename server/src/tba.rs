@@ -5,8 +5,8 @@ use std::{
 	sync::Arc,
 };
 
-use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
+use base64::Engine;
 use color_eyre::{eyre::bail, Result};
 use futures_util::future;
 use log::{error, info};

@@ -48,6 +48,8 @@ pub struct MatchEntry {
 	pub title: String,
 	/// Human readable description of the entry
 	pub description: String,
+	/// The page that holds this metric
+	pub page: String,
 	/// The type of entry along with any parameters (if present)
 	pub entry: MatchEntryType,
 }
@@ -144,6 +146,7 @@ impl MatchEntryFields {
 								MatchEntry {
 									title: metric.name.clone(),
 									description: metric.description.clone(),
+									page: category.name.clone(),
 									entry: MatchEntryType::from(&metric.metric, entry_type),
 								},
 							)
