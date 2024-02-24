@@ -1,6 +1,5 @@
 use std::collections::HashSet;
 use std::sync::Arc;
-use std::time::Instant;
 use std::{collections::HashMap, time::Duration};
 
 use color_eyre::Result;
@@ -12,14 +11,7 @@ use tokio::spawn;
 use tokio::sync::{Mutex, RwLock};
 use ts_rs::TS;
 
-#[derive(Debug, Clone, PartialEq)]
-struct DefaultInstant(Instant);
-
-impl Default for DefaultInstant {
-	fn default() -> Self {
-		Self(Instant::now())
-	}
-}
+use crate::DefaultInstant;
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]

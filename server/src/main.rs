@@ -9,6 +9,8 @@ mod server;
 mod statbotics;
 mod tba;
 
+use std::time::Instant;
+
 use color_eyre::Result;
 use log::info;
 use simplelog::{Config, LevelFilter, SimpleLogger};
@@ -16,6 +18,15 @@ use simplelog::{Config, LevelFilter, SimpleLogger};
 use crate::config::ConfigManager;
 use crate::database::Database;
 use crate::server::ScoutingServer;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct DefaultInstant(Instant);
+
+impl Default for DefaultInstant {
+	fn default() -> Self {
+		Self(Instant::now())
+	}
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {

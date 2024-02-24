@@ -1,26 +1,33 @@
-use base64::Engine;
+use std::collections::HashSet;
+use std::time::{Duration, Instant};
 use std::{
-	collections::{btree_map::Entry, BTreeMap, HashMap},
+	collections::{BTreeMap, HashMap},
 	sync::Arc,
 };
 
+use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 use color_eyre::{eyre::bail, Result};
 use futures_util::future;
-use log::error;
+use log::{error, info};
 use poem::http::{HeaderMap, HeaderValue};
 use poem_openapi::{Enum, Object, Union};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use tokio::spawn;
 use tokio::sync::{Mutex, RwLock};
 use ts_rs::TS;
+
+use crate::DefaultInstant;
+
+type AvatarCache = RwLock<HashMap<(u32, u32), Option<Vec<u8>>>>;
 
 /// A struct to manage and cache information from the blue alliance
 #[derive(Debug)]
 pub struct Tba {
-	event_cache: Mutex<BTreeMap<String, Arc<EventInfo>>>,
-	#[allow(clippy::type_complexity)]
-	avatar_cache: RwLock<HashMap<(u32, u32), Option<Vec<u8>>>>,
+	event_cache: Arc<RwLock<BTreeMap<String, EventInfo>>>,
+	events_loading: Arc<Mutex<HashSet<String>>>,
+	avatar_cache: Arc<AvatarCache>,
 	client: Client,
 }
 
@@ -31,6 +38,10 @@ pub struct EventInfo {
 	pub team_infos: HashMap<u32, TeamInfo>,
 	pub event: String,
 	pub year: u32,
+	#[serde(skip)]
+	#[ts(skip)]
+	#[oai(skip)]
+	last_update: DefaultInstant,
 }
 
 impl EventInfo {
@@ -53,6 +64,7 @@ impl EventInfo {
 				.collect(),
 			event: event.to_string(),
 			year,
+			last_update: DefaultInstant(Instant::now()),
 		}
 	}
 }
@@ -62,8 +74,9 @@ impl Tba {
 		let mut headers = HeaderMap::new();
 		headers.insert("X-TBA-Auth-Key", HeaderValue::from_str(&key)?);
 		Ok(Tba {
-			avatar_cache: RwLock::new(HashMap::new()),
-			event_cache: Mutex::new(BTreeMap::new()),
+			avatar_cache: Arc::new(RwLock::new(HashMap::new())),
+			event_cache: Arc::new(RwLock::new(BTreeMap::new())),
+			events_loading: Arc::new(Mutex::new(HashSet::new())),
 			client: Client::builder()
 				.user_agent(env!("CARGO_PKG_NAME"))
 				.default_headers(headers)
@@ -72,12 +85,76 @@ impl Tba {
 	}
 
 	pub async fn get_avatar(&self, team: u32, year: u32) -> Option<Vec<u8>> {
-		if let Some(data) = self.avatar_cache.read().await.get(&(team, year)) {
+		Self::get_avatar_impl(&self.avatar_cache, &self.client, team, year).await
+	}
+
+	pub async fn get_event(&self, year: u32, event: &str) -> Option<EventInfo> {
+		let event_info = self.event_cache.read().await.get(event).cloned();
+
+		match event_info {
+			None => match Self::load_event(&self.client, &self.avatar_cache, year, event).await {
+				Ok(event_info) => {
+					info!("TBA ({event}): load complete");
+					self.event_cache
+						.write()
+						.await
+						.insert(event.to_string(), event_info.clone());
+					Some(event_info)
+				}
+				Err(err) => {
+					error!("TBA ({event}): load error: {err}");
+					None
+				}
+			},
+			Some(event_info) => {
+				if event_info.last_update.0.elapsed() > Duration::from_secs(5 * 60) {
+					self.trigger_load(year, event).await;
+				}
+
+				Some(event_info)
+			}
+		}
+	}
+
+	async fn trigger_load(&self, year: u32, event: &str) {
+		let mut lock = self.events_loading.lock().await;
+
+		if !lock.contains(event) {
+			lock.insert(event.to_string());
+			drop(lock);
+
+			let event = event.to_string();
+			let client_clone = self.client.clone();
+			let avatar_cache_clone = self.avatar_cache.clone();
+			let event_cache_clone = self.event_cache.clone();
+			let events_loading_clone = self.events_loading.clone();
+			spawn(async move {
+				match Self::load_event(&client_clone, &avatar_cache_clone, year, &event).await {
+					Ok(data) => {
+						info!("TBA ({event}): background load complete");
+						event_cache_clone.write().await.insert(event.clone(), data);
+					}
+					Err(err) => {
+						error!("TBA ({event}): background load error: {err}");
+					}
+				}
+
+				events_loading_clone.lock().await.remove(&event);
+			});
+		}
+	}
+
+	async fn get_avatar_impl(
+		avatar_cache: &AvatarCache,
+		client: &Client,
+		team: u32,
+		year: u32,
+	) -> Option<Vec<u8>> {
+		if let Some(data) = avatar_cache.read().await.get(&(team, year)) {
 			return data.clone();
 		}
 
-		let image = self
-			.client
+		let image = client
 			.get(format!(
 				"https://www.thebluealliance.com/api/v3/team/frc{team}/media/{year}",
 			))
@@ -95,7 +172,7 @@ impl Tba {
 			})
 			.and_then(|image_base64| STANDARD.decode(image_base64).ok());
 
-		self.avatar_cache
+		avatar_cache
 			.write()
 			.await
 			.insert((team, year), image.clone());
@@ -103,60 +180,52 @@ impl Tba {
 		image
 	}
 
-	pub async fn get_event(&self, year: u32, event: &str) -> Option<Arc<EventInfo>> {
-		Some(
-			match self.event_cache.lock().await.entry(event.to_string()) {
-				Entry::Occupied(entry) => entry.into_mut(),
-				Entry::Vacant(entry) => entry.insert(Arc::new({
-					let mut teams = self
-						.client
-						.get(format!(
-							"https://www.thebluealliance.com/api/v3/event/{event}/teams"
-						))
-						.send()
-						.await
-						.ok()?
-						.json::<Vec<RawTbaTeam>>()
-						.await
-						.ok()?;
-					teams.retain(|t| !(9990..=9999).contains(&t.team_number));
-					let team_infos: Vec<_> =
-						future::join_all(teams.into_iter().map(|raw_team| async move {
-							TeamInfo {
-								num: raw_team.team_number,
-								name: raw_team
-									.nickname
-									.or(raw_team.name)
-									.unwrap_or_else(|| "unknown".to_string()),
-								has_avatar: self
-									.get_avatar(raw_team.team_number, year)
-									.await
-									.is_some(),
-							}
-						}))
-						.await
-						.into_iter()
-						.collect();
-					EventInfo::new(
-						self.client
-							.get(format!(
-								"https://www.thebluealliance.com/api/v3/event/{event}/matches"
-							))
-							.send()
-							.await
-							.ok()?
-							.json::<Vec<RawTbaMatch>>()
-							.await
-							.ok()?,
-						team_infos,
-						year,
-						event,
-					)
+	async fn load_event(
+		client: &Client,
+		avatar_cache: &AvatarCache,
+		year: u32,
+		event: &str,
+	) -> Result<EventInfo> {
+		info!("TBA ({event}): Loading data");
+
+		let mut teams = client
+			.get(format!(
+				"https://www.thebluealliance.com/api/v3/event/{event}/teams"
+			))
+			.send()
+			.await?
+			.json::<Vec<RawTbaTeam>>()
+			.await?;
+		teams.retain(|t| !(9990..=9999).contains(&t.team_number));
+		let team_infos: Vec<_> = future::join_all(teams.into_iter().map(|raw_team| async move {
+			TeamInfo {
+				num: raw_team.team_number,
+				name: raw_team
+					.nickname
+					.or(raw_team.name)
+					.unwrap_or_else(|| "unknown".to_string()),
+				has_avatar: Self::get_avatar_impl(avatar_cache, client, raw_team.team_number, year)
 					.await
-				})),
+					.is_some(),
 			}
-			.to_owned(),
+		}))
+		.await
+		.into_iter()
+		.collect();
+		Ok(EventInfo::new(
+			client
+				.get(format!(
+					"https://www.thebluealliance.com/api/v3/event/{event}/matches"
+				))
+				.send()
+				.await?
+				.json::<Vec<RawTbaMatch>>()
+				.await?,
+			team_infos,
+			year,
+			event,
 		)
+		.await)
 	}
 }
 
@@ -168,6 +237,7 @@ struct RawTbaMatch {
 	comp_level: String,
 	set_number: u32,
 	match_number: u32,
+	score_breakdown: Option<RawTbaScoreBreakdowns>,
 	winning_alliance: Option<String>,
 }
 
@@ -244,6 +314,12 @@ struct RawTbaAlliances {
 struct RawTbaAlliance {
 	score: Option<i16>,
 	team_keys: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+struct RawTbaScoreBreakdowns {
+	blue: HashMap<String, serde_json::Value>,
+	red: HashMap<String, serde_json::Value>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
