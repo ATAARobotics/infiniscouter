@@ -6,12 +6,11 @@ use poem_openapi::{Enum, Object, Union};
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
-use crate::config::PreMatchDisplay;
 use crate::{
 	api::data::{DriverEntryIdData, ImageData, MatchEntryData, MatchEntryIdData, MatchEntryValue},
 	config::{
-		match_entry::MatchEntryType, DisplayColumn, GameConfigs, SingleMetric, TeamConfig,
-		TeamNameMetric,
+		match_entry::MatchEntryType, DisplayColumn, GameConfigs, PreMatchDisplay, SingleMetric,
+		TeamConfig, TeamNameMetric,
 	},
 	database::Database,
 	statbotics::{StatboticsCache, StatboticsTeam},
@@ -87,9 +86,8 @@ pub struct MinMaxAvg {
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct InfoEntryWithSource {
+	name: NameAndSource,
 	entry: TeamInfoEntry,
-	page: String,
-	source: DataSource,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -98,7 +96,7 @@ pub struct SingleTeamInfo {
 	team_number: u32,
 	team_name: String,
 	team_icon_uri: Option<String>,
-	data: HashMap<String, InfoEntryWithSource>,
+	data: Vec<InfoEntryWithSource>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -623,7 +621,7 @@ fn default_display(config: &GameConfigs) -> Vec<usize> {
 		.collect()
 }
 
-pub async fn single_team(
+pub async fn get_single_team_analysis(
 	tba: &Tba,
 	statbotics: &StatboticsCache,
 	database: &Database,
@@ -631,6 +629,8 @@ pub async fn single_team(
 	config: &GameConfigs,
 	team: u32,
 ) -> SingleTeamInfo {
+	info!("Loading team analysis for {team}");
+
 	let match_entries =
 		database.get_all_match_entries(team_config.current_year, &team_config.current_event);
 	let driver_entries =
@@ -639,14 +639,17 @@ pub async fn single_team(
 		.get_event(team_config.current_year, &team_config.current_event)
 		.await
 		.unwrap();
+	let statbotics_team = statbotics.get(team).await;
 	SingleTeamInfo {
 		team_number: team,
 		team_name: tba_data.team_infos[&team].name.clone(),
 		team_icon_uri: tba_data.team_infos[&team].get_icon_url(),
-		data: table_labels(config)
-			.into_iter()
-			.zip(
-				single_team_impl(
+		data: config
+			.all_metrics
+			.iter()
+			.map(|metric| InfoEntryWithSource {
+				name: get_metric_name(config, metric),
+				entry: get_single_metric(
 					config,
 					&match_entries,
 					&driver_entries,
@@ -658,27 +661,16 @@ pub async fn single_team(
 						)
 						.unwrap()
 						.as_ref(),
-					&tba_data,
-					statbotics.get(team).await.as_deref(),
+					statbotics_team.as_deref(),
 					team,
-				)
-				.into_iter(),
-			)
-			.map(|(name_and_source, entry)| {
-				(
-					name_and_source.name,
-					InfoEntryWithSource {
-						entry,
-						page: name_and_source.page,
-						source: name_and_source.source,
-					},
-				)
+					metric,
+				),
 			})
 			.collect(),
 	}
 }
 
-pub async fn list(
+pub async fn get_analysis_list(
 	tba: &Tba,
 	statbotics: &StatboticsCache,
 	database: &Database,

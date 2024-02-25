@@ -166,8 +166,8 @@ pub struct ImageMetric {
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct StatboticsTeamMetric {
-	/// The property to extract from the statbotics team object
-	pub prop: String,
+	/// The Statbotics properties to include
+	pub props: Vec<String>,
 }
 
 /// Configure how the data is processed and displayed
@@ -267,14 +267,46 @@ pub struct GameConfigs {
 	pub driver_entry_fields: MatchEntryFields,
 	/// The fields to gather for pit scouting
 	pub pit_entry_fields: MatchEntryFields,
+	/// All the categories for all field types
+	pub all_metrics: Vec<String>,
 }
 
 impl From<GameConfig> for GameConfigs {
 	fn from(value: GameConfig) -> Self {
+		let mut all_categories = value.categories.values().cloned().collect::<Vec<_>>();
+		all_categories.sort_by_key(|c| c.order);
+
 		GameConfigs {
 			match_entry_fields: MatchEntryFields::from_game_config(&value, EntryType::Match),
 			driver_entry_fields: MatchEntryFields::from_game_config(&value, EntryType::DriveTeam),
 			pit_entry_fields: MatchEntryFields::from_game_config(&value, EntryType::Pit),
+			all_metrics: all_categories
+				.into_iter()
+				.flat_map(|category| {
+					let mut metrics = category
+						.metrics
+						.iter()
+						.map(|(metric_name, metric)| (metric_name.clone(), metric))
+						.collect::<Vec<_>>();
+					metrics.sort_by_key(|(_, m)| m.order);
+
+					metrics
+						.into_iter()
+						.flat_map(|(metric_name, metric)| {
+							if let CollectedMetricType::StatboticsTeam(statbotics) = &metric.metric
+							{
+								statbotics
+									.props
+									.iter()
+									.map(|prop| format!("statbotics-{prop}"))
+									.collect()
+							} else {
+								vec![metric_name]
+							}
+						})
+						.collect::<Vec<_>>()
+				})
+				.collect(),
 			game_config: value,
 		}
 	}

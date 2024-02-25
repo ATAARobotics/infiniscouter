@@ -5,46 +5,35 @@ categories:
     name: Data
     order: 10
     metrics:
-      total-points:
+      statbotics:
         order: 10
-        name: Total Points
-        description: Total average points scored
+        name: Statbotics Data
+        description: This represents all of the statbotics data
         metric:
           type: statbotics_team
-          prop: total_epa_end
+          props:
+            - wlt-ratio
+            - rps-ratio
+            - points
+            - auto-points
+            - teleop-points
+            - endgame-points
+            - wins
+            - losses
+            - ties
+            - rps
+            - games
+            - rp-1
+            - rp-2
   auto:
     name: Auto
     order: 20
-    metrics:
-      auto-points:
-        order: 10
-        name: Auto Points
-        description: Points scored in auto
-        metric:
-          type: statbotics_team
-          prop: auto_epa_end
   teleop:
     name: Teleop
     order: 30
-    metrics:
-      teleop-points:
-        order: 10
-        name: Teleop Points
-        description: Points scored in teleop
-        metric:
-          type: statbotics_team
-          prop: teleop_epa_end
   endgame:
     name: Endgame
     order: 40
-    metrics:
-      teleop-points:
-        order: 10
-        name: Endgame Points
-        description: Points scored in endgame
-        metric:
-          type: statbotics_team
-          prop: endgame_epa_end
   impressions:
     name: Impressions
     order: 50

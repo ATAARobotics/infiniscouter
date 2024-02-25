@@ -365,7 +365,7 @@ impl Api {
 	#[oai(path = "/analysis/list", method = "get")]
 	pub async fn analysis_list(&self) -> Json<TeamInfoList> {
 		Json(
-			analysis::list(
+			analysis::get_analysis_list(
 				&self.tba,
 				&self.statbotics,
 				&self.database,
@@ -378,7 +378,7 @@ impl Api {
 	#[oai(path = "/analysis/team/:team", method = "get")]
 	pub async fn analysis_team(&self, team: Path<u32>) -> Json<SingleTeamInfo> {
 		Json(
-			analysis::single_team(
+			analysis::get_single_team_analysis(
 				&self.tba,
 				&self.statbotics,
 				&self.database,
