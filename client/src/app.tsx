@@ -14,6 +14,7 @@ import { NotFound } from "./pages/not_found";
 import { PitEntry } from "./pages/pit_entry";
 import { Reload } from "./pages/reload";
 import { TeamInfo } from "./pages/team_info";
+import { Leaderboard } from "./pages/leaderboard";
 
 /**
  * Main app component.
@@ -35,6 +36,7 @@ function App() {
 						<Route path="/pit_entry" component={PitEntry} />
 						<Route path="/analysis" component={Analysis} />
 						<Route path="/team/:team" component={TeamInfo} />
+						<Route path="/leaderboard" component={Leaderboard} />
 						<Route default component={NotFound} />
 					</Router>
 				</main>
