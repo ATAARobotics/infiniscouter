@@ -1,6 +1,7 @@
 import { Box } from "@mui/joy";
 import { useLocation } from "preact-iso";
 import { useEffect } from "react";
+
 import { Navbar } from "./navbar";
 
 /**

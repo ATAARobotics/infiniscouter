@@ -1,14 +1,14 @@
 import { Box, Checkbox, Chip, Stack, Table, Typography } from "@mui/joy";
 import { useEffect, useState } from "preact/compat";
-import { TeamInfoEntry } from "src/generated/TeamInfoEntry";
+import FlipMove from "react-flip-move";
 
 import { DataValue } from "../components/data_value";
 import { LoadIndicator } from "../components/load_indicator";
+import { Navbar } from "../components/navbar";
+import { NameAndSource } from "../generated/NameAndSource";
+import { TeamInfoDisplay } from "../generated/TeamInfoDisplay";
+import { TeamInfoEntry } from "../generated/TeamInfoEntry";
 import { TeamInfoList } from "../generated/TeamInfoList";
-import FlipMove from "react-flip-move";
-import { TeamInfoDisplay } from "src/generated/TeamInfoDisplay";
-import { NameAndSource } from "src/generated/NameAndSource";
-import { Navbar } from "src/components/navbar";
 
 /**
  * Return the sort value for a table based on index

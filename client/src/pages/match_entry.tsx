@@ -4,13 +4,13 @@ import { useState } from "preact/hooks";
 
 import { MatchPage } from "../components/entry_components";
 import { MatchAndTeamSelector } from "../components/match_and_team_selector";
+import { Navbar } from "../components/navbar";
 import { ScoutNameRequired } from "../components/scout_name_required";
 import { SyncRequired } from "../components/sync_required";
 import { matchFieldsAtom, matchListAtom, scoutNameAtom } from "../data/atoms";
 import { getMatchKey, useEntries } from "../data/entries";
 import { MatchEntry } from "../generated/MatchEntry";
 import { MatchEntryIdData } from "../generated/MatchEntryIdData";
-import { Navbar } from "src/components/navbar";
 
 /**
  * The match entry page component.

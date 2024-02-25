@@ -1,6 +1,7 @@
 import { Box, Stack, Table } from "@mui/joy";
 import { useAtomValue } from "jotai/react";
 
+import { Navbar } from "../components/navbar";
 import { SyncRequired } from "../components/sync_required";
 import { TbaLink } from "../components/tba_link";
 import { matchListAtom } from "../data/atoms";
@@ -8,7 +9,6 @@ import { getMatchScout } from "../data/entries";
 import { EventInfo } from "../generated/EventInfo";
 import { MatchId } from "../generated/MatchId";
 import { MatchInfo } from "../generated/MatchInfo";
-import { Navbar } from "src/components/navbar";
 
 /**
  * Format a match ID for display.

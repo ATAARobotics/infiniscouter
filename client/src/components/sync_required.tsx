@@ -1,4 +1,5 @@
 import { Box } from "@mui/joy";
+
 import { Navbar } from "./navbar";
 
 /**

@@ -58,11 +58,11 @@ export function TeamInfo(props: TeamInfoProps) {
 					<Stack direction="row" flexWrap={"wrap"} gap={"25px"}>
 						{entries
 							.filter(({ entry }) => entry.type !== "multi_text")
-							.map(({ entry, name }) => {
+							.map(({ entry, name: entry_name }) => {
 								return (
 									<Card sx={{ width: 150 }}>
 										<Typography level="title-lg">
-											{name.name}
+											{entry_name.name}
 										</Typography>
 
 										<DataValue
@@ -75,10 +75,12 @@ export function TeamInfo(props: TeamInfoProps) {
 					</Stack>
 					{entries
 						.filter(({ entry }) => entry.type === "multi_text")
-						.map(({ entry, name }) => {
+						.map(({ entry, name: entry_name }) => {
 							return (
 								<>
-									<Typography level="title-lg">{name.name}</Typography>
+									<Typography level="title-lg">
+										{entry_name.name}
+									</Typography>
 									{(entry as MultiTextEntry).strings.map((s) => (
 										<p>{s}</p>
 									))}

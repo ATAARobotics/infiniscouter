@@ -1,4 +1,4 @@
-import { Navbar } from "src/components/navbar";
+import { Navbar } from "../components/navbar";
 
 /**
  *	Component for the "404 not found" page.

@@ -1,8 +1,8 @@
 import { Box, Input } from "@mui/joy";
 import { useAtom } from "jotai/react";
 
+import { Navbar } from "../components/navbar";
 import { scoutNameAtom } from "../data/atoms";
-import { Navbar } from "src/components/navbar";
 
 /**
  * Scouting configuration page

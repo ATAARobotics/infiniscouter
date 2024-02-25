@@ -4,12 +4,12 @@ import { useState } from "preact/hooks";
 
 import { MatchPage } from "../components/entry_components";
 import { MatchAndTeamSelector } from "../components/match_and_team_selector";
+import { Navbar } from "../components/navbar";
 import { ScoutNameRequired } from "../components/scout_name_required";
 import { SyncRequired } from "../components/sync_required";
 import { driverFieldsAtom, matchListAtom, scoutNameAtom } from "../data/atoms";
 import { getDriverKey, useEntries } from "../data/entries";
 import { DriverEntryIdData } from "../generated/DriverEntryIdData";
-import { Navbar } from "src/components/navbar";
 
 /**
  * The driver scouting page component.

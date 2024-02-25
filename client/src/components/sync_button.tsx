@@ -1,6 +1,6 @@
 import { Button } from "@mui/joy";
 import { useAtom, useSetAtom } from "jotai/react";
-import { useEffect, useState } from "preact/hooks";
+import { useState } from "preact/hooks";
 
 import {
 	driverFieldsAtom,

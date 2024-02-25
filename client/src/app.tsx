@@ -7,6 +7,7 @@ import { Analysis } from "./pages/analysis";
 import { Configuration } from "./pages/configuration";
 import { DriverEntry } from "./pages/driver_entry";
 import { Home } from "./pages/home";
+import { Leaderboard } from "./pages/leaderboard";
 import { MatchEntry } from "./pages/match_entry";
 import { MatchInfo } from "./pages/match_info";
 import { MatchList } from "./pages/match_list";
@@ -14,7 +15,6 @@ import { NotFound } from "./pages/not_found";
 import { PitEntry } from "./pages/pit_entry";
 import { Reload } from "./pages/reload";
 import { TeamInfo } from "./pages/team_info";
-import { Leaderboard } from "./pages/leaderboard";
 
 /**
  * Main app component.

@@ -25,6 +25,7 @@
       "jsx": true
     }
   },
+  "ignorePatterns": ["src/generated/**"],
   "rules": {
     "quotes": ["warn", "double"],
     "comma-style": ["warn", "last"],

@@ -4,12 +4,12 @@ import { useState } from "preact/hooks";
 
 import { MatchPage } from "../components/entry_components";
 import { LoadIndicator } from "../components/load_indicator";
+import { Navbar } from "../components/navbar";
 import { ScoutNameRequired } from "../components/scout_name_required";
 import { SyncRequired } from "../components/sync_required";
 import { matchListAtom, pitFieldsAtom, scoutNameAtom } from "../data/atoms";
 import { getPitKey, useEntries } from "../data/entries";
 import { PitEntryIdData } from "../generated/PitEntryIdData";
-import { Navbar } from "src/components/navbar";
 
 /**
  * The pit scouting entry page component.

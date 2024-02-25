@@ -1,4 +1,5 @@
 import { JSXInternal } from "preact/src/jsx";
+
 import { MatchId } from "../generated/MatchId";
 
 export interface TbaLinkProps {
