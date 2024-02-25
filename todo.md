@@ -5,7 +5,7 @@
 4. [x] Make pre-match page - Jason - Probably not today
 5. [x] Fix yes/no boolean things - Jason - tomorrow
 6. [x] Send zeros for pie charts and don't average in "Nothing"
-7. [ ] Organize single team analysis page
+7. [x] Organize single team analysis page
 8. [ ] Send notes to ChatGPT
 9. [x] Fix counter double click
 10. [ ] Show pit things as non-pie chart things
@@ -13,7 +13,7 @@
 12. [ ] Scout scheduling
 13. [ ] Scount leaderboard
 14. [x] Update config with default values for anlysis page
-15. [ ] Send all values for single team analysis page
+15. [x] Send all values for single team analysis page
 16. [ ] Add attempts/success for scout boredom
 17. [x] Add order to config file entries within pages
 18. [ ] Get stuff from TBA !important

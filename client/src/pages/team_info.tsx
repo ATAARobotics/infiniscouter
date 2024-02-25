@@ -3,8 +3,10 @@ import { useEffect, useState } from "react";
 
 import { DataValue } from "../components/data_value";
 import { LoadIndicator } from "../components/load_indicator";
+import { Navbar } from "../components/navbar";
+import { InfoEntryWithSource } from "../generated/InfoEntryWithSource";
+import { MultiTextEntry } from "../generated/MultiTextEntry";
 import { SingleTeamInfo } from "../generated/SingleTeamInfo";
-import { Navbar } from "src/components/navbar";
 
 interface TeamInfoProps {
 	team: number;
@@ -27,43 +29,64 @@ export function TeamInfo(props: TeamInfoProps) {
 		return <LoadIndicator></LoadIndicator>;
 	}
 
+	const pages: Array<Array<InfoEntryWithSource>> = [];
+	for (const entry of data.data) {
+		if (
+			pages.length === 0 ||
+			pages[pages.length - 1][0].name.page !== entry.name.page
+		) {
+			pages.push([entry]);
+		} else {
+			pages[pages.length - 1].push(entry);
+		}
+	}
+
 	return (
 		<Box>
 			<Navbar title={"Team Info"} />
-			<Stack
-				direction="row"
-				flexWrap={"wrap"}
-				gap={"25px"}
-				justifyContent={"space-evenly"}
-			>
-				<Card sx={{ width: 320 }}>
-					<Typography level="title-lg">
-						{data?.team_icon_uri && (
-							<img width={40} height={40} src={data?.team_icon_uri} />
-						)}
-						{data?.team_number}
-						<br />
-						{data?.team_name}
-					</Typography>
-				</Card>
-				{data !== undefined ? (
-					Object.entries(data.data)
-						.filter((entry) => entry[1].entry.type !== "team_name")
-						.map((entry) => {
-							return (
-								<Card sx={{ width: 320 }}>
-									<Typography level="title-lg">{entry[0]}</Typography>
-									<DataValue
-										listView={false}
-										value={entry[1].entry}
-									></DataValue>
-								</Card>
-							);
-						})
-				) : (
-					<></>
+			<Typography level="h2">
+				{data.team_icon_uri && (
+					<img width={40} height={40} src={data.team_icon_uri} />
 				)}
-			</Stack>
+				{data.team_number}
+				<br />
+				{data.team_name}
+			</Typography>
+			{pages.map((entries) => (
+				<>
+					<Typography level="h3">{entries[0].name.page}</Typography>
+					<Stack direction="row" flexWrap={"wrap"} gap={"25px"}>
+						{entries
+							.filter(({ entry }) => entry.type !== "multi_text")
+							.map(({ entry, name }) => {
+								return (
+									<Card sx={{ width: 150 }}>
+										<Typography level="title-lg">
+											{name.name}
+										</Typography>
+
+										<DataValue
+											listView={false}
+											value={entry}
+										></DataValue>
+									</Card>
+								);
+							})}
+					</Stack>
+					{entries
+						.filter(({ entry }) => entry.type === "multi_text")
+						.map(({ entry, name }) => {
+							return (
+								<>
+									<Typography level="title-lg">{name.name}</Typography>
+									{(entry as MultiTextEntry).strings.map((s) => (
+										<p>{s}</p>
+									))}
+								</>
+							);
+						})}
+				</>
+			))}
 		</Box>
 	);
 }
