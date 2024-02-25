@@ -1,5 +1,3 @@
-#![feature(slice_group_by)]
-
 mod analysis;
 mod api;
 mod config;
@@ -8,6 +6,7 @@ mod database;
 mod server;
 mod statbotics;
 mod tba;
+mod leaderboard;
 
 use std::time::Instant;
 

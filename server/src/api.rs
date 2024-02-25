@@ -11,6 +11,7 @@ use crate::config::match_entry::MatchEntryFields;
 use crate::config::{ConfigManager, GameConfig, TeamConfig};
 use crate::data_validation::validate_match;
 use crate::database::Database;
+use crate::leaderboard::{self, LeaderboardInfo};
 use crate::statbotics::StatboticsCache;
 use crate::tba::{EventInfo, MatchId, SetMatch, Tba};
 use poem::http::StatusCode;
@@ -432,5 +433,9 @@ impl Api {
 			)
 			.await,
 		))
+	}
+	#[oai(path = "/leaderboard", method = "get")]
+	pub async fn get_leaderboard(&self) -> Json<LeaderboardInfo> {
+		Json(leaderboard::get_leaderboard(&self.database, &self.config.get_server_config()))
 	}
 }

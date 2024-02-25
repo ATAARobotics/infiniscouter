@@ -199,7 +199,7 @@ fn get_pie_chart(
 	actual_values.sort();
 
 	let options_map: HashMap<_, _> = actual_values
-		.group_by(|a, b| a == b)
+		.chunk_by(|a, b| a == b)
 		.map(|group| (group[0].to_string(), group.len() as f32))
 		.collect();
 	let count = option_values
