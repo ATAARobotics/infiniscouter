@@ -11,7 +11,7 @@
 10. [ ] Show pit things as non-pie chart things
 11. [ ] Show some number values differently (max, distribution, etc)
 12. [ ] Scout scheduling
-13. [ ] Scount leaderboard
+13. [x] Scount leaderboard
 14. [x] Update config with default values for anlysis page
 15. [x] Send all values for single team analysis page
 16. [ ] Add attempts/success for scout boredom

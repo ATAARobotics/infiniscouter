@@ -38,7 +38,8 @@ async fn get_avatar(
 impl ScoutingServer {
 	pub fn new(config: ConfigManager, database: Database) -> Result<Self> {
 		let tba_auth_key = config.get_tba_auth_key().to_string();
-		let tba = Arc::new(Tba::new(tba_auth_key)?);
+		let game_config = config.get_game_config(config.get_server_config().current_year).unwrap().clone();
+		let tba = Arc::new(Tba::new(game_config, tba_auth_key)?);
 		Ok(Self {
 			api: Api::new(
 				tba.clone(),

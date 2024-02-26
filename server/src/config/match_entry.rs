@@ -91,6 +91,9 @@ impl MatchEntryType {
 			CollectedMetricType::StatboticsTeam(_) => {
 				unimplemented!("Statbotics metrics aren't collectable per-match.");
 			}
+			CollectedMetricType::TbaMatch(_) => {
+				unimplemented!("TBA metrics aren't collectable per-match.");
+			}
 		}
 	}
 }

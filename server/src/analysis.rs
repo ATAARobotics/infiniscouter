@@ -621,6 +621,16 @@ fn default_display(config: &GameConfigs) -> Vec<usize> {
 		.collect()
 }
 
+fn get_match_entries(database: &Database, year: u32, event: &str, tba_data: &EventInfo) -> Vec<MatchEntryIdData> {
+	let mut match_entries =
+		database.get_all_match_entries(year, event);
+	for entry in &mut match_entries {
+		println!("{:?}", entry.match_id);
+		let tba_match = tba_data.match_infos.iter().find(|mi| false/*mi.id.is_qual_match(&entry.match_id)*/).unwrap();
+	}
+	match_entries
+}
+
 pub async fn get_single_team_analysis(
 	tba: &Tba,
 	statbotics: &StatboticsCache,
@@ -631,14 +641,14 @@ pub async fn get_single_team_analysis(
 ) -> SingleTeamInfo {
 	info!("Loading team analysis for {team}");
 
-	let match_entries =
-		database.get_all_match_entries(team_config.current_year, &team_config.current_event);
 	let driver_entries =
 		database.get_all_driver_entries(team_config.current_year, &team_config.current_event);
 	let tba_data = tba
 		.get_event(team_config.current_year, &team_config.current_event)
 		.await
 		.unwrap();
+	let match_entries = get_match_entries(&database, team_config.current_year, &team_config.current_event, &tba_data);
+
 	let statbotics_team = statbotics.get(team).await;
 	SingleTeamInfo {
 		team_number: team,
@@ -677,8 +687,6 @@ pub async fn get_analysis_list(
 	team_config: &TeamConfig,
 	config: &GameConfigs,
 ) -> TeamInfoList {
-	let match_entries =
-		database.get_all_match_entries(team_config.current_year, &team_config.current_event);
 	let driver_entries =
 		database.get_all_driver_entries(team_config.current_year, &team_config.current_event);
 	let pit_entries =
@@ -687,6 +695,8 @@ pub async fn get_analysis_list(
 		.get_event(team_config.current_year, &team_config.current_event)
 		.await
 		.unwrap();
+	let match_entries = get_match_entries(&database, team_config.current_year, &team_config.current_event, &tba_data);
+
 	let tba_teams = future::join_all(
 		tba_data
 			.team_infos
@@ -742,14 +752,13 @@ pub async fn get_match_analysis(
 ) -> MatchAnalysisInfo {
 	info!("Loading match preview for {match_id:?}");
 
-	let match_entries =
-		database.get_all_match_entries(team_config.current_year, &team_config.current_event);
 	let driver_entries =
 		database.get_all_driver_entries(team_config.current_year, &team_config.current_event);
 	let tba_data = tba
 		.get_event(team_config.current_year, &team_config.current_event)
 		.await
 		.unwrap();
+	let match_entries = get_match_entries(&database, team_config.current_year, &team_config.current_event, &tba_data);
 
 	let other_data_names = config
 		.game_config

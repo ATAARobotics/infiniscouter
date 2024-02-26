@@ -18,6 +18,8 @@ use tokio::spawn;
 use tokio::sync::{Mutex, RwLock};
 use ts_rs::TS;
 
+use crate::api::data::{CounterEntry, MatchBoolEntry, MatchEntryValue, MatchEnumEntry};
+use crate::config::{GameConfig, GameConfigs};
 use crate::DefaultInstant;
 
 type AvatarCache = RwLock<HashMap<(u32, u32), Option<Vec<u8>>>>;
@@ -29,6 +31,7 @@ pub struct Tba {
 	events_loading: Arc<Mutex<HashSet<String>>>,
 	avatar_cache: Arc<AvatarCache>,
 	client: Client,
+	game_configs: Arc<GameConfigs>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -50,10 +53,11 @@ impl EventInfo {
 		team_infos: Vec<TeamInfo>,
 		year: u32,
 		event: &str,
+		game_config: &GameConfig,
 	) -> EventInfo {
 		let mut match_infos: Vec<_> = match_infos
 			.into_iter()
-			.filter_map(|m| m.into_match().ok())
+			.filter_map(|m| m.into_match(game_config).ok())
 			.collect();
 		match_infos.sort_by_key(|m| m.start_time);
 		EventInfo {
@@ -70,17 +74,18 @@ impl EventInfo {
 }
 
 impl Tba {
-	pub fn new(key: String) -> Result<Tba> {
+	pub fn new(game_configs: Arc<GameConfigs>, key: String) -> Result<Tba> {
 		let mut headers = HeaderMap::new();
 		headers.insert("X-TBA-Auth-Key", HeaderValue::from_str(&key)?);
 		Ok(Tba {
-			avatar_cache: Arc::new(RwLock::new(HashMap::new())),
 			event_cache: Arc::new(RwLock::new(BTreeMap::new())),
 			events_loading: Arc::new(Mutex::new(HashSet::new())),
+			avatar_cache: Arc::new(RwLock::new(HashMap::new())),
 			client: Client::builder()
 				.user_agent(env!("CARGO_PKG_NAME"))
 				.default_headers(headers)
 				.build()?,
+			game_configs,
 		})
 	}
 
@@ -92,7 +97,15 @@ impl Tba {
 		let event_info = self.event_cache.read().await.get(event).cloned();
 
 		match event_info {
-			None => match Self::load_event(&self.client, &self.avatar_cache, year, event).await {
+			None => match Self::load_event(
+				&self.client,
+				&self.avatar_cache,
+				&self.game_configs.game_config,
+				year,
+				event,
+			)
+			.await
+			{
 				Ok(event_info) => {
 					info!("TBA ({event}): load complete");
 					self.event_cache
@@ -128,8 +141,17 @@ impl Tba {
 			let avatar_cache_clone = self.avatar_cache.clone();
 			let event_cache_clone = self.event_cache.clone();
 			let events_loading_clone = self.events_loading.clone();
+			let game_configs = self.game_configs.clone();
 			spawn(async move {
-				match Self::load_event(&client_clone, &avatar_cache_clone, year, &event).await {
+				match Self::load_event(
+					&client_clone,
+					&avatar_cache_clone,
+					&game_configs.game_config,
+					year,
+					&event,
+				)
+				.await
+				{
 					Ok(data) => {
 						info!("TBA ({event}): background load complete");
 						event_cache_clone.write().await.insert(event.clone(), data);
@@ -183,6 +205,7 @@ impl Tba {
 	async fn load_event(
 		client: &Client,
 		avatar_cache: &AvatarCache,
+		game_config: &GameConfig,
 		year: u32,
 		event: &str,
 	) -> Result<EventInfo> {
@@ -224,6 +247,7 @@ impl Tba {
 			team_infos,
 			year,
 			event,
+			game_config,
 		)
 		.await)
 	}
@@ -237,12 +261,13 @@ struct RawTbaMatch {
 	comp_level: String,
 	set_number: u32,
 	match_number: u32,
-	score_breakdown: Option<RawTbaScoreBreakdowns>,
+	#[serde(default)]
+	score_breakdown: RawTbaScoreBreakdowns,
 	winning_alliance: Option<String>,
 }
 
 impl RawTbaMatch {
-	fn into_match(self) -> Result<MatchInfo> {
+	fn into_match(self, game_config: &GameConfig) -> Result<MatchInfo> {
 		Ok(MatchInfo {
 			id: match self.comp_level.as_str() {
 				"q" | "qm" => MatchId::Qualification(SetMatch {
@@ -300,8 +325,70 @@ impl RawTbaMatch {
 				Some("blue") => MatchResult::Blue,
 				_ => MatchResult::Tbd,
 			},
+			custom_entries: CustomEntries {
+				blue: custom_entries_for(game_config, self.score_breakdown.blue),
+				red: custom_entries_for(game_config, self.score_breakdown.red),
+			},
 		})
 	}
+}
+
+fn custom_entries_for(
+	game_config: &GameConfig,
+	value: HashMap<String, RawTbaScoreBreakdownValue>,
+) -> [HashMap<String, MatchEntryValue>; 3] {
+	[1, 2, 3].map(|n| {
+		game_config
+			.get_tba_props()
+			.into_iter()
+			.map(|(prop_name, prop)| {
+				let name = prop.name.replace("{N}", &n.to_string());
+				let data = value
+					.get(&name)
+					.expect("TBA Data wasn't included in report from TBA.");
+				(
+					prop_name.clone(),
+					match prop.ty {
+						crate::config::TbaMatchPropType::Bool => {
+							if let RawTbaScoreBreakdownValue::Boolean(value) = *data {
+								MatchEntryValue::Bool(MatchBoolEntry { value })
+							} else if let RawTbaScoreBreakdownValue::String(value) = data {
+								MatchEntryValue::Bool(MatchBoolEntry {
+									value: value.starts_with('Y') || value.starts_with('y'),
+								})
+							} else {
+								panic!("Expected TBA data of type bool for prop {name}, but found {data:?}");
+							}
+						}
+						crate::config::TbaMatchPropType::Enum => {
+							if let RawTbaScoreBreakdownValue::String(string) = data {
+								if !prop
+									.options
+									.as_ref()
+									.map(|o| o.contains(string))
+									.unwrap_or_default()
+								{
+									panic!("Invalid enum string {string:?} for TBA prop {name}, expected one of: {:?}", prop.options);
+								}
+								MatchEntryValue::Enum(MatchEnumEntry {
+									value: string.clone(),
+								})
+							} else {
+								panic!("Expected TBA data of type string (enum) for prop {name}, but found {data:?}");
+							}
+						}
+						crate::config::TbaMatchPropType::Number => {
+							if let RawTbaScoreBreakdownValue::Number(count) = *data {
+								MatchEntryValue::Counter(CounterEntry { count })
+							} else {
+								panic!("Expected TBA data of type number for prop {name}, but found {data:?}");
+							}
+						}
+					},
+				)
+			})
+			.collect()
+	})
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -317,9 +404,19 @@ struct RawTbaAlliance {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(untagged)]
+enum RawTbaScoreBreakdownValue {
+	Number(i32),
+	String(String),
+	Boolean(bool),
+	//#[serde(default)]
+	//Unknown,
+}
+
+#[derive(Debug, Default, Clone, PartialEq, Deserialize)]
 struct RawTbaScoreBreakdowns {
-	blue: HashMap<String, serde_json::Value>,
-	red: HashMap<String, serde_json::Value>,
+	blue: HashMap<String, RawTbaScoreBreakdownValue>,
+	red: HashMap<String, RawTbaScoreBreakdownValue>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -385,6 +482,13 @@ pub enum MatchResult {
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
+pub struct CustomEntries {
+	blue: [HashMap<String, MatchEntryValue>; 3],
+	red: [HashMap<String, MatchEntryValue>; 3],
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct MatchInfo {
 	pub id: MatchId,
 	/// Start time in milliseconds since the unix epoch.
@@ -396,4 +500,5 @@ pub struct MatchInfo {
 	pub result: MatchResult,
 	pub score_blue: Option<u16>,
 	pub score_red: Option<u16>,
+	pub custom_entries: CustomEntries,
 }

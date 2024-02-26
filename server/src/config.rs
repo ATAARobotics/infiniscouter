@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::File;
 use std::iter;
+use std::sync::Arc;
 use ts_rs::TS;
 
 /// Global configuration for a "game" e.g. rapid react
@@ -25,6 +26,20 @@ pub struct GameConfig {
 	pub ranking_points: Vec<String>,
 	/// Configuration on how to display collected information
 	pub display: DisplayConfig,
+}
+
+impl GameConfig {
+	pub fn get_tba_props(&self) -> HashMap<&String, &TbaMatchProp> {
+		let mut props = HashMap::new();
+		for cat in self.categories.values() {
+			for metric in cat.metrics.values() {
+				if let CollectedMetricType::TbaMatch(metric) = &metric.metric {
+					props.extend(metric.props.iter());
+				}
+			}
+		}
+		props
+	}
 }
 
 /// A category for metrics to collect
@@ -113,6 +128,8 @@ pub enum CollectedMetricType {
 	Image(ImageMetric),
 	/// A metric that represents data fetched from statbotics' team api
 	StatboticsTeam(StatboticsTeamMetric),
+	/// A metric that represents data fetched from tba's match api
+	TbaMatch(TbaMatchMetric),
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -168,6 +185,33 @@ pub struct ImageMetric {
 pub struct StatboticsTeamMetric {
 	/// The Statbotics properties to include
 	pub props: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct TbaMatchMetric {
+	/// The TBA properties to include
+	pub props: HashMap<String, TbaMatchProp>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct TbaMatchProp {
+	#[serde(rename = "type")]
+	#[oai(rename = "type")]
+	pub ty: TbaMatchPropType,
+	pub name: String,
+	pub options: Option<Vec<String>>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Enum, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+#[serde(rename_all = "snake_case")]
+#[oai(rename_all = "snake_case")]
+pub enum TbaMatchPropType {
+	Bool,
+	Enum,
+	Number,
 }
 
 /// Configure how the data is processed and displayed
@@ -300,6 +344,8 @@ impl From<GameConfig> for GameConfigs {
 									.iter()
 									.map(|prop| format!("statbotics-{prop}"))
 									.collect()
+							} else if let CollectedMetricType::TbaMatch(tba) = &metric.metric {
+								tba.props.keys().map(|prop| format!("tba-{prop}")).collect()
 							} else {
 								vec![metric_name]
 							}
@@ -316,7 +362,7 @@ impl From<GameConfig> for GameConfigs {
 pub struct ConfigManager {
 	/// Game configs for each year.
 	/// Also preprocesses and caches the
-	games: HashMap<u32, GameConfigs>,
+	games: HashMap<u32, Arc<GameConfigs>>,
 	/// Configuration that varies per-instance
 	config: TeamConfig,
 }
@@ -367,12 +413,12 @@ impl ConfigManager {
 					}
 					for cat in config.categories.values_mut() {
 						for met in cat.metrics.values_mut() {
-							if matches!(met.metric, CollectedMetricType::StatboticsTeam(_)) {
+							if matches!(met.metric, CollectedMetricType::StatboticsTeam(_) | CollectedMetricType::TbaMatch(_)) {
 								met.collect = CollectionOption::Never;
 							}
 						}
 					}
-					games.insert(config.year, config.into());
+					games.insert(config.year, Arc::new(config.into()));
 				}
 				Err(err) => {
 					log::error!("Failed to load game config file '{filename}': {err}");
@@ -390,7 +436,7 @@ impl ConfigManager {
 		})
 	}
 	/// Get the full configuration for a specific year's game
-	pub fn get_game_config(&self, year: u32) -> Option<&GameConfigs> {
+	pub fn get_game_config(&self, year: u32) -> Option<&Arc<GameConfigs>> {
 		self.games.get(&year)
 	}
 	pub fn get_current_game_config(&self) -> &GameConfigs {
