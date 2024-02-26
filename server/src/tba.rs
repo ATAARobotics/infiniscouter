@@ -483,8 +483,8 @@ pub enum MatchResult {
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct CustomEntries {
-	blue: [HashMap<String, MatchEntryValue>; 3],
-	red: [HashMap<String, MatchEntryValue>; 3],
+	pub blue: [HashMap<String, MatchEntryValue>; 3],
+	pub red: [HashMap<String, MatchEntryValue>; 3],
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]

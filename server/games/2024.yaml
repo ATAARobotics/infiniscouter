@@ -137,6 +137,8 @@ ranking_points:
 display:
   team_row:
     - source: single
+      metric: tba-auto-line
+    - source: single
       metric: moved
     - source: single
       metric: auto-notes
@@ -155,6 +157,8 @@ display:
     - source: single
       metric: climb
       display: true
+    - source: single
+      metric: tba-endgame
     - source: single
       metric: trap
       display: true

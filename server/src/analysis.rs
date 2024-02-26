@@ -516,9 +516,9 @@ fn get_single_metric(
 					images,
 				})
 			}
-			_ => TeamInfoEntry::Text(TeamInfoTextEntry {
+			ty => TeamInfoEntry::Text(TeamInfoTextEntry {
 				sort_value: 999999.0,
-				display_text: format!("TODO: {}", metric),
+				display_text: format!("TODO: {metric} of type {ty:?}"),
 			}),
 		}
 	}
@@ -621,12 +621,39 @@ fn default_display(config: &GameConfigs) -> Vec<usize> {
 		.collect()
 }
 
-fn get_match_entries(database: &Database, year: u32, event: &str, tba_data: &EventInfo) -> Vec<MatchEntryIdData> {
-	let mut match_entries =
-		database.get_all_match_entries(year, event);
-	for entry in &mut match_entries {
-		println!("{:?}", entry.match_id);
-		let tba_match = tba_data.match_infos.iter().find(|mi| false/*mi.id.is_qual_match(&entry.match_id)*/).unwrap();
+fn get_match_entries(
+	database: &Database,
+	year: u32,
+	event: &str,
+	tba_data: &EventInfo,
+) -> Vec<MatchEntryIdData> {
+	let mut match_entries = database.get_all_match_entries(year, event);
+	for match_info in &tba_data.match_infos {
+		if let MatchId::Qualification(num) = &match_info.id {
+			for (team, custom_entries) in match_info
+				.teams_red
+				.iter()
+				.zip(match_info.custom_entries.red.iter())
+				.chain(
+					match_info
+						.teams_blue
+						.iter()
+						.zip(match_info.custom_entries.blue.iter()),
+				) {
+				// This will duplicate some but I think that's actually ok? Like I think the analysis
+				// code doesn't care. It'd be easy enough to dedupe if it doesn't work though.
+				// TODO: Check if this needs doing.
+				match_entries.push(MatchEntryIdData {
+					match_id: num.num.to_string(),
+					team_id: team.to_string(),
+					data: MatchEntryData {
+						entries: custom_entries.clone(),
+						scout: "TBA".to_string(),
+						timestamp_ms: 0,
+					},
+				})
+			}
+		}
 	}
 	match_entries
 }
@@ -647,7 +674,12 @@ pub async fn get_single_team_analysis(
 		.get_event(team_config.current_year, &team_config.current_event)
 		.await
 		.unwrap();
-	let match_entries = get_match_entries(&database, team_config.current_year, &team_config.current_event, &tba_data);
+	let match_entries = get_match_entries(
+		&database,
+		team_config.current_year,
+		&team_config.current_event,
+		&tba_data,
+	);
 
 	let statbotics_team = statbotics.get(team).await;
 	SingleTeamInfo {
@@ -695,7 +727,12 @@ pub async fn get_analysis_list(
 		.get_event(team_config.current_year, &team_config.current_event)
 		.await
 		.unwrap();
-	let match_entries = get_match_entries(&database, team_config.current_year, &team_config.current_event, &tba_data);
+	let match_entries = get_match_entries(
+		&database,
+		team_config.current_year,
+		&team_config.current_event,
+		&tba_data,
+	);
 
 	let tba_teams = future::join_all(
 		tba_data
@@ -758,7 +795,12 @@ pub async fn get_match_analysis(
 		.get_event(team_config.current_year, &team_config.current_event)
 		.await
 		.unwrap();
-	let match_entries = get_match_entries(&database, team_config.current_year, &team_config.current_event, &tba_data);
+	let match_entries = get_match_entries(
+		&database,
+		team_config.current_year,
+		&team_config.current_event,
+		&tba_data,
+	);
 
 	let other_data_names = config
 		.game_config
