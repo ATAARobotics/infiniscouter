@@ -1,4 +1,4 @@
-import { Box, Table } from "@mui/joy";
+import { Box, Table, Typography } from "@mui/joy";
 import { useAtomValue } from "jotai";
 import { useEffect, useState } from "preact/hooks";
 import { LoadIndicator } from "src/components/load_indicator";
@@ -16,7 +16,12 @@ function sortScouts(a: LeaderboardPerson, b: LeaderboardPerson): number {
 	} else if (b.name.trim().length === 0) {
 		return -1;
 	}
-	return (b.matches_scouted+b.pits_scouted+b.drivers_scouted) - (a.matches_scouted+a.pits_scouted+a.drivers_scouted);
+	return (
+		b.matches_scouted +
+		b.pits_scouted +
+		b.drivers_scouted -
+		(a.matches_scouted + a.pits_scouted + a.drivers_scouted)
+	);
 }
 
 /**
@@ -36,16 +41,24 @@ export function Leaderboard() {
 	}, []);
 
 	if (!leaderboard) {
-		return (<Box>
-			<Navbar title="Leaderboard" />
-			<LoadIndicator />
-		</Box>);
+		return (
+			<Box>
+				<Navbar title="Leaderboard" />
+				<LoadIndicator />
+			</Box>
+		);
 	}
 
 	return (
 		<Box>
 			<Navbar title="Leaderboard" />
-			<Table hoverRow stickyHeader borderAxis="y" stripe="even">
+			<Table
+				hoverRow
+				stickyHeader
+				borderAxis="yBetween"
+				variant="soft"
+				stripe="even"
+			>
 				<thead>
 					<tr>
 						<th>Scout Name</th>
@@ -58,18 +71,45 @@ export function Leaderboard() {
 					</tr>
 				</thead>
 				<tbody>
-					{Object.values(leaderboard.leaderboard).sort(sortScouts).map(scout => (<tr>
-						<td>{scout.name.trim().length === 0 ? "Unknown" : scout.name}</td>
-						<td>{scout.matches_scouted+scout.pits_scouted+scout.drivers_scouted}</td>
-						<td>{scout.matches_scouted}</td>
-						<td>{scout.pits_scouted}</td>
-						<td>{scout.drivers_scouted}</td>
-						<td>{Object.entries(scout.teams_scouted).length}</td>
-						<td>{(() => {
-							const team = Object.entries(scout.teams_scouted).sort((a, b) => b[1] - a[1])[0];
-							return `Team ${team[0]}, ${team[1]} Time${team[1] !== 1 ? "s" : ""}`;
-						})()}</td>
-					</tr>))}
+					{Object.values(leaderboard.leaderboard)
+						.sort(sortScouts)
+						.map((scout) => (
+							<tr>
+								<td>
+									<Typography
+										color={
+											scout.name.trim().toLowerCase() ===
+											currentScout?.trim().toLowerCase()
+												? "primary"
+												: "neutral"
+										}
+									>
+										{scout.name.trim().length === 0
+											? "Unknown"
+											: scout.name}
+									</Typography>
+								</td>
+								<td>
+									{scout.matches_scouted +
+										scout.pits_scouted +
+										scout.drivers_scouted}
+								</td>
+								<td>{scout.matches_scouted}</td>
+								<td>{scout.pits_scouted}</td>
+								<td>{scout.drivers_scouted}</td>
+								<td>{Object.entries(scout.teams_scouted).length}</td>
+								<td>
+									{(() => {
+										const team = Object.entries(
+											scout.teams_scouted,
+										).sort((a, b) => b[1] - a[1])[0];
+										return `Team ${team[0]}, ${team[1]} Time${
+											team[1] !== 1 ? "s" : ""
+										}`;
+									})()}
+								</td>
+							</tr>
+						))}
 				</tbody>
 			</Table>
 		</Box>
