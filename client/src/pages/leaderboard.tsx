@@ -11,6 +11,11 @@ import { LeaderboardPerson } from "src/generated/LeaderboardPerson";
  * Compare two scouts for sorting
  */
 function sortScouts(a: LeaderboardPerson, b: LeaderboardPerson): number {
+	if (a.name.trim().length === 0) {
+		return 1;
+	} else if (b.name.trim().length === 0) {
+		return -1;
+	}
 	return (b.matches_scouted+b.pits_scouted+b.drivers_scouted) - (a.matches_scouted+a.pits_scouted+a.drivers_scouted);
 }
 
@@ -40,7 +45,7 @@ export function Leaderboard() {
 	return (
 		<Box>
 			<Navbar title="Leaderboard" />
-			<Table hoverRow stickyHeader borderAxis="x" stripe="even">
+			<Table hoverRow stickyHeader borderAxis="y" stripe="even">
 				<thead>
 					<tr>
 						<th>Scout Name</th>
@@ -60,7 +65,10 @@ export function Leaderboard() {
 						<td>{scout.pits_scouted}</td>
 						<td>{scout.drivers_scouted}</td>
 						<td>{Object.entries(scout.teams_scouted).length}</td>
-						<td>TODO UWU</td>
+						<td>{(() => {
+							const team = Object.entries(scout.teams_scouted).sort((a, b) => b[1] - a[1])[0];
+							return `Team ${team[0]}, ${team[1]} Time${team[1] !== 1 ? "s" : ""}`;
+						})()}</td>
 					</tr>))}
 				</tbody>
 			</Table>
