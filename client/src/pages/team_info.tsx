@@ -26,7 +26,7 @@ export function TeamInfo(props: TeamInfoProps) {
 	}, []);
 
 	if (!data) {
-		return <LoadIndicator></LoadIndicator>;
+		return <LoadIndicator title="Team Info"></LoadIndicator>;
 	}
 
 	const pages: Array<Array<InfoEntryWithSource>> = [];
@@ -43,7 +43,7 @@ export function TeamInfo(props: TeamInfoProps) {
 
 	return (
 		<Box>
-			<Navbar title={"Team Info"} />
+			<Navbar title="Team Info" />
 			<Typography level="h2">
 				{data.team_icon_uri && (
 					<img width={40} height={40} src={data.team_icon_uri} />

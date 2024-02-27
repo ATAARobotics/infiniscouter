@@ -53,7 +53,7 @@ export function Analysis() {
 	}, []);
 
 	if (!table) {
-		return <LoadIndicator></LoadIndicator>;
+		return <LoadIndicator title="Analysis"></LoadIndicator>;
 	}
 
 	const enabledColsPicker = (

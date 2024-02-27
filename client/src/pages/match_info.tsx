@@ -163,7 +163,7 @@ export function MatchInfo(props: MatchInfoProps) {
 		return <SyncRequired></SyncRequired>;
 	}
 	if (!matchAnalysis) {
-		return <LoadIndicator></LoadIndicator>;
+		return <LoadIndicator title="Match Preview"></LoadIndicator>;
 	}
 
 	return (

@@ -114,7 +114,7 @@ export function Navbar(props: NavbarProps) {
 			</Drawer>
 			<SyncButton></SyncButton>
 			<Typography level="h1">{props.title}</Typography>
-			{props.component === undefined ? <></> : props.component}
+			{props.component}
 		</Stack>
 	);
 }

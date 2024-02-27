@@ -3,7 +3,6 @@ import { useAtomValue } from "jotai/react";
 import { useState } from "preact/hooks";
 
 import { MatchPage } from "../components/entry_components";
-import { LoadIndicator } from "../components/load_indicator";
 import { Navbar } from "../components/navbar";
 import { ScoutNameRequired } from "../components/scout_name_required";
 import { SyncRequired } from "../components/sync_required";
@@ -33,13 +32,13 @@ export function PitEntry() {
 	if (!scoutName) {
 		return <ScoutNameRequired></ScoutNameRequired>;
 	}
-	if (!matchList) {
+	if (!matchList || !fields) {
 		return <SyncRequired></SyncRequired>;
 	}
 
 	return (
 		<Box>
-			<Navbar title={"Pit Entry"} />
+			<Navbar title="Pit Entry" />
 			<Box>
 				<Autocomplete
 					placeholder={"Team Number"}
@@ -50,18 +49,14 @@ export function PitEntry() {
 						setTeamId(value?.num ?? 0);
 					}}
 				/>
-				{teamId !== undefined &&
-					(fields ? (
-						fields.pages.map((page) => (
-							<MatchPage
-								page={page}
-								entries={fields.entries}
-								setEntry={setEntry}
-								allEntries={dataEntries}
-							></MatchPage>
-						))
-					) : (
-						<LoadIndicator></LoadIndicator>
+				{teamId &&
+					fields.pages.map((page) => (
+						<MatchPage
+							page={page}
+							entries={fields.entries}
+							setEntry={setEntry}
+							allEntries={dataEntries}
+						></MatchPage>
 					))}
 			</Box>
 		</Box>

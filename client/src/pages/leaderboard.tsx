@@ -41,12 +41,7 @@ export function Leaderboard() {
 	}, []);
 
 	if (!leaderboard) {
-		return (
-			<Box>
-				<Navbar title="Leaderboard" />
-				<LoadIndicator />
-			</Box>
-		);
+		return <LoadIndicator title="Leaderboard" />;
 	}
 
 	return (
