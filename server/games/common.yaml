@@ -13,7 +13,6 @@ categories:
           type: statbotics_team
           props:
             - wlt-ratio
-            - rps-ratio
             - points
             - auto-points
             - teleop-points

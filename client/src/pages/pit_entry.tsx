@@ -50,9 +50,6 @@ export function PitEntry(props: PitEntryProps) {
 						<Typography level="h2">
 							{props.team} {matchList.team_infos[props.team].name}
 						</Typography>
-						<Typography level="h1">
-							{teamId} {matchList.team_infos[props.team].name}
-						</Typography>
 						<p>
 							Click <a href="/pit_entry">here</a> to scout a different
 							team.
