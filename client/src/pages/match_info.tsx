@@ -5,6 +5,7 @@ import { Bar } from "react-chartjs-2";
 
 import { DataValue } from "../components/data_value";
 import { LoadIndicator } from "../components/load_indicator";
+import { Navbar } from "../components/navbar";
 import { SyncRequired } from "../components/sync_required";
 import { matchListAtom, useCharts } from "../data/atoms";
 import { MatchAnalysisInfo } from "../generated/MatchAnalysisInfo";
@@ -168,17 +169,16 @@ export function MatchInfo(props: MatchInfoProps) {
 
 	return (
 		<Box>
-			<Typography level="h1">
-				Match Preview for{" "}
-				{formatMatchId(
+			<Navbar
+				title={`Match Preview for ${formatMatchId(
 					{
 						match_type: props.type,
 						num: props.num,
 						set: props.set,
 					},
 					matchList.year,
-				)}
-			</Typography>
+				)}`}
+			/>
 			<Stack
 				direction="row"
 				flexWrap={"wrap"}

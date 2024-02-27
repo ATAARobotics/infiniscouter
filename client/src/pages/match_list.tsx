@@ -86,7 +86,7 @@ export function MatchList() {
 
 	return (
 		<Box>
-			<Navbar title={"Match List"} />
+			<Navbar title="Match List" />
 			<Table hoverRow stickyHeader borderAxis="y" stripe="even">
 				<thead>
 					<th style={{ width: "150px" }}>Match</th>
