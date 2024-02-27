@@ -1,0 +1,71 @@
+version: '3.8'
+
+# Setup the network for the reverse proxy.
+# All containers will be connected to this network.
+networks:
+  default:
+    internal: false
+    name: reverse-proxy
+
+services:
+  traefik:
+    container_name: traefik
+    image: traefik:2.6
+    restart: always
+    command:
+      # We are going to use the docker provider
+      - "--providers.docker"
+      # Only enabled containers should be exposed
+      - "--providers.docker.exposedByDefault=false"
+      # We want to use the dashbaord
+      - "--api.dashboard=false"
+      # The entrypoints we ant to expose
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Enable ACME (Let's Encrypt): automatic SSL.
+      - "--certificatesresolvers.letsencrypt.acme.email=jasonpheard@101100.ca"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      # Global redirect to https
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+    ports:
+      - 80:80/tcp
+      - 443:443/tcp
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # The acme.json file is required by Let's Encrypt
+      - ./letsencrypt/acme.json:/etc/traefik/acme/acme.json
+
+  infiniscouter:
+    build: ..
+    container_name: infiniscouter
+    image: infiniscouter
+    restart: always
+    volumes:
+      - ./data:/app/data
+      - ./team_config.yaml:/app/team_config.yaml
+    labels:
+      # Since we don't expose containers per default we need to enable traefik for this container
+      - "traefik.enable=true"
+      # Set up the service by defining the port
+      - "traefik.http.services.infiniscouter.loadbalancer.server.port=4421"
+      # http
+      # Since we are using the http challenge we and use the redirect we need
+      #  to enable the http entrypoint.
+      - "traefik.http.routers.infiniscouter-http.entrypoints=web"
+      # The domain we want to listen to
+      - "traefik.http.routers.infiniscouter-http.rule=Host(`scouting.ataarobotics.ca`)"
+      # Tie the router to the service
+      - "traefik.http.routers.infiniscouter-http.service=infiniscouter"
+      # https
+      # Enable the https entrypoint
+      - "traefik.http.routers.infiniscouter.entrypoints=websecure"
+      # The domain we want to listen to
+      - "traefik.http.routers.infiniscouter.rule=Host(`scouting.ataarobotics.ca`)"
+      # We want to obtain a certificate through Let's Encrypt
+      - "traefik.http.routers.infiniscouter.tls=true"
+      - "traefik.http.routers.infiniscouter.tls.certresolver=letsencrypt"
+      # Tie the router to the service
+      - "traefik.http.routers.infiniscouter.service=infiniscouter"
