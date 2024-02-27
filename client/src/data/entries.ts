@@ -30,9 +30,10 @@ export function useEntries<T extends AnyEntryId>(
 		entries: {},
 		timestamp_ms: 0,
 	});
+	const [changed, setChanged] = useState<boolean>(false);
 
 	useEffect(() => {
-		if (key && scoutName) {
+		if (changed && key && scoutName && Object.keys(data.entries).length > 0) {
 			const saveData: T = maker({ ...data, scout: scoutName });
 			localStorage.setItem(key, JSON.stringify(saveData));
 		}
@@ -43,8 +44,10 @@ export function useEntries<T extends AnyEntryId>(
 				localStorage.getItem(key) ?? "null",
 			);
 			if (newData !== null) {
+				setChanged(false);
 				setData(newData.data);
 			} else {
+				setChanged(false);
 				setData({
 					entries: {},
 					timestamp_ms: 0,
@@ -62,6 +65,7 @@ export function useEntries<T extends AnyEntryId>(
 			} else {
 				newEntries[id] = value;
 			}
+			setChanged(true);
 			setData({
 				timestamp_ms: Date.now(),
 				entries: newEntries,
