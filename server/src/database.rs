@@ -1,6 +1,7 @@
 use crate::api::data::{DriverEntryIdData, MatchEntryData, MatchEntryIdData};
 use sled::{Db, Tree};
 use std::{collections::HashMap, path::Path};
+use log::info;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -90,6 +91,7 @@ impl Database {
 		team: &str,
 		data: &MatchEntryData,
 	) -> Result<(), DbError> {
+		info!("Updating MATCH scouting data for match {match_id} and team {team} by scout {}", data.scout);
 		let data = serde_json::to_vec(data)?;
 		self.match_entries
 			.insert(Self::match_entry_key(year, event, match_id, team), data)?;
@@ -119,6 +121,7 @@ impl Database {
 		team: &str,
 		data: &MatchEntryData,
 	) -> Result<(), DbError> {
+		info!("Updating DRIVER scouting data for match {match_id} and team {team} by scout {}", data.scout);
 		let data = serde_json::to_vec(data)?;
 		self.driver_entries
 			.insert(Self::driver_entry_key(year, event, match_id, team), data)?;
@@ -146,6 +149,7 @@ impl Database {
 		team: &str,
 		data: &MatchEntryData,
 	) -> Result<(), DbError> {
+		info!("Updating PIT scouting data for team {team} by scout {}", data.scout);
 		let data = serde_json::to_vec(data)?;
 		self.pit_entries
 			.insert(Self::pit_entry_key(year, event, team), data)?;
