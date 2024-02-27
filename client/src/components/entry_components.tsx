@@ -240,6 +240,8 @@ function CounterEntry(props: CounterEntryProps) {
 		fontSize: "2rem",
 		fontWeight: "bold",
 	};
+	const rangeStart = props.entry?.limit_range?.start;
+	const rangeEnd = props.entry?.limit_range?.end;
 	return (
 		<Stack direction="row" height={{ xs: "6rem", md: "4rem" }}>
 			<Box width={{ xs: "6rem", md: "4rem" }}>
@@ -276,13 +278,12 @@ function CounterEntry(props: CounterEntryProps) {
 						borderRadius: "0",
 						fontSize: { xs: "2rem", md: "1.5rem" },
 					}}
-					placeholder={"Enter a number uwu..."}
+					placeholder={rangeStart && rangeEnd ? `Enter a number from ${rangeStart} to ${rangeEnd}` : "Enter a number"}
 					onChange={(ev: InputEvent) => {
 						const value = parseInt((ev.target as HTMLInputElement).value);
 						if (
 							!isNaN(value) &&
-							(props.entry?.limit_range === null ||
-								props.entry?.limit_range === undefined ||
+							(!props.entry?.limit_range ||
 								(value >= props.entry.limit_range.start &&
 									value <= props.entry.limit_range.end_inclusive))
 						) {
@@ -350,7 +351,7 @@ function TextFieldEntry(props: TextFieldEntryProps) {
 		<Textarea
 			minRows={props.entry.multiline ? 4 : 1}
 			maxRows={props.entry.multiline ? 8 : 1}
-			placeholder={"Enter some text uwu..."}
+			placeholder="Enter useful notes, if any"
 			onKeyDown={cl}
 			onKeyUp={cl}
 			onChange={cl}
