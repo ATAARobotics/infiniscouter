@@ -48,9 +48,7 @@ export function TeamInfo(props: TeamInfoProps) {
 				{data.team_icon_uri && (
 					<img width={40} height={40} src={data.team_icon_uri} />
 				)}
-				{data.team_number}
-				<br />
-				{data.team_name}
+				{data.team_number} {data.team_name}
 			</Typography>
 			{pages.map((entries) => (
 				<>

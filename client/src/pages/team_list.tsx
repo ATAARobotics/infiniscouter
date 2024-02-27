@@ -1,0 +1,84 @@
+import { Box, Stack, Table } from "@mui/joy";
+import { useAtomValue } from "jotai/react";
+
+import { Navbar } from "../components/navbar";
+import { SyncRequired } from "../components/sync_required";
+import { TbaTeamLink } from "../components/tba_links";
+import { matchListAtom } from "../data/atoms";
+import { getPitScout } from "../data/entries";
+
+/**
+ * Page that shows a list of all teams.
+ */
+export function TeamList() {
+	const matchList = useAtomValue(matchListAtom);
+
+	if (!matchList) {
+		return <SyncRequired></SyncRequired>;
+	}
+
+	const teams = Object.values(matchList.team_infos);
+
+	return (
+		<Box>
+			<Navbar title="Team List" />
+			<Table hoverRow stickyHeader borderAxis="y" stripe="even">
+				<thead>
+					<th>Team</th>
+					<th>Analysis</th>
+					<th>Pit Scouting</th>
+				</thead>
+				<tbody>
+					{teams.map((teamInfo) => {
+						const pitScout = getPitScout(teamInfo.num);
+						return (
+							<>
+								<tr>
+									<td>
+										<Stack direction="row">
+											<a
+												href={`/team/${teamInfo.num}`}
+												title={teamInfo.name}
+											>
+												{teamInfo.num}
+											</a>{" "}
+											<TbaTeamLink
+												team={teamInfo.num}
+												year={matchList.year}
+											></TbaTeamLink>
+										</Stack>
+									</td>
+									<td>
+										<a href={`/team/${teamInfo.num}`}>Team Data</a>{" "}
+									</td>
+									<td>
+										<Stack direction="row">
+											<a href={`/pit_entry/${teamInfo.num}`}>
+												Pit Scouting
+											</a>{" "}
+											{pitScout ? (
+												<a
+													title={`Scouted by ${pitScout}`}
+													style={{ marginLeft: "auto" }}
+												>
+													✅
+												</a>
+											) : (
+												<a
+													title="No scouting data"
+													style={{ marginLeft: "auto" }}
+												>
+													❌
+												</a>
+											)}
+										</Stack>
+									</td>
+								</tr>
+							</>
+						);
+					})}
+				</tbody>
+			</Table>
+		</Box>
+	);
+}

@@ -87,9 +87,20 @@ export function Navbar(props: NavbarProps) {
 								path: "/driver_entry",
 								name: "Driver Entry",
 							},
+						].map((item) => (
+							<NavbarItem {...item}></NavbarItem>
+						))}
+					</List>
+					<Divider />
+					<List>
+						{[
 							{
 								path: "/analysis",
 								name: "Analysis",
+							},
+							{
+								path: "/team_list",
+								name: "Team List",
 							},
 							{
 								path: "/match_list",

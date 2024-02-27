@@ -278,7 +278,11 @@ function CounterEntry(props: CounterEntryProps) {
 						borderRadius: "0",
 						fontSize: { xs: "2rem", md: "1.5rem" },
 					}}
-					placeholder={rangeStart && rangeEnd ? `Enter a number from ${rangeStart} to ${rangeEnd}` : "Enter a number"}
+					placeholder={
+						rangeStart && rangeEnd
+							? `Enter a number from ${rangeStart} to ${rangeEnd}`
+							: "Enter a number"
+					}
 					onChange={(ev: InputEvent) => {
 						const value = parseInt((ev.target as HTMLInputElement).value);
 						if (

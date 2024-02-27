@@ -3,7 +3,7 @@ import { useAtomValue } from "jotai/react";
 
 import { Navbar } from "../components/navbar";
 import { SyncRequired } from "../components/sync_required";
-import { TbaLink } from "../components/tba_link";
+import { TbaMatchLink } from "../components/tba_links";
 import { matchListAtom } from "../data/atoms";
 import { getMatchScout } from "../data/entries";
 import { EventInfo } from "../generated/EventInfo";
@@ -107,11 +107,11 @@ export function MatchList() {
 									>
 										{formatMatchId(match.id, matchList.year)}
 									</a>{" "}
-									<TbaLink
+									<TbaMatchLink
 										matchId={match.id}
 										event={matchList.event}
 										style={{ marginLeft: "auto" }}
-									></TbaLink>
+									></TbaMatchLink>
 								</Stack>
 							</td>
 							<TeamCell

@@ -13,8 +13,8 @@ export function Configuration() {
 		<Box>
 			<Navbar title={"Scouting Configuration"} />
 			<Box>
-					<Typography level="h3">Your Name</Typography>
-					{
+				<Typography level="h3">Your Name</Typography>
+				{
 					// @ts-expect-error Input seems to want a component for some reason?
 					<Input
 						value={scoutName}

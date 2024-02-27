@@ -146,6 +146,24 @@ export function getMatchKey(
 }
 
 /**
+ * Get scout that scouted a team in the pits (if there is scouting data for that team).
+ */
+export function getPitScout(teamId: number): string | null {
+	const pitEntry = getPitEntry(teamId);
+
+	return pitEntry ? pitEntry.data.scout : null;
+}
+
+/**
+ * Loads a single pit entry from local storage.
+ */
+function getPitEntry(teamId: number): PitEntryIdData | null {
+	return JSON.parse(
+		localStorage.getItem(getPitKey(teamId)) ?? "null",
+	) as PitEntryIdData;
+}
+
+/**
  * Get key used for a match entry.
  */
 export function getPitKey(teamId: string | number): string {
