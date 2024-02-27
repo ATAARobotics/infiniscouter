@@ -36,15 +36,11 @@ export function TeamList() {
 								<tr>
 									<td>
 										<Stack direction="row">
-											<a
-												href={`/team/${teamInfo.num}`}
-												title={teamInfo.name}
-											>
-												{teamInfo.num}
-											</a>{" "}
+											{teamInfo.num} {teamInfo.name}
 											<TbaTeamLink
 												team={teamInfo.num}
 												year={matchList.year}
+												style={{ marginLeft: "auto" }}
 											></TbaTeamLink>
 										</Stack>
 									</td>
