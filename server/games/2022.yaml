@@ -118,6 +118,7 @@ categories:
         metric:
           type: image
           allow_video: true
+tba:
 ranking_points:
   - Ball Threshold
   - Climb Threshold

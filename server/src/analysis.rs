@@ -9,8 +9,7 @@ use ts_rs::TS;
 use crate::{
 	api::data::{DriverEntryIdData, ImageData, MatchEntryData, MatchEntryIdData, MatchEntryValue},
 	config::{
-		match_entry::MatchEntryType, DisplayColumn, GameConfigs, PreMatchDisplay, SingleMetric,
-		TeamConfig, TeamNameMetric,
+		match_entry::MatchEntryType, DisplayColumn, GameConfigs, PreMatchDisplay, SingleMetric, TbaMatchPropType, TeamConfig, TeamNameMetric
 	},
 	database::Database,
 	statbotics::{StatboticsCache, StatboticsTeam},
@@ -170,7 +169,8 @@ pub struct ImagesEntry {
 	sort_value: f32,
 }
 
-const SB_PREFIX: &str = "statbotics-";
+pub const SB_PREFIX: &str = "statbotics-";
+pub const TBA_PREFIX: &str = "tba-";
 
 fn get_pie_chart(
 	data_points: &[&MatchEntryValue],
@@ -283,6 +283,23 @@ fn get_single_metric(
 	team: u32,
 	metric: &str,
 ) -> TeamInfoEntry {
+		let data_points: Vec<_> = match_entries
+			.iter()
+			.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team)
+			.filter_map(|match_entry| match_entry.data.entries.get(metric))
+			.chain(
+				pit_entry
+					.and_then(|pe| pe.entries.get(metric))
+					.iter()
+					.copied(),
+			)
+			.chain(
+				driver_entries
+					.iter()
+					.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team)
+					.filter_map(|match_entry| match_entry.data.entries.get(metric)),
+			)
+			.collect();
 	if metric.starts_with(SB_PREFIX) {
 		if let Some(sb) = statbotics {
 			let real_metric = metric.strip_prefix(SB_PREFIX).unwrap();
@@ -357,24 +374,27 @@ fn get_single_metric(
 				display_text: "ERROR: No statbotics for team".to_string(),
 			})
 		}
+	} else if let Some(metric) = metric.strip_prefix(TBA_PREFIX) {
+		let metric = &config.game_config.tba[metric];
+		match metric.ty {
+			TbaMatchPropType::Bool => get_pie_chart(&data_points, &[("No", Some(0.0)), ("Yes", Some(1.0))]),
+			TbaMatchPropType::Enum => {
+				let count = metric.options.as_ref().map(|a| a.len()).unwrap_or_default() as f32;
+				let option_values = metric
+					.options
+					.iter()
+					.flatten()
+					.enumerate()
+					.map(|(i, option)| (option.as_str(), Some((i as f32) / count)))
+					.collect::<Vec<_>>();
+				get_pie_chart(&data_points, &option_values)
+			}
+			TbaMatchPropType::Number => TeamInfoEntry::Text(TeamInfoTextEntry {
+				sort_value: 999999.0,
+				display_text: format!("This is a number don't you believe me"),
+			}),
+		}
 	} else {
-		let data_points: Vec<_> = match_entries
-			.iter()
-			.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team)
-			.filter_map(|match_entry| match_entry.data.entries.get(metric))
-			.chain(
-				pit_entry
-					.and_then(|pe| pe.entries.get(metric))
-					.iter()
-					.copied(),
-			)
-			.chain(
-				driver_entries
-					.iter()
-					.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team)
-					.filter_map(|match_entry| match_entry.data.entries.get(metric)),
-			)
-			.collect();
 		match config
 			.match_entry_fields
 			.entries
@@ -407,13 +427,13 @@ fn get_single_metric(
 			),
 			Some(MatchEntryType::Enum(enum_metric)) => {
 				let count = enum_metric.options.len() as f32;
-				let thing = enum_metric
+				let option_values = enum_metric
 					.options
 					.iter()
 					.enumerate()
 					.map(|(i, option)| (option.as_str(), Some((i as f32) / count)))
 					.collect::<Vec<_>>();
-				get_pie_chart(&data_points, &thing)
+				get_pie_chart(&data_points, &option_values)
 			}
 			Some(MatchEntryType::Bool(_)) => {
 				get_pie_chart(&data_points, &[("No", Some(0.0)), ("Yes", Some(1.0))])

@@ -179,6 +179,7 @@ categories:
         metric:
           type: text_entry
           multiline: true
+tba:
 ranking_points:
 display:
   team_row:

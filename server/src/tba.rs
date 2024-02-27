@@ -18,6 +18,7 @@ use tokio::spawn;
 use tokio::sync::{Mutex, RwLock};
 use ts_rs::TS;
 
+use crate::analysis::TBA_PREFIX;
 use crate::api::data::{CounterEntry, MatchBoolEntry, MatchEntryValue, MatchEnumEntry};
 use crate::config::{GameConfig, GameConfigs};
 use crate::DefaultInstant;
@@ -339,15 +340,15 @@ fn custom_entries_for(
 ) -> [HashMap<String, MatchEntryValue>; 3] {
 	[1, 2, 3].map(|n| {
 		game_config
-			.get_tba_props()
-			.into_iter()
+			.tba
+			.iter()
 			.map(|(prop_name, prop)| {
-				let name = prop.name.replace("{N}", &n.to_string());
+				let name = prop.property.replace("{N}", &n.to_string());
 				let data = value
 					.get(&name)
 					.expect("TBA Data wasn't included in report from TBA.");
 				(
-					prop_name.clone(),
+					format!("{TBA_PREFIX}{prop_name}"),
 					match prop.ty {
 						crate::config::TbaMatchPropType::Bool => {
 							if let RawTbaScoreBreakdownValue::Boolean(value) = *data {

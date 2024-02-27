@@ -1,6 +1,5 @@
 pub mod match_entry;
 
-use crate::config::match_entry::{EntryType, MatchEntryFields};
 use color_eyre::eyre::eyre;
 use color_eyre::Result;
 use poem_openapi::{Enum, Object, Union};
@@ -12,6 +11,9 @@ use std::iter;
 use std::sync::Arc;
 use ts_rs::TS;
 
+use crate::analysis::TBA_PREFIX;
+use crate::config::match_entry::{EntryType, MatchEntryFields};
+
 /// Global configuration for a "game" e.g. rapid react
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
@@ -22,24 +24,12 @@ pub struct GameConfig {
 	pub year: u32,
 	/// Metric categories
 	pub categories: HashMap<String, MetricCategory>,
+	/// Names of stats to get from the blue alliance
+	pub tba: HashMap<String, TbaMatchProp>,
 	/// Names of the numbered ranking points, usually 2
 	pub ranking_points: Vec<String>,
 	/// Configuration on how to display collected information
 	pub display: DisplayConfig,
-}
-
-impl GameConfig {
-	pub fn get_tba_props(&self) -> HashMap<&String, &TbaMatchProp> {
-		let mut props = HashMap::new();
-		for cat in self.categories.values() {
-			for metric in cat.metrics.values() {
-				if let CollectedMetricType::TbaMatch(metric) = &metric.metric {
-					props.extend(metric.props.iter());
-				}
-			}
-		}
-		props
-	}
 }
 
 /// A category for metrics to collect
@@ -128,8 +118,6 @@ pub enum CollectedMetricType {
 	Image(ImageMetric),
 	/// A metric that represents data fetched from statbotics' team api
 	StatboticsTeam(StatboticsTeamMetric),
-	/// A metric that represents data fetched from tba's match api
-	TbaMatch(TbaMatchMetric),
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -189,17 +177,11 @@ pub struct StatboticsTeamMetric {
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
-pub struct TbaMatchMetric {
-	/// The TBA properties to include
-	pub props: HashMap<String, TbaMatchProp>,
-}
-
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
 pub struct TbaMatchProp {
 	#[serde(rename = "type")]
 	#[oai(rename = "type")]
 	pub ty: TbaMatchPropType,
+	pub property: String,
 	pub name: String,
 	pub options: Option<Vec<String>>,
 }
@@ -344,12 +326,11 @@ impl From<GameConfig> for GameConfigs {
 									.iter()
 									.map(|prop| format!("statbotics-{prop}"))
 									.collect()
-							} else if let CollectedMetricType::TbaMatch(tba) = &metric.metric {
-								tba.props.keys().map(|prop| format!("tba-{prop}")).collect()
 							} else {
 								vec![metric_name]
 							}
 						})
+						.chain(value.tba.keys().map(|prop| format!("{TBA_PREFIX}{prop}")))
 						.collect::<Vec<_>>()
 				})
 				.collect(),
@@ -413,7 +394,10 @@ impl ConfigManager {
 					}
 					for cat in config.categories.values_mut() {
 						for met in cat.metrics.values_mut() {
-							if matches!(met.metric, CollectedMetricType::StatboticsTeam(_) | CollectedMetricType::TbaMatch(_)) {
+							if matches!(
+								met.metric,
+								CollectedMetricType::StatboticsTeam(_)
+							) {
 								met.collect = CollectionOption::Never;
 							}
 						}

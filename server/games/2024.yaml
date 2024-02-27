@@ -100,37 +100,33 @@ categories:
         collect: match_only
         metric:
           type: bool
-  data:
-    name: Data
-    metrics:
-      auto-line:
-        order: 20
-        name: TBA Data
-        description: This represents all of the TBA data
-        metric:
-          type: tba_match
-          props:
-            auto-line:
-              type: bool
-              name: autoLineRobot{N}
-            endgame:
-              type: enum
-              options:
-                - None
-                - Parked
-                - CenterStage
-                - StageRight
-                - StageLeft
-              name: endGameRobot{N}
-            spotlight:
-              type: number
-              name: endGameSpotLightBonusPoints
-            coopertition-criteria-met:
-              type: bool
-              name: coopertitionCriteriaMet
-            coopertition:
-              type: bool
-              name: coopertitionBonusAchieved
+tba:
+  auto-line:
+    type: bool
+    property: autoLineRobot{N}
+    name: "Auto Moved"
+  endgame:
+    type: enum
+    options:
+      - None
+      - Parked
+      - CenterStage
+      - StageRight
+      - StageLeft
+    property: endGameRobot{N}
+    name: "Endgame State"
+  spotlight:
+    type: number
+    property: endGameSpotLightBonusPoints
+    name: "High Notes"
+  coopertition-criteria-met:
+    type: bool
+    property: coopertitionCriteriaMet
+    name: "Coopertition Criteria Met"
+  coopertition:
+    type: bool
+    property: coopertitionBonusAchieved
+    name: "Coopertition Bonus"
 ranking_points:
   - Melody
   - Ensemble
