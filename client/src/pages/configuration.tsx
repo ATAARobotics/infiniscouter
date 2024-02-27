@@ -1,4 +1,4 @@
-import { Box, Input } from "@mui/joy";
+import { Box, Input, Typography } from "@mui/joy";
 import { useAtom } from "jotai/react";
 
 import { Navbar } from "../components/navbar";
@@ -13,7 +13,8 @@ export function Configuration() {
 		<Box>
 			<Navbar title={"Scouting Configuration"} />
 			<Box>
-				{
+					<Typography level="h3">Your Name</Typography>
+					{
 					// @ts-expect-error Input seems to want a component for some reason?
 					<Input
 						value={scoutName}
