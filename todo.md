@@ -21,3 +21,7 @@
 20. [ ] Analysis client pinning rows and columns
 21. [x] Only allow pit/match as combo
 22. [x] Refresh TBA data periodically
+23. [ ] Make images separate URLs and include in analysis page(s)
+24. [ ] Allow selecting colour pallette in config
+25. [ ] Improve column selection (menu with submenus for pages)
+26. [ ] Allow user to select text instead of chart
