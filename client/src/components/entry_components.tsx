@@ -241,7 +241,7 @@ function CounterEntry(props: CounterEntryProps) {
 		fontWeight: "bold",
 	};
 	const rangeStart = props.entry?.limit_range?.start;
-	const rangeEnd = props.entry?.limit_range?.end;
+	const rangeEnd = props.entry?.limit_range?.end_inclusive;
 	return (
 		<Stack direction="row" height={{ xs: "6rem", md: "4rem" }}>
 			<Box width={{ xs: "6rem", md: "4rem" }}>

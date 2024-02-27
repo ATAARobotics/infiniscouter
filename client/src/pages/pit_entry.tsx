@@ -1,7 +1,6 @@
 import { Autocomplete, Box, Typography } from "@mui/joy";
 import { useAtomValue } from "jotai/react";
 import { useState } from "preact/hooks";
-import { useEffect } from "react";
 
 import { MatchPage } from "../components/entry_components";
 import { Navbar } from "../components/navbar";

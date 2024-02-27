@@ -1,10 +1,23 @@
-import { Box, Checkbox, Chip, Stack, Table, Typography } from "@mui/joy";
+import { MoreVert } from "@mui/icons-material";
+import {
+	Box,
+	Checkbox,
+	Dropdown,
+	IconButton,
+	Menu,
+	MenuButton,
+	MenuItem,
+	Table,
+	Typography,
+} from "@mui/joy";
+import { useAtom } from "jotai";
 import { useEffect, useState } from "preact/compat";
 import FlipMove from "react-flip-move";
 
 import { DataValue } from "../components/data_value";
 import { LoadIndicator } from "../components/load_indicator";
 import { Navbar } from "../components/navbar";
+import { analysisColumnsAtom } from "../data/atoms";
 import { NameAndSource } from "../generated/NameAndSource";
 import { TeamInfoDisplay } from "../generated/TeamInfoDisplay";
 import { TeamInfoEntry } from "../generated/TeamInfoEntry";
@@ -30,7 +43,8 @@ function sortValue(
  */
 export function Analysis() {
 	const [table, setTable] = useState<TeamInfoList>();
-	const [enabledColumns, setEnabledColumns] = useState<number[]>([0]);
+	const [storedColumns, setEnabledColumns] = useAtom(analysisColumnsAtom);
+	const [defaultColumns, setDefaultColumns] = useState<number[]>([]);
 
 	const [colours, setColours] = useState<number[]>([]);
 
@@ -43,7 +57,7 @@ export function Analysis() {
 			.then((response) => response.json())
 			.then((data2: TeamInfoList) => {
 				setTable(data2);
-				setEnabledColumns(data2.default_display);
+				setDefaultColumns(data2.default_display);
 				setColours(
 					data2.heading.map(() =>
 						Math.floor(Math.random() * 64 * 54 * 25 * 13 * 7),
@@ -52,48 +66,53 @@ export function Analysis() {
 			});
 	}, []);
 
+	const enabledColumns = storedColumns ?? defaultColumns;
+
 	if (!table) {
 		return <LoadIndicator title="Analysis"></LoadIndicator>;
 	}
 
 	const enabledColsPicker = (
-		<Stack
-			direction="row"
-			sx={{
-				width: "100%",
-				overflow: "scroll",
-				padding: "12px",
-				gap: "12px",
-			}}
-		>
-			{table.heading.map((column, idx) => {
-				const checked = enabledColumns.includes(idx);
-				return (
-					<Chip
-						key={idx}
-						variant="plain"
-						color={checked ? "primary" : "neutral"}
-						startDecorator={checked && <span>✓</span>}
-					>
-						<Checkbox
-							variant="outlined"
+		<Dropdown>
+			<MenuButton
+				slots={{ root: IconButton }}
+				slotProps={{ root: { variant: "outlined", color: "neutral" } }}
+			>
+				<MoreVert />
+			</MenuButton>
+			<Menu sx={{ height: "80vh" }}>
+				<MenuItem
+					key="reset"
+					color="neutral"
+					onClick={() => setEnabledColumns(defaultColumns)}
+				>
+					Reset Columns
+				</MenuItem>
+				{table.heading.map((column, idx) => {
+					const checked = enabledColumns.includes(idx);
+					return (
+						<MenuItem
+							key={idx}
 							color={checked ? "primary" : "neutral"}
-							disableIcon
-							overlay
-							label={column.name}
-							checked={checked}
-							onchange={(ev: InputEvent) => {
+							onClick={() =>
 								setEnabledColumns(
-									!((ev.target as HTMLInputElement).checked as boolean)
+									checked
 										? enabledColumns.filter((n) => n !== idx)
 										: [...enabledColumns, idx],
-								);
-							}}
-						/>
-					</Chip>
-				);
-			})}
-		</Stack>
+								)
+							}
+						>
+							<Checkbox
+								checkedIcon={<span>✓</span>}
+								overlay
+								label={column.name}
+								checked={checked}
+							/>
+						</MenuItem>
+					);
+				})}
+			</Menu>
+		</Dropdown>
 	);
 
 	return (

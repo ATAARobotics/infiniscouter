@@ -33,6 +33,10 @@ export const pitFieldsAtom = atomWithStorage<MatchEntryFields | null>(
 	null,
 );
 
+export const analysisColumnsAtom = atomWithStorage<Array<number> | null>(
+	"anlysisColumns",
+	null,
+);
 export const scoutNameAtom = atomWithStorage<string | null>("scoutName", null);
 
 export const lastMatchSaveAtom = atomWithStorage<number>("lastMatchSave", 0);
