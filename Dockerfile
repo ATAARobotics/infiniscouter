@@ -72,7 +72,7 @@ RUN chmod -R u=rwX,go=rX /build/dist
 # Create minimal container
 ##############################
 
-FROM gcr.io/distroless/cc
+FROM gcr.io/distroless/cc-debian12
 
 # copy passwd and group to get forge user and group
 COPY --from=build-rust /etc/passwd /etc/passwd

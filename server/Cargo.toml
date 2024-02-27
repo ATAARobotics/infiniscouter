@@ -4,14 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-async-openai = "0.18"
+async-openai = { version = "0.18", default-features = false, features = ["rustls"] }
 base64 = "0.21"
 color-eyre = "0.6"
 futures-util = "0.3"
 log = "0.4"
-poem = { version = "1", features = ["compression", "static-files"] }
+poem = { version = "1", default-features = false, features = ["compression", "rustls", "static-files"] }
 poem-openapi = { version = "3", features = ["swagger-ui"] }
-reqwest = { version = "0.11", features = ["json"] }
+reqwest = { version = "0.11", default-features = false, features = ["json", "rustls"] }
 rust-embed = "6"
 serde = { version = "1", features = ["derive"] }
 serde_yaml = "0.9"
