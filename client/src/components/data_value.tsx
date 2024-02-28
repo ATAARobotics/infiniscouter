@@ -74,31 +74,48 @@ const excludeWords = [
  */
 export function DataValue(props: DataValueProps) {
 	const chartsReady = useCharts();
-	switch (props.value.type) {
+	switch (props.value.graphic?.type) {
+		case undefined:
+			return (
+				<Typography
+					level="h1"
+					style={{
+						color: `rgb(${props.value.colour})`,
+					}}
+				>
+					{props.value.text}
+				</Typography>
+			);
 		case "team_name":
 			return (
-				<a href={`/team/${props.value.number}`}>
+				<a href={`/team/${props.value.graphic.number}`}>
 					<Typography level="h3">
-						{props.value.icon_uri !== null && (
-							<img width={40} height={40} src={props.value.icon_uri} />
+						{props.value.graphic.icon_uri !== null && (
+							<img
+								width={40}
+								height={40}
+								src={props.value.graphic.icon_uri}
+							/>
 						)}{" "}
-						{props.value.number} {props.value.name}
+						{props.value.graphic.number} {props.value.graphic.name}
 					</Typography>
 				</a>
 			);
-		case "text":
-			return <p>{props.value.display_text}</p>;
 		case "pie_chart": {
 			return (
 				<Box sx={{ width: "100px", height: "100px" }}>
 					{chartsReady && (
 						<Pie
 							data={{
-								labels: props.value.options.map((op) => op.label),
+								labels: props.value.graphic.options.map(
+									(op) => op.label,
+								),
 								datasets: [
 									{
 										label: "Data",
-										data: props.value.options.map((op) => op.value),
+										data: props.value.graphic.options.map(
+											(op) => op.value,
+										),
 										backgroundColor:
 											colorSchemes[
 												(props.forceColorScheme ??
@@ -123,7 +140,7 @@ export function DataValue(props: DataValueProps) {
 					<>
 						{(() => {
 							const words: { [word: string]: number } = {};
-							for (const string of props.value.strings) {
+							for (const string of props.value.graphic.strings) {
 								for (const wordUp of string.split(/[^\w]+/)) {
 									const word = wordUp.toLowerCase();
 									if (excludeWords.indexOf(word) === -1) {
@@ -163,12 +180,18 @@ export function DataValue(props: DataValueProps) {
 												),
 												color: `rgb(${
 													Math.min(
-														Math.max(-props.value.sentiment, 0),
+														Math.max(
+															-props.value.graphic.sentiment,
+															0,
+														),
 														2,
 													) * 128
 												}, 128, ${
 													Math.min(
-														Math.max(props.value.sentiment, 0),
+														Math.max(
+															props.value.graphic.sentiment,
+															0,
+														),
 														2,
 													) * 128
 												})`,
@@ -188,7 +211,7 @@ export function DataValue(props: DataValueProps) {
 			} else {
 				return (
 					<>
-						{props.value.strings.map((text) => (
+						{props.value.graphic.strings.map((text) => (
 							<Box>{text}</Box>
 						))}
 					</>
@@ -198,9 +221,9 @@ export function DataValue(props: DataValueProps) {
 		case "images": {
 			if (props.listView) {
 				return (
-					props.value.images[0] && (
+					props.value.graphic.images[0] && (
 						<a
-							href={`/image/full/${props.value.images[0].image_id}`}
+							href={`/image/full/${props.value.graphic.images[0].image_id}`}
 							target="_blank"
 							style={{
 								transform: "translateX(-50%)",
@@ -210,7 +233,7 @@ export function DataValue(props: DataValueProps) {
 						>
 							<img
 								height={100}
-								src={`/image/small/${props.value.images[0].image_id}`}
+								src={`/image/small/${props.value.graphic.images[0].image_id}`}
 							/>
 						</a>
 					)
@@ -218,7 +241,7 @@ export function DataValue(props: DataValueProps) {
 			} else {
 				return (
 					<>
-						{props.value.images.map((image) => (
+						{props.value.graphic.images.map((image) => (
 							<a href={`/image/full/${image.image_id}`}>
 								<img
 									width={256}
@@ -231,23 +254,17 @@ export function DataValue(props: DataValueProps) {
 			}
 		}
 		case "numeric": {
-			const mma = props.value.min_max_avg ?? {
-				avg: props.value.number,
-				min: props.value.number - 1,
-				max: props.value.number + 1,
-			};
-			const spread = (mma.avg - mma.min) / 2 + (mma.max - mma.avg) / 2;
-			const goodness = (props.value.number - mma.avg) / spread;
 			return (
 				<Typography
 					level="h1"
 					style={{
-						color: `rgb(${Math.min(1 - goodness, 1) * 255}, ${
-							Math.min(goodness + 1, 1) * 255
-						}, ${(1 - Math.abs(goodness)) * 255})`,
+						color: `rgb(${props.value.colour})`,
 					}}
 				>
-					{props.value.number.toFixed(2)}
+					{props.value.graphic.number.toFixed(2)}
+					{props.value.graphic.collected_std_dev
+						? `(dev ${props.value.graphic.collected_std_dev.toFixed(2)})`
+						: ""}
 				</Typography>
 			);
 		}

@@ -55,33 +55,43 @@ export function TeamInfo(props: TeamInfoProps) {
 					<Typography level="h3">{entries[0].name.page}</Typography>
 					<Stack direction="row" flexWrap={"wrap"} gap={"25px"}>
 						{entries
-							.filter(({ entry }) => entry.type !== "multi_text")
+							.filter(
+								({ entry }) => entry.graphic?.type !== "multi_text",
+							)
 							.map(({ entry, name: entry_name }) => {
 								return (
 									<Card sx={{ width: 150 }}>
-										<Typography level="title-lg">
-											{entry_name.name}
-										</Typography>
-
-										<DataValue
-											listView={false}
-											value={entry}
-										></DataValue>
+										<Stack
+											direction="column"
+											justifyContent="space-between"
+											alignItems="center"
+											height="100%"
+										>
+											<Typography level="title-lg">
+												{entry_name.name}
+											</Typography>
+											<DataValue
+												listView={false}
+												value={entry}
+											></DataValue>
+										</Stack>
 									</Card>
 								);
 							})}
 					</Stack>
 					{entries
-						.filter(({ entry }) => entry.type === "multi_text")
+						.filter(({ entry }) => entry.graphic?.type === "multi_text")
 						.map(({ entry, name: entry_name }) => {
 							return (
 								<>
 									<Typography level="title-lg">
 										{entry_name.name}
 									</Typography>
-									{(entry as MultiTextEntry).strings.map((s) => (
-										<p>{s}</p>
-									))}
+									{(entry.graphic as MultiTextEntry).strings.map(
+										(s) => (
+											<p>{s}</p>
+										),
+									)}
 								</>
 							);
 						})}

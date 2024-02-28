@@ -24,13 +24,28 @@ pub struct TeamInfoDisplay {
 	pub info: Vec<TeamInfoEntry>,
 }
 
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct InfoEntryWithSource {
+	name: NameAndSource,
+	entry: TeamInfoEntry,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct TeamInfoEntry {
+	pub text: String,
+	pub sort_value: f32,
+	pub colour: [u8; 3],
+	pub graphic: Option<TeamInfoGraphic>,
+}
+
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[oai(discriminator_name = "type", rename_all = "snake_case")]
-pub enum TeamInfoEntry {
+pub enum TeamInfoGraphic {
 	TeamName(TeamNameEntry),
-	Text(TeamInfoTextEntry),
 	Numeric(TeamInfoNumericEntry),
 	PieChart(PieChartEntry),
 	MultiText(MultiTextEntry),
@@ -57,22 +72,15 @@ pub struct TeamNameEntry {
 	pub number: u32,
 	pub name: String,
 	pub icon_uri: Option<String>,
-	pub sort_value: f32,
-}
-
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
-pub struct TeamInfoTextEntry {
-	pub sort_value: f32,
-	pub display_text: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct TeamInfoNumericEntry {
-	pub sort_value: f32,
 	pub number: f32,
-	pub min_max_avg: Option<MinMaxAvg>,
+	pub collected_std_dev: Option<f32>,
+	pub collected_min_max: Option<[f32; 2]>,
+	pub compare_other_numbers: Option<MinMaxAvg>,
 	pub is_time: bool,
 }
 
@@ -82,13 +90,33 @@ pub struct MinMaxAvg {
 	min: f32,
 	max: f32,
 	avg: f32,
+	stddev: f32,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
-pub struct InfoEntryWithSource {
-	name: NameAndSource,
-	entry: TeamInfoEntry,
+pub struct PieChartEntry {
+	options: Vec<PieChartOption>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct PieChartOption {
+	label: String,
+	value: f32,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct MultiTextEntry {
+	strings: Vec<String>,
+	sentiment: f32,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct ImagesEntry {
+	images: Vec<ImageEntryItem>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -140,35 +168,6 @@ pub struct TeamInfoList {
 	heading: Vec<NameAndSource>,
 	list: Vec<TeamInfoDisplay>,
 	default_display: Vec<usize>,
-}
-
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
-pub struct PieChartEntry {
-	options: Vec<PieChartOption>,
-	sort_value: f32,
-}
-
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
-pub struct PieChartOption {
-	label: String,
-	value: f32,
-}
-
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
-pub struct MultiTextEntry {
-	strings: Vec<String>,
-	sentiment: f32,
-	sort_value: f32,
-}
-
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
-pub struct ImagesEntry {
-	images: Vec<ImageEntryItem>,
-	sort_value: f32,
 }
 
 pub const SB_PREFIX: &str = "statbotics-";
@@ -232,10 +231,13 @@ fn get_pie_chart(
 			})
 		})
 		.collect::<Vec<_>>();
-	TeamInfoEntry::PieChart(PieChartEntry {
-		options,
+	TeamInfoEntry {
 		sort_value,
-	})
+		// TODO
+		text: "PIE CHART".to_string(),
+		colour: [255, 255, 255],
+		graphic: Some(TeamInfoGraphic::PieChart(PieChartEntry { options })),
+	}
 }
 
 fn single_team_impl(
@@ -262,16 +264,26 @@ fn single_team_impl(
 				team,
 				&metric.metric,
 			),
-			DisplayColumn::TeamName(_) => TeamInfoEntry::TeamName(TeamNameEntry {
-				number: tba_data.team_infos[&team].num,
-				name: tba_data.team_infos[&team].name.clone(),
-				icon_uri: tba_data.team_infos[&team].get_icon_url(),
+			DisplayColumn::TeamName(_) => TeamInfoEntry {
 				sort_value: tba_data.team_infos[&team].num as f32,
-			}),
-			DisplayColumn::CommonYearSpecific(_) => TeamInfoEntry::Text(TeamInfoTextEntry {
+				text: format!(
+					"{} - {}",
+					tba_data.team_infos[&team].num, tba_data.team_infos[&team].name
+				),
+				// TODO: Team colour owo?
+				colour: [255, 255, 255],
+				graphic: Some(TeamInfoGraphic::TeamName(TeamNameEntry {
+					number: tba_data.team_infos[&team].num,
+					name: tba_data.team_infos[&team].name.clone(),
+					icon_uri: tba_data.team_infos[&team].get_icon_url(),
+				})),
+			},
+			DisplayColumn::CommonYearSpecific(_) => TeamInfoEntry {
 				sort_value: 999999.0,
-				display_text: "ERROR".to_string(),
-			}),
+				text: "ERROR".to_string(),
+				colour: [255, 255, 255],
+				graphic: None,
+			},
 		})
 		.collect()
 }
@@ -307,47 +319,56 @@ fn get_single_metric(
 			let real_metric = metric.strip_prefix(SB_PREFIX).unwrap();
 			let total_matches = sb.wins as f32 + sb.losses as f32 + sb.ties as f32;
 			if let Some(pie_values) = match real_metric {
-				"wlt-ratio" => Some(PieChartEntry {
-					options: vec![
-						PieChartOption {
-							label: "Wins".to_string(),
-							value: sb.wins as f32,
-						},
-						PieChartOption {
-							label: "Losses".to_string(),
-							value: sb.losses as f32,
-						},
-						PieChartOption {
-							label: "Ties".to_string(),
-							value: sb.ties as f32,
-						},
-					],
-					sort_value: if total_matches == 0.0 {
+				"wlt-ratio" => Some((
+					PieChartEntry {
+						options: vec![
+							PieChartOption {
+								label: "Wins".to_string(),
+								value: sb.wins as f32,
+							},
+							PieChartOption {
+								label: "Losses".to_string(),
+								value: sb.losses as f32,
+							},
+							PieChartOption {
+								label: "Ties".to_string(),
+								value: sb.ties as f32,
+							},
+						],
+					},
+					if total_matches == 0.0 {
 						-420.0
 					} else {
 						(sb.wins as f32 + sb.ties as f32 * 0.5) / total_matches
 					},
-				}),
-				"rps-ratio" => Some(PieChartEntry {
-					options: vec![
-						PieChartOption {
-							label: "None".to_string(),
-							value: (1.0 - (sb.rp_1_epa_end + sb.rp_2_epa_end)).max(0.0),
-						},
-						PieChartOption {
-							label: "RP 1".to_string(),
-							value: sb.rp_1_epa_end,
-						},
-						PieChartOption {
-							label: "RP 2".to_string(),
-							value: sb.rp_2_epa_end,
-						},
-					],
-					sort_value: sb.rp_1_epa_end + sb.rp_2_epa_end,
-				}),
+				)),
+				"rps-ratio" => Some((
+					PieChartEntry {
+						options: vec![
+							PieChartOption {
+								label: "None".to_string(),
+								value: (1.0 - (sb.rp_1_epa_end + sb.rp_2_epa_end)).max(0.0),
+							},
+							PieChartOption {
+								label: "RP 1".to_string(),
+								value: sb.rp_1_epa_end,
+							},
+							PieChartOption {
+								label: "RP 2".to_string(),
+								value: sb.rp_2_epa_end,
+							},
+						],
+					},
+					sb.rp_1_epa_end + sb.rp_2_epa_end,
+				)),
 				_ => None,
 			} {
-				TeamInfoEntry::PieChart(pie_values)
+				TeamInfoEntry {
+					text: "PIE LOL".to_string(),
+					sort_value: pie_values.1,
+					colour: [255, 255, 255],
+					graphic: Some(TeamInfoGraphic::PieChart(pie_values.0)),
+				}
 			} else {
 				let value = match real_metric {
 					"points" => sb.epa_end,
@@ -363,18 +384,26 @@ fn get_single_metric(
 					"rp-2" => sb.rp_2_epa_end,
 					_ => panic!("That's not a statbotics thing bruh"),
 				};
-				TeamInfoEntry::Numeric(TeamInfoNumericEntry {
+				TeamInfoEntry {
+					text: format!("{value:.2}"),
+					colour: [255, 255, 255],
 					sort_value: value,
-					number: value,
-					min_max_avg: None,
-					is_time: false,
-				})
+					graphic: Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry {
+						number: value,
+						collected_std_dev: None,
+						collected_min_max: None,
+						compare_other_numbers: None,
+						is_time: false,
+					})),
+				}
 			}
 		} else {
-			TeamInfoEntry::Text(TeamInfoTextEntry {
+			TeamInfoEntry {
+				text: "ERROR: No statbotics for team".to_string(),
 				sort_value: 9999999.0,
-				display_text: "ERROR: No statbotics for team".to_string(),
-			})
+				colour: [255, 255, 255],
+				graphic: None,
+			}
 		}
 	} else {
 		match config
@@ -422,10 +451,12 @@ fn get_single_metric(
 			}
 			Some(MatchEntryType::Timer(_)) => {
 				if data_points.is_empty() {
-					TeamInfoEntry::Text(TeamInfoTextEntry {
+					TeamInfoEntry {
+						text: String::new(),
 						sort_value: -420.0,
-						display_text: "".to_string(),
-					})
+						colour: [255, 255, 255],
+						graphic: None,
+					}
 				} else {
 					let value = data_points
 						.iter()
@@ -437,20 +468,28 @@ fn get_single_metric(
 							}
 						})
 						.sum::<f32>() / data_points.len() as f32;
-					TeamInfoEntry::Numeric(TeamInfoNumericEntry {
+					TeamInfoEntry {
+						text: format!("{value:.2}"),
 						sort_value: value,
-						number: value,
-						min_max_avg: None,
-						is_time: true,
-					})
+						colour: [255, 255, 255],
+						graphic: Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry {
+							number: value,
+							collected_std_dev: None,
+							collected_min_max: None,
+							compare_other_numbers: None,
+							is_time: true,
+						})),
+					}
 				}
 			}
 			Some(MatchEntryType::Counter(_)) => {
 				if data_points.is_empty() {
-					TeamInfoEntry::Text(TeamInfoTextEntry {
+					TeamInfoEntry {
+						text: String::new(),
 						sort_value: -420.0,
-						display_text: "".to_string(),
-					})
+						colour: [255, 255, 255],
+						graphic: None,
+					}
 				} else {
 					let average = data_points
 						.iter()
@@ -462,12 +501,18 @@ fn get_single_metric(
 							}
 						})
 						.sum::<f32>() / data_points.len() as f32;
-					TeamInfoEntry::Numeric(TeamInfoNumericEntry {
+					TeamInfoEntry {
+						text: format!("{average:.2}"),
 						sort_value: average,
-						number: average,
-						min_max_avg: None,
-						is_time: false,
-					})
+						colour: [255, 255, 255],
+						graphic: Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry {
+							number: average,
+							collected_std_dev: None,
+							collected_min_max: None,
+							compare_other_numbers: None,
+							is_time: true,
+						})),
+					}
 				}
 			}
 			Some(MatchEntryType::TextEntry(_)) => {
@@ -492,15 +537,19 @@ fn get_single_metric(
 							.unwrap_or_default() as f32
 					})
 					.sum();
-				TeamInfoEntry::MultiText(MultiTextEntry {
-					sentiment,
+				TeamInfoEntry {
+					text: strings.first().map(|s| s.to_string()).unwrap_or_default(),
 					sort_value: if strings.is_empty() {
 						-420.0
 					} else {
 						sentiment
 					},
-					strings,
-				})
+					colour: [255, 255, 255],
+					graphic: Some(TeamInfoGraphic::MultiText(MultiTextEntry {
+						sentiment,
+						strings,
+					})),
+				}
 			}
 			Some(MatchEntryType::Image(_)) => {
 				let images = data_points
@@ -514,15 +563,19 @@ fn get_single_metric(
 						}
 					})
 					.collect::<Vec<_>>();
-				TeamInfoEntry::Images(ImagesEntry {
+				TeamInfoEntry {
+					text: "Image".to_string(),
 					sort_value: -(images.len() as f32),
-					images,
-				})
+					colour: [255, 255, 255],
+					graphic: Some(TeamInfoGraphic::Images(ImagesEntry { images })),
+				}
 			}
-			ty => TeamInfoEntry::Text(TeamInfoTextEntry {
+			ty => TeamInfoEntry {
+				text: format!("TODO: {metric} of type {ty:?}"),
 				sort_value: 999999.0,
-				display_text: format!("TODO: {metric} of type {ty:?}"),
-			}),
+				colour: [255, 255, 255],
+				graphic: None,
+			},
 		}
 	}
 }
@@ -771,7 +824,9 @@ pub async fn get_analysis_list(
 	for row in 0..til.heading.len() {
 		let (mut min, mut max, mut avg, mut cnt) = (f32::MAX, f32::MIN, 0.0, 0.0);
 		for team in &til.list {
-			if let TeamInfoEntry::Numeric(TeamInfoNumericEntry { number, .. }) = &team.info[row] {
+			if let Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry { number, .. })) =
+				&team.info[row].graphic
+			{
 				min = min.min(*number);
 				max = max.max(*number);
 				avg += *number;
@@ -779,9 +834,29 @@ pub async fn get_analysis_list(
 			}
 		}
 		avg /= cnt;
+		let mut stddev = 0.0;
+		for team in &til.list {
+			if let Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry { number, .. })) =
+				&team.info[row].graphic
+			{
+				stddev += (*number - avg).powi(2);
+			}
+		}
+		stddev = (stddev / cnt).sqrt();
 		for team in &mut til.list {
-			if let TeamInfoEntry::Numeric(entry) = &mut team.info[row] {
-				entry.min_max_avg = Some(MinMaxAvg { min, max, avg });
+			if let Some(TeamInfoGraphic::Numeric(entry)) = &mut team.info[row].graphic {
+				entry.compare_other_numbers = Some(MinMaxAvg {
+					min,
+					max,
+					avg,
+					stddev,
+				});
+				let colour_value = ((entry.number - avg) / (2.0 * stddev)).clamp(-1.0, 1.0);
+				team.info[row].colour = [
+					((1.0 - colour_value).min(1.0) * 255.9) as u8,
+					((colour_value + 1.0).min(1.0) * 255.9) as u8,
+					((1.0 - colour_value.abs()) * 255.9) as u8,
+				];
 			}
 		}
 	}
@@ -942,7 +1017,7 @@ fn get_single_team_match_preview(
 		.iter()
 		.map(|graph_element| MatchAnalysisScorePart {
 			name: graph_element.name.clone(),
-			score: match get_single_metric(
+			score: get_single_metric(
 				config,
 				match_entries,
 				driver_entries,
@@ -950,10 +1025,8 @@ fn get_single_team_match_preview(
 				statbotics,
 				*team,
 				&graph_element.metric,
-			) {
-				TeamInfoEntry::Numeric(numeric_entry) => numeric_entry.number,
-				_ => 0.0,
-			},
+			)
+			.sort_value,
 		})
 		.collect::<Vec<_>>();
 
@@ -961,7 +1034,7 @@ fn get_single_team_match_preview(
 		team_number,
 		team_name,
 		team_icon_uri,
-		expected_score: match get_single_metric(
+		expected_score: get_single_metric(
 			config,
 			match_entries,
 			driver_entries,
@@ -969,10 +1042,8 @@ fn get_single_team_match_preview(
 			statbotics,
 			*team,
 			&pre_match_display.score,
-		) {
-			TeamInfoEntry::Numeric(numeric_entry) => numeric_entry.number,
-			_ => 0.0,
-		},
+		)
+		.sort_value,
 		expected_score_parts,
 		other_data,
 	}

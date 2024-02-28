@@ -16,7 +16,7 @@
 15. [x] Send all values for single team analysis page
 16. [ ] Add attempts/success for scout boredom
 17. [x] Add order to config file entries within pages
-18. [ ] Get stuff from TBA !important
+18. [x] Get stuff from TBA !important
 19. [x] Update match scouting for did not show
 20. [ ] Analysis client pinning rows and columns
 21. [x] Only allow pit/match as combo
@@ -25,3 +25,4 @@
 24. [ ] Allow selecting colour pallette in config
 25. [x] Improve column selection (menu with submenus for pages)
 26. [ ] Allow user to select text instead of chart
+27. [ ] Fix the interface for adding images
