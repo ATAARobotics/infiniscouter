@@ -1,11 +1,20 @@
 pub mod data;
 
 use std::collections::HashMap;
+use std::io::Cursor;
 use std::sync::Arc;
+
+use image::io::Reader as ImageReader;
+use image::ImageFormat;
+use poem::http::StatusCode;
+use poem_openapi::param::Path;
+use poem_openapi::payload::Json;
+use poem_openapi::OpenApi;
 
 use crate::analysis::{self, MatchAnalysisInfo, SingleTeamInfo, TeamInfoList};
 use crate::api::data::{
-	DriverEntryIdData, DriverEntryTimedId, MatchEntryData, MatchEntryTimedId, PitEntryTimedId,
+	DriverEntryIdData, DriverEntryTimedId, ImageEntryData, MatchEntryData, MatchEntryTimedId,
+	PitEntryTimedId,
 };
 use crate::config::match_entry::MatchEntryFields;
 use crate::config::{ConfigManager, GameConfig, TeamConfig};
@@ -14,17 +23,13 @@ use crate::database::Database;
 use crate::leaderboard::{self, LeaderboardInfo};
 use crate::statbotics::StatboticsCache;
 use crate::tba::{EventInfo, MatchId, SetMatch, Tba};
-use poem::http::StatusCode;
-use poem_openapi::param::Path;
-use poem_openapi::payload::Json;
-use poem_openapi::OpenApi;
 
 use self::data::{MatchEntryIdData, PitEntryIdData};
 
 #[derive(Debug)]
 pub struct Api {
 	config: ConfigManager,
-	database: Database,
+	database: Arc<Database>,
 	tba: Arc<Tba>,
 	statbotics: StatboticsCache,
 }
@@ -34,7 +39,7 @@ impl Api {
 		tba: Arc<Tba>,
 		statbotics: StatboticsCache,
 		config: ConfigManager,
-		database: Database,
+		database: Arc<Database>,
 	) -> Self {
 		Self {
 			config,
@@ -351,6 +356,31 @@ impl Api {
 		Ok(())
 	}
 
+	/// Saves a batch of images fro mthe client
+	#[oai(path = "/images", method = "put")]
+	pub async fn save_images(&self, data: Json<Vec<ImageEntryData>>) -> poem::Result<()> {
+		for image_data in data.0 {
+			let mut image_reader = ImageReader::new(Cursor::new(image_data.image_data));
+			let image_result = match ImageFormat::from_mime_type(image_data.image_mime) {
+				Some(image_format) => {
+					image_reader.set_format(image_format);
+					image_reader.decode()
+				}
+				None => image_reader
+					.with_guessed_format()
+					.map_err(|err| poem::Error::new(err, StatusCode::BAD_REQUEST))?
+					.decode(),
+			};
+			let image =
+				image_result.map_err(|err| poem::Error::new(err, StatusCode::BAD_REQUEST))?;
+
+			self.database
+				.write_image(&image, &image_data.image_id)
+				.map_err(|e| poem::Error::new(e, StatusCode::INTERNAL_SERVER_ERROR))?;
+		}
+		Ok(())
+	}
+
 	/// Get a list of all matches for the current event (as well as any teams involved)
 	#[oai(path = "/event/matches", method = "get")]
 	pub async fn event_list_matches(&self) -> Json<Option<EventInfo>> {
@@ -436,6 +466,9 @@ impl Api {
 	}
 	#[oai(path = "/leaderboard", method = "get")]
 	pub async fn get_leaderboard(&self) -> Json<LeaderboardInfo> {
-		Json(leaderboard::get_leaderboard(&self.database, &self.config.get_server_config()))
+		Json(leaderboard::get_leaderboard(
+			&self.database,
+			self.config.get_server_config(),
+		))
 	}
 }

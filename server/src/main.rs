@@ -3,10 +3,10 @@ mod api;
 mod config;
 mod data_validation;
 mod database;
+mod leaderboard;
 mod server;
 mod statbotics;
 mod tba;
-mod leaderboard;
 
 use std::time::Instant;
 

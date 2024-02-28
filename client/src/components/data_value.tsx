@@ -198,29 +198,33 @@ export function DataValue(props: DataValueProps) {
 		case "images": {
 			if (props.listView) {
 				return (
-					<>
-						{
-							props.value.images.map((image) => (
-								<img
-									height={100}
-									src={`data:${image.image_mime};base64,${btoa(
-										String.fromCharCode.apply(null, image.image_data),
-									)}`}
-								/>
-							))[0]
-						}
-					</>
+					props.value.images[0] && (
+						<a
+							href={`/image/full/${props.value.images[0].image_id}`}
+							target="_blank"
+							style={{
+								transform: "translateX(-50%)",
+								display: "inline-block",
+								marginLeft: "50%",
+							}}
+						>
+							<img
+								height={100}
+								src={`/image/small/${props.value.images[0].image_id}`}
+							/>
+						</a>
+					)
 				);
 			} else {
 				return (
 					<>
 						{props.value.images.map((image) => (
-							<img
-								width={256}
-								src={`data:${image.image_mime};base64,${btoa(
-									String.fromCharCode.apply(null, image.image_data),
-								)}`}
-							/>
+							<a href={`/image/full/${image.image_id}`}>
+								<img
+									width={256}
+									src={`/image/small/${image.image_id}`}
+								/>
+							</a>
 						))}
 					</>
 				);

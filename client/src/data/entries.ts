@@ -1,6 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 
 import { DriverEntryIdData } from "../generated/DriverEntryIdData";
+import { ImageEntryData } from "../generated/ImageEntryData";
 import { MatchEntryData } from "../generated/MatchEntryData";
 import { MatchEntryIdData } from "../generated/MatchEntryIdData";
 import { MatchEntryValue } from "../generated/MatchEntryValue";
@@ -75,23 +76,27 @@ export function useEntries<T extends AnyEntryId>(
 }
 
 /**
- * Adds image data that was stored in indexed DB.
+ * Gets all image data that was stored in indexed DB for the given entries.
  */
-export async function addImageData<T extends AnyEntryId>(
+export async function getImageData<T extends AnyEntryId>(
 	entries: Array<T>,
-): Promise<void> {
+): Promise<Array<ImageEntryData>> {
+	const images: Array<ImageEntryData> = [];
 	for (const entry of entries) {
 		for (const value of Object.values(entry.data.entries)) {
 			if (value.type === "image") {
 				for (const image of value.images) {
-					// @ts-expect-error Again this is like bad and dumb but whatever lol
-					const imageData = await getImage(image.image_uuid);
-					// @ts-expect-error MY TYPESCRIPT BINDINGS ARE WRONG OWIEE!!!! -Papyrus from undertale
-					image.image_data = [...new Uint8Array(imageData)];
+					const imageData = await getImage(image.image_id);
+					images.push({
+						...image,
+						// @ts-expect-error MY TYPESCRIPT BINDINGS ARE WRONG OWIEE!!!! -Papyrus from undertale
+						image_data: [...new Uint8Array(imageData)],
+					});
 				}
 			}
 		}
 	}
+	return images;
 }
 
 /**

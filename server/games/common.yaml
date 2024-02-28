@@ -88,6 +88,14 @@ categories:
         collect: pit_only
         metric:
           type: bool
+      pit-picture:
+        order: 25
+        name: Pit Pictures
+        description: Take a picture of their pit
+        collect: pit_only
+        metric:
+          type: image
+          allow_video: true
       battery-count:
         order: 30
         name: Battery Count
@@ -146,7 +154,7 @@ categories:
       robot-picture:
         order: 40
         name: Robot Pictures
-        description: Take some pictures of their robot pls
+        description: Take a good picture of their robot
         collect: pit_only
         metric:
           type: image
@@ -185,6 +193,8 @@ display:
   team_row:
     - source: team_name
       display: true
+    - source: single
+      metric: robot-picture
     - source: single
       metric: statbotics-wlt-ratio
       display: true

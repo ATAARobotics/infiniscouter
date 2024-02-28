@@ -12,10 +12,10 @@ import {
 	pitFieldsAtom,
 } from "../data/atoms";
 import {
-	addImageData,
 	getAllDriverEntries,
 	getAllMatchEntries,
 	getAllPitEntries,
+	getImageData,
 	saveDriver as saveDriverEntry,
 	saveMatch as saveMatchEntry,
 	savePit as savePitEntry,
@@ -76,19 +76,23 @@ export function SyncButton() {
 			(entry) => entry.data.timestamp_ms > lastMatchSave,
 		);
 		if (matchesToSave.length > 0) {
-			await addImageData(matchesToSave)
-				.then(() =>
-					fetch("/api/match_entry/data/all", {
-						method: "PUT",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify(matchesToSave),
-					}),
-				)
-				.then((response) => {
-					if (response.ok) {
-						setLastMatchSave(matchSaveTime);
-					}
-				});
+			const images = await getImageData(matchesToSave);
+
+			await fetch("/api/images", {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(images),
+			});
+
+			await fetch("/api/match_entry/data/all", {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(matchesToSave),
+			}).then((response) => {
+				if (response.ok) {
+					setLastMatchSave(matchSaveTime);
+				}
+			});
 		} else {
 			setLastMatchSave(matchSaveTime);
 		}
@@ -99,19 +103,23 @@ export function SyncButton() {
 			(entry) => entry.data.timestamp_ms > lastPitSave,
 		);
 		if (pitEntriesToSave.length > 0) {
-			await addImageData(pitEntriesToSave)
-				.then(() =>
-					fetch("/api/pit_entry/data/all", {
-						method: "PUT",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify(pitEntriesToSave),
-					}),
-				)
-				.then((response) => {
-					if (response.ok) {
-						setLastPitSave(pitSaveTime);
-					}
-				});
+			const images = await getImageData(pitEntriesToSave);
+
+			await fetch("/api/images", {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(images),
+			});
+
+			await fetch("/api/pit_entry/data/all", {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(pitEntriesToSave),
+			}).then((response) => {
+				if (response.ok) {
+					setLastPitSave(pitSaveTime);
+				}
+			});
 		} else {
 			setLastPitSave(pitSaveTime);
 		}
@@ -122,19 +130,23 @@ export function SyncButton() {
 			(entry) => entry.data.timestamp_ms > lastDriverSave,
 		);
 		if (driverEntriesToSave.length > 0) {
-			await addImageData(driverEntriesToSave)
-				.then(() =>
-					fetch("/api/driver_entry/data/all", {
-						method: "PUT",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify(driverEntriesToSave),
-					}),
-				)
-				.then((response) => {
-					if (response.ok) {
-						setLastDriverSave(driverSaveTime);
-					}
-				});
+			const images = await getImageData(pitEntriesToSave);
+
+			await fetch("/api/images", {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(images),
+			});
+
+			fetch("/api/driver_entry/data/all", {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(driverEntriesToSave),
+			}).then((response) => {
+				if (response.ok) {
+					setLastDriverSave(driverSaveTime);
+				}
+			});
 		} else {
 			setLastDriverSave(driverSaveTime);
 		}

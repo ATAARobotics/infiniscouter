@@ -145,13 +145,24 @@ pub struct TextFieldEntry {
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct ImageEntry {
-	/// A list of images
-	pub images: Vec<ImageData>,
+	/// A list of image entries
+	pub images: Vec<ImageEntryItem>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
-pub struct ImageData {
+pub struct ImageEntryItem {
+	/// The unique ID for this image
+	pub image_id: String,
+	/// The format mime type of the image, e.g. `image/png`
+	pub image_mime: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct ImageEntryData {
+	/// The unique ID for this image
+	pub image_id: String,
 	/// The format mime type of the image, e.g. `image/png`
 	pub image_mime: String,
 	/// The actual image data, can be encoded as png, jpeg, or other formats idk (gif, bmp, or webp

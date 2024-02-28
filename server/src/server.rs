@@ -10,7 +10,7 @@ use poem_openapi::OpenApiService;
 
 use crate::api::Api;
 use crate::config::ConfigManager;
-use crate::database::Database;
+use crate::database::{Database, ImageSize};
 use crate::statbotics::StatboticsCache;
 use crate::tba::Tba;
 
@@ -18,6 +18,7 @@ pub struct ScoutingServer {
 	api: Api,
 	tba: Arc<Tba>,
 	config: ConfigManager,
+	database: Arc<Database>,
 }
 
 #[handler]
@@ -35,20 +36,45 @@ async fn get_avatar(
 	}
 }
 
+#[handler]
+async fn get_image_full(image_id: Path<String>, database: Data<&Arc<Database>>) -> Response {
+	match database.get_image(&image_id, ImageSize::Full).unwrap() {
+		Some(image) => Response::builder()
+			.content_type(image.mime_type)
+			.body(image.image_data),
+		None => poem::Response::from(StatusCode::NOT_FOUND),
+	}
+}
+
+#[handler]
+async fn get_image_small(image_id: Path<String>, database: Data<&Arc<Database>>) -> Response {
+	match database.get_image(&image_id, ImageSize::Small).unwrap() {
+		Some(image) => Response::builder()
+			.content_type(image.mime_type)
+			.body(image.image_data),
+		None => poem::Response::from(StatusCode::NOT_FOUND),
+	}
+}
+
 impl ScoutingServer {
 	pub fn new(config: ConfigManager, database: Database) -> Result<Self> {
 		let tba_auth_key = config.get_tba_auth_key().to_string();
-		let game_config = config.get_game_config(config.get_server_config().current_year).unwrap().clone();
+		let game_config = config
+			.get_game_config(config.get_server_config().current_year)
+			.unwrap()
+			.clone();
 		let tba = Arc::new(Tba::new(game_config, tba_auth_key)?);
+		let database = Arc::new(database);
 		Ok(Self {
 			api: Api::new(
 				tba.clone(),
 				StatboticsCache::new(&config.get_server_config().current_event),
 				config.clone(),
-				database,
+				database.clone(),
 			),
 			tba,
 			config,
+			database,
 		})
 	}
 	/// Start serving connections on `addr`
@@ -70,9 +96,12 @@ impl ScoutingServer {
 			.nest("/api", api_service)
 			.nest("/api/docs", swagger_ui)
 			.at("/avatar/:team", get(get_avatar))
+			.at("/image/full/:image_id", get(get_image_full))
+			.at("/image/small/:image_id", get(get_image_small))
 			.with(Compression::new())
 			.with(AddData::new(self.tba.clone()))
-			.with(AddData::new(self.config.clone()));
+			.with(AddData::new(self.config.clone()))
+			.with(AddData::new(self.database.clone()));
 		Server::new(TcpListener::bind(addr)).run(app).await?;
 		Ok(())
 	}

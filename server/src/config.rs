@@ -394,10 +394,7 @@ impl ConfigManager {
 					}
 					for cat in config.categories.values_mut() {
 						for met in cat.metrics.values_mut() {
-							if matches!(
-								met.metric,
-								CollectedMetricType::StatboticsTeam(_)
-							) {
+							if matches!(met.metric, CollectedMetricType::StatboticsTeam(_)) {
 								met.collect = CollectionOption::Never;
 							}
 						}

@@ -1,13 +1,14 @@
 use std::collections::HashMap;
 
 use futures_util::future;
-use log::info;
+use log::{info, warn};
 use poem_openapi::{Enum, Object, Union};
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
+use crate::api::data::ImageEntryItem;
 use crate::{
-	api::data::{DriverEntryIdData, ImageData, MatchEntryData, MatchEntryIdData, MatchEntryValue},
+	api::data::{DriverEntryIdData, MatchEntryData, MatchEntryIdData, MatchEntryValue},
 	config::{
 		match_entry::MatchEntryType, DisplayColumn, GameConfigs, PreMatchDisplay, SingleMetric,
 		TeamConfig, TeamNameMetric,
@@ -166,7 +167,7 @@ pub struct MultiTextEntry {
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct ImagesEntry {
-	images: Vec<ImageData>,
+	images: Vec<ImageEntryItem>,
 	sort_value: f32,
 }
 
@@ -508,7 +509,8 @@ fn get_single_metric(
 						if let MatchEntryValue::Image(im) = dp {
 							im.images.clone()
 						} else {
-							panic!("Invalid data type of {dp:?} for image match entry");
+							warn!("Invalid data type of {dp:?} for image match entry");
+							Vec::new()
 						}
 					})
 					.collect::<Vec<_>>();
@@ -682,7 +684,7 @@ pub async fn get_single_team_analysis(
 		.await
 		.unwrap();
 	let match_entries = get_match_entries(
-		&database,
+		database,
 		team_config.current_year,
 		&team_config.current_event,
 		&tba_data,
@@ -735,7 +737,7 @@ pub async fn get_analysis_list(
 		.await
 		.unwrap();
 	let match_entries = get_match_entries(
-		&database,
+		database,
 		team_config.current_year,
 		&team_config.current_event,
 		&tba_data,
@@ -803,7 +805,7 @@ pub async fn get_match_analysis(
 		.await
 		.unwrap();
 	let match_entries = get_match_entries(
-		&database,
+		database,
 		team_config.current_year,
 		&team_config.current_event,
 		&tba_data,

@@ -6,6 +6,7 @@ import { LocationProvider, Route, Router } from "preact-iso";
 import { Analysis } from "./pages/analysis";
 import { Configuration } from "./pages/configuration";
 import { DriverEntry } from "./pages/driver_entry";
+import { FullImage } from "./pages/full_image";
 import { Home } from "./pages/home";
 import { Leaderboard } from "./pages/leaderboard";
 import { MatchEntry } from "./pages/match_entry";
@@ -31,6 +32,7 @@ function App() {
 						<Route path="/api/docs" component={Reload} />
 						<Route path="/config" component={Configuration} />
 						<Route path="/driver_entry" component={DriverEntry} />
+						<Route path="/image/full/:id" component={FullImage} />
 						<Route path="/match_entry" component={MatchEntry} />
 						<Route path="/match_list" component={MatchList} />
 						<Route path="/match/:type/:num/:set" component={MatchInfo} />

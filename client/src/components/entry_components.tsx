@@ -424,8 +424,7 @@ function ImageEntry(props: ImageEntryProps) {
 												: undefined) ?? []),
 											{
 												image_mime: toMime(file.name),
-												// @ts-expect-error yeah I know this is the wrong type but we're replacing it before sending anyway so it's fine
-												image_uuid: imageUuid,
+												image_id: imageUuid,
 											},
 										],
 									});

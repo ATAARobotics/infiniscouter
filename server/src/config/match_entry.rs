@@ -166,8 +166,12 @@ impl MatchEntryFields {
 							page: "The Blue Alliance".to_string(),
 							entry: match prop.ty {
 								TbaMatchPropType::Bool => MatchEntryType::Bool(BoolMetric {}),
-								TbaMatchPropType::Enum => MatchEntryType::Enum(EnumMetric { options: prop.options.clone().unwrap_or_default() }),
-								TbaMatchPropType::Number => MatchEntryType::Counter(CounterMetric { limit_range: None }),
+								TbaMatchPropType::Enum => MatchEntryType::Enum(EnumMetric {
+									options: prop.options.clone().unwrap_or_default(),
+								}),
+								TbaMatchPropType::Number => {
+									MatchEntryType::Counter(CounterMetric { limit_range: None })
+								}
 							},
 						},
 					)
