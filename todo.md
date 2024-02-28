@@ -9,7 +9,7 @@
 8. [ ] Send notes to ChatGPT
 9. [x] Fix counter double click
 10. [ ] Show pit things as non-pie chart things
-11. [ ] Show some number values differently (max, distribution, etc)
+11. [x] Show some number values differently (max, distribution, etc)
 12. [ ] Scout scheduling
 13. [x] Scount leaderboard
 14. [x] Update config with default values for anlysis page

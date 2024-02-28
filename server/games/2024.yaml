@@ -110,9 +110,9 @@ tba:
     options:
       - None
       - Parked
-      - CenterStage
       - StageRight
       - StageLeft
+      - CenterStage
     property: endGameRobot{N}
     name: "Endgame State"
   spotlight:
@@ -126,7 +126,7 @@ tba:
   coopertition:
     type: bool
     property: coopertitionBonusAchieved
-    name: "Coopertition Bonus"
+    name: "Coopertition"
 ranking_points:
   - Melody
   - Ensemble
@@ -151,10 +151,16 @@ display:
       metric: note-pickup
       display: true
     - source: single
+      metric: tba-coopertition
+      display: true
+    - source: single
       metric: climb
       display: true
     - source: single
       metric: tba-endgame
+      display: true
+    - source: single
+      metric: tba-spotlight
     - source: single
       metric: trap
       display: true

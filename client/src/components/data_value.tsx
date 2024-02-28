@@ -103,7 +103,7 @@ export function DataValue(props: DataValueProps) {
 			);
 		case "pie_chart": {
 			return (
-				<Box sx={{ width: "100px", height: "100px" }}>
+				<Box sx={{ width: "100px", height: "100px", marginLeft: "50%", translate: "-50%" }}>
 					{chartsReady && (
 						<Pie
 							data={{
@@ -256,14 +256,14 @@ export function DataValue(props: DataValueProps) {
 		case "numeric": {
 			return (
 				<Typography
-					level="h1"
+					level="h2"
 					style={{
 						color: `rgb(${props.value.colour})`,
 					}}
 				>
 					{props.value.graphic.number.toFixed(2)}
-					{props.value.graphic.collected_std_dev
-						? `(dev ${props.value.graphic.collected_std_dev.toFixed(2)})`
+					{props.value.graphic.collected_std_dev !== null
+						? ` σ${props.value.graphic.collected_std_dev.toFixed(1)}`
 						: ""}
 				</Typography>
 			);

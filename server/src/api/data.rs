@@ -153,6 +153,7 @@ pub struct ImageEntry {
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct ImageEntryItem {
 	/// The unique ID for this image
+	#[serde(default)]
 	pub image_id: String,
 	/// The format mime type of the image, e.g. `image/png`
 	pub image_mime: String,

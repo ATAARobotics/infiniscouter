@@ -240,6 +240,25 @@ fn get_pie_chart(
 	}
 }
 
+fn number_entry(numbers: Vec<f32>, is_time: bool) -> TeamInfoEntry {
+	let value = numbers.iter().sum::<f32>() / numbers.len() as f32;
+	let std_dev = (numbers.iter().sum::<f32>() / numbers.len() as f32).sqrt();
+	let min = numbers.iter().copied().reduce(|a, b| a.min(b)).unwrap_or_default();
+	let max = numbers.iter().copied().reduce(|a, b| a.max(b)).unwrap_or_default();
+	TeamInfoEntry {
+		text: format!("{value:.2}"),
+		sort_value: value,
+		colour: [255, 255, 255],
+		graphic: Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry {
+			number: value,
+			collected_std_dev: Some(std_dev),
+			collected_min_max: Some([min, max]),
+			compare_other_numbers: None,
+			is_time,
+		})),
+	}
+}
+
 fn single_team_impl(
 	config: &GameConfigs,
 	match_entries: &[MatchEntryIdData],
@@ -314,9 +333,8 @@ fn get_single_metric(
 				.filter_map(|match_entry| match_entry.data.entries.get(metric)),
 		)
 		.collect();
-	if metric.starts_with(SB_PREFIX) {
+	if let Some(real_metric) = metric.strip_prefix(SB_PREFIX) {
 		if let Some(sb) = statbotics {
-			let real_metric = metric.strip_prefix(SB_PREFIX).unwrap();
 			let total_matches = sb.wins as f32 + sb.losses as f32 + sb.ties as f32;
 			if let Some(pie_values) = match real_metric {
 				"wlt-ratio" => Some((
@@ -390,8 +408,16 @@ fn get_single_metric(
 					sort_value: value,
 					graphic: Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry {
 						number: value,
-						collected_std_dev: None,
-						collected_min_max: None,
+						collected_std_dev: if real_metric == "points" {
+							sb.epa_diff
+						} else {
+							None
+						},
+						collected_min_max: if real_metric == "points" {
+							sb.epa_min.and_then(|min| sb.epa_max.map(|max| [min, max]))
+						} else {
+							None
+						},
 						compare_other_numbers: None,
 						is_time: false,
 					})),
@@ -458,28 +484,19 @@ fn get_single_metric(
 						graphic: None,
 					}
 				} else {
-					let value = data_points
-						.iter()
-						.map(|dp| {
-							if let MatchEntryValue::Timer(tm) = dp {
-								tm.time_seconds
-							} else {
-								panic!("Invalid data type of {dp:?} for timer match entry");
-							}
-						})
-						.sum::<f32>() / data_points.len() as f32;
-					TeamInfoEntry {
-						text: format!("{value:.2}"),
-						sort_value: value,
-						colour: [255, 255, 255],
-						graphic: Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry {
-							number: value,
-							collected_std_dev: None,
-							collected_min_max: None,
-							compare_other_numbers: None,
-							is_time: true,
-						})),
-					}
+					number_entry(
+						data_points
+							.iter()
+							.map(|dp| {
+								if let MatchEntryValue::Timer(tm) = dp {
+									tm.time_seconds
+								} else {
+									panic!("Invalid data type of {dp:?} for timer match entry");
+								}
+							})
+							.collect(),
+						true,
+					)
 				}
 			}
 			Some(MatchEntryType::Counter(_)) => {
@@ -491,28 +508,19 @@ fn get_single_metric(
 						graphic: None,
 					}
 				} else {
-					let average = data_points
-						.iter()
-						.map(|dp| {
-							if let MatchEntryValue::Counter(cm) = dp {
-								cm.count as f32
-							} else {
-								panic!("Invalid data type of {dp:?} for counter match entry");
-							}
-						})
-						.sum::<f32>() / data_points.len() as f32;
-					TeamInfoEntry {
-						text: format!("{average:.2}"),
-						sort_value: average,
-						colour: [255, 255, 255],
-						graphic: Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry {
-							number: average,
-							collected_std_dev: None,
-							collected_min_max: None,
-							compare_other_numbers: None,
-							is_time: true,
-						})),
-					}
+					number_entry(
+						data_points
+							.iter()
+							.map(|dp| {
+								if let MatchEntryValue::Counter(cm) = dp {
+									cm.count as f32
+								} else {
+									panic!("Invalid data type of {dp:?} for counter match entry");
+								}
+							})
+							.collect(),
+						false,
+					)
 				}
 			}
 			Some(MatchEntryType::TextEntry(_)) => {

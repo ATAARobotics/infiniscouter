@@ -17,6 +17,9 @@ use crate::DefaultInstant;
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct StatboticsTeam {
 	pub epa_end: f32,
+	pub epa_diff: Option<f32>,
+	pub epa_min: Option<f32>,
+	pub epa_max: Option<f32>,
 	pub auto_epa_end: f32,
 	pub teleop_epa_end: f32,
 	pub endgame_epa_end: f32,
