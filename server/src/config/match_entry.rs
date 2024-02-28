@@ -1,11 +1,16 @@
-use crate::config::{
-	AbilityMetric, BoolMetric, CollectedMetricType, CounterMetric, EnumMetric, GameConfig,
-	ImageMetric, TextEntryMetric, TimerMetric,
+use crate::{
+	analysis::TBA_PREFIX,
+	config::{
+		AbilityMetric, BoolMetric, CollectedMetricType, CounterMetric, EnumMetric, GameConfig,
+		ImageMetric, TextEntryMetric, TimerMetric,
+	},
 };
 use poem_openapi::{Object, Union};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use ts_rs::TS;
+
+use super::TbaMatchPropType;
 
 // TODO: Rename the following types
 
@@ -152,6 +157,21 @@ impl MatchEntryFields {
 							)
 						})
 				})
+				.chain(game_config.tba.iter().map(|(name, prop)| {
+					(
+						format!("{TBA_PREFIX}{name}"),
+						MatchEntry {
+							title: prop.name.clone(),
+							description: format!("{} from The Blue Alliance.", prop.name),
+							page: "The Blue Alliance".to_string(),
+							entry: match prop.ty {
+								TbaMatchPropType::Bool => MatchEntryType::Bool(BoolMetric {}),
+								TbaMatchPropType::Enum => MatchEntryType::Enum(EnumMetric { options: prop.options.clone().unwrap_or_default() }),
+								TbaMatchPropType::Number => MatchEntryType::Counter(CounterMetric { limit_range: None }),
+							},
+						},
+					)
+				}))
 				.collect(),
 			pages: pages.into_iter().map(|(_, page)| page).collect(),
 		}
