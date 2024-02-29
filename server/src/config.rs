@@ -330,9 +330,9 @@ impl From<GameConfig> for GameConfigs {
 								vec![metric_name]
 							}
 						})
-						.chain(value.tba.keys().map(|prop| format!("{TBA_PREFIX}{prop}")))
 						.collect::<Vec<_>>()
 				})
+				.chain(value.tba.keys().map(|prop| format!("{TBA_PREFIX}{prop}")))
 				.collect(),
 			game_config: value,
 		}
