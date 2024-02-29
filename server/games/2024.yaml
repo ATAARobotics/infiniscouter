@@ -90,6 +90,16 @@ categories:
         metric:
           type: ability
           implies: [climb]
+  robot:
+    name: Robot
+    metrics:
+      low-bot:
+        order: 70
+        name: Low Bot
+        description: Is it a low bot?
+        collect:pit_only
+        metric:
+          type: bool
   team:
     name: Team
     metrics:
