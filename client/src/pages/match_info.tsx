@@ -7,7 +7,8 @@ import { DataValue } from "../components/data_value";
 import { LoadIndicator } from "../components/load_indicator";
 import { Navbar } from "../components/navbar";
 import { SyncRequired } from "../components/sync_required";
-import { matchListAtom, useCharts } from "../data/atoms";
+import { matchListAtom } from "../data/atoms";
+import { useCharts, useColorSchemes as useColors } from "../data/hooks";
 import { MatchAnalysisInfo } from "../generated/MatchAnalysisInfo";
 import { MatchAnalysisTeamInfo } from "../generated/MatchAnalysisTeamInfo";
 import { formatMatchId } from "./match_list";
@@ -15,6 +16,7 @@ import { formatMatchId } from "./match_list";
 interface TeamPreviewProps extends MatchAnalysisTeamInfo {
 	alliance: "red" | "blue";
 	other_data_names: Array<string>;
+	colors: Array<Array<string>>;
 }
 
 /**
@@ -39,7 +41,11 @@ function TeamPreview(props: TeamPreviewProps) {
 							<Typography level="title-lg">
 								{props.other_data_names[idx]}
 							</Typography>
-							<DataValue listView={false} value={data}></DataValue>
+							<DataValue
+								listView={false}
+								value={data}
+								colorScheme={props.colors[idx]}
+							></DataValue>
 						</Card>
 					);
 				})}
@@ -61,6 +67,7 @@ interface AlliancePreviewProps {
 	alliance: "red" | "blue";
 	teams: Array<MatchAnalysisTeamInfo>;
 	other_data_names: Array<string>;
+	colors: Array<Array<string>>;
 }
 
 /**
@@ -132,6 +139,7 @@ function AlliancePreview(props: AlliancePreviewProps) {
 					{...teamInfo}
 					alliance={props.alliance}
 					other_data_names={props.other_data_names}
+					colors={props.colors}
 				></TeamPreview>
 			))}
 		</Stack>
@@ -150,6 +158,8 @@ export interface MatchInfoProps {
 export function MatchInfo(props: MatchInfoProps) {
 	const matchList = useAtomValue(matchListAtom);
 	const [matchAnalysis, setMatchAnalysis] = useState<MatchAnalysisInfo>();
+
+	const colors = useColors(matchAnalysis?.other_data_names.length ?? 0);
 
 	useEffect(() => {
 		setMatchAnalysis(undefined);
@@ -170,14 +180,14 @@ export function MatchInfo(props: MatchInfoProps) {
 	return (
 		<Box>
 			<Navbar
-				title={`Match Preview for ${formatMatchId(
+				title={formatMatchId(
 					{
 						match_type: props.type,
 						num: props.num,
 						set: props.set,
 					},
 					matchList.year,
-				)}`}
+				)}
 			/>
 			<Stack
 				direction="row"
@@ -189,11 +199,13 @@ export function MatchInfo(props: MatchInfoProps) {
 					alliance="red"
 					teams={matchAnalysis.red_teams}
 					other_data_names={matchAnalysis.other_data_names}
+					colors={colors}
 				></AlliancePreview>
 				<AlliancePreview
 					alliance="blue"
 					teams={matchAnalysis.blue_teams}
 					other_data_names={matchAnalysis.other_data_names}
+					colors={colors}
 				></AlliancePreview>
 			</Stack>
 		</Box>

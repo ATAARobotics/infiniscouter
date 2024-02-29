@@ -2,54 +2,14 @@ import { Box, Typography } from "@mui/joy";
 import { WordCloudController } from "chartjs-chart-wordcloud";
 import { Chart, Pie } from "react-chartjs-2";
 
-import { useCharts } from "../data/atoms";
+import { useCharts } from "../data/hooks";
 import { TeamInfoEntry } from "../generated/TeamInfoEntry";
 
 interface DataValueProps {
 	value: TeamInfoEntry;
 	listView: boolean;
-	forceColorScheme?: number;
+	colorScheme: string[];
 }
-
-// Pride colour schemes -Veda
-// White and gray have been added to some of these to make each at least 4 colours.
-// Oh I commented out some that are similar to other ones
-const colorSchemes = [
-	// Rainbow
-	["#e74c3c", "#f1c40f", "#2ecc71", "#3498db", "#9b59b6", "#e67e22"],
-	// Trans
-	["#5bcffa", "#ff8eb2", "#ffffff", "#a9a9a9"],
-	// Nonbinary
-	["#9b59d0", "#fff433", "#2d2d2d", "#ffffff"],
-	// Pan
-	["#ff218c", "#ffd800", "#0094ff", "#2d2d2d"],
-	// Bi
-	["#d60270", "#9b4f97", "#0038a7", "#2d2d2d"],
-	// Aro-ace
-	["#e28d00", "#65ace2", "#eccd00", "#223756", "#ffffff"],
-	// Aro/Agender
-	["#3da542", "#b8f483", "#a9a9a9", "#ffffff", "#2d2d2d"],
-	// Ace
-	// ["#800080", "#808080", "#ffffff", "#2d2d2d"],
-	// Lesbian
-	["#a50062", "#ff9b55", "#d462a6", "#ffffff", "#d62900"],
-	// Gay men
-	[
-		"#089276",
-		"#451d7e",
-		"#9de9c3",
-		"#584fcf",
-		"#ffffff",
-		"#81b0e4",
-		"#2ad1ad",
-	],
-	// Genderqueer
-	// ["#b77fdd", "#4b821e", "#ffffff", "#a9a9a9"],
-	// Polysexual
-	// ["#ff02bc", "#00d959", "#0092fd", "#a9a9a9"],
-	// Genderfluid
-	["#3437c1", "#cf00de", "#ff69a0", "#ffffff", "#a9a9a9"],
-];
 
 // These shouldn't go in the word cloud
 const excludeWords = [
@@ -103,7 +63,14 @@ export function DataValue(props: DataValueProps) {
 			);
 		case "pie_chart": {
 			return (
-				<Box sx={{ width: "100px", height: "100px", marginLeft: "50%", translate: "-50%" }}>
+				<Box
+					sx={{
+						width: "100px",
+						height: "100px",
+						marginLeft: "50%",
+						translate: "-50%",
+					}}
+				>
 					{chartsReady && (
 						<Pie
 							data={{
@@ -116,13 +83,7 @@ export function DataValue(props: DataValueProps) {
 										data: props.value.graphic.options.map(
 											(op) => op.value,
 										),
-										backgroundColor:
-											colorSchemes[
-												(props.forceColorScheme ??
-													Math.floor(
-														Math.random() * colorSchemes.length,
-													)) % colorSchemes.length
-											],
+										backgroundColor: props.colorScheme,
 									},
 								],
 							}}

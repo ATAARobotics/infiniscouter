@@ -18,6 +18,7 @@ import { DataValue } from "../components/data_value";
 import { LoadIndicator } from "../components/load_indicator";
 import { Navbar } from "../components/navbar";
 import { analysisColumnsAtom } from "../data/atoms";
+import { useColorSchemes } from "../data/hooks";
 import { NameAndSource } from "../generated/NameAndSource";
 import { TeamInfoDisplay } from "../generated/TeamInfoDisplay";
 import { TeamInfoEntry } from "../generated/TeamInfoEntry";
@@ -46,7 +47,7 @@ export function Analysis() {
 	const [storedColumns, setEnabledColumns] = useAtom(analysisColumnsAtom);
 	const [defaultColumns, setDefaultColumns] = useState<number[]>([]);
 
-	const [colours, setColours] = useState<number[]>([]);
+	const colorSchemes = useColorSchemes(table?.heading.length ?? 0);
 
 	const [sortBy, setSortBy] = useState<number>(0);
 	const [sortReverse, setSortReverse] = useState<boolean>(false);
@@ -58,11 +59,6 @@ export function Analysis() {
 			.then((data2: TeamInfoList) => {
 				setTable(data2);
 				setDefaultColumns(data2.default_display);
-				setColours(
-					data2.heading.map(() =>
-						Math.floor(Math.random() * 64 * 54 * 25 * 13 * 7),
-					),
-				);
 			});
 	}, []);
 
@@ -202,7 +198,7 @@ export function Analysis() {
 												<DataValue
 													listView={true}
 													value={val}
-													forceColorScheme={colours[idx2] ?? 0}
+													colorScheme={colorSchemes[idx2]}
 												/>
 											</td>
 										))}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { DataValue } from "../components/data_value";
 import { LoadIndicator } from "../components/load_indicator";
 import { Navbar } from "../components/navbar";
+import { useColorSchemes } from "../data/hooks";
 import { InfoEntryWithSource } from "../generated/InfoEntryWithSource";
 import { MultiTextEntry } from "../generated/MultiTextEntry";
 import { SingleTeamInfo } from "../generated/SingleTeamInfo";
@@ -17,6 +18,8 @@ interface TeamInfoProps {
  */
 export function TeamInfo(props: TeamInfoProps) {
 	const [data, setData] = useState<SingleTeamInfo>();
+	const [colorScheme] = useColorSchemes(1);
+
 	useEffect(() => {
 		fetch("/api/analysis/team/" + props.team)
 			.then((response) => response.json())
@@ -73,6 +76,7 @@ export function TeamInfo(props: TeamInfoProps) {
 											<DataValue
 												listView={false}
 												value={entry}
+											colorScheme={colorScheme}
 											></DataValue>
 										</Stack>
 									</Card>
