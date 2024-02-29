@@ -5,7 +5,7 @@ import { Navbar } from "../components/navbar";
 import { SyncRequired } from "../components/sync_required";
 import { TbaMatchLink } from "../components/tba_links";
 import { matchListAtom } from "../data/atoms";
-import { getMatchScout } from "../data/entries";
+import { getMatchScouts } from "../data/entries";
 import { EventInfo } from "../generated/EventInfo";
 import { MatchId } from "../generated/MatchId";
 import { MatchInfo } from "../generated/MatchInfo";
@@ -44,7 +44,7 @@ interface TeamCellProps {
 function TeamCell(props: TeamCellProps) {
 	const team_info = props.matchList.team_infos[props.team];
 	const isQuals = props.match.id.match_type === "qualification";
-	const scout = isQuals ? getMatchScout(props.match.id.num, props.team) : null;
+	const scouts = isQuals ? getMatchScouts(props.match.id.num, props.team) : [];
 	return (
 		<td>
 			<Stack direction="row">
@@ -55,9 +55,9 @@ function TeamCell(props: TeamCellProps) {
 				) : (
 					props.team
 				)}{" "}
-				{scout && (
+				{scouts.length > 0 && (
 					<Tooltip
-						title={`Scouted by ${scout}`}
+						title={`Scouted by ${scouts.join(", ")}`}
 						style={{ marginLeft: "auto" }}
 					>
 						<Typography>✅</Typography>

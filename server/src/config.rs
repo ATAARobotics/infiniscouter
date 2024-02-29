@@ -386,6 +386,13 @@ impl From<GameConfig> for GameConfigs {
 						})
 						.collect::<Vec<_>>()
 				})
+				.chain(
+					value
+						.tba
+						.props
+						.keys()
+						.map(|prop| format!("{TBA_PREFIX}{prop}")),
+				)
 				.collect(),
 			game_config: value,
 		}

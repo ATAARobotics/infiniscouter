@@ -5,7 +5,7 @@ import { Navbar } from "../components/navbar";
 import { SyncRequired } from "../components/sync_required";
 import { TbaTeamLink } from "../components/tba_links";
 import { matchListAtom } from "../data/atoms";
-import { getPitScout } from "../data/entries";
+import { getPitScouts } from "../data/entries";
 
 /**
  * Page that shows a list of all teams.
@@ -30,7 +30,7 @@ export function TeamList() {
 				</thead>
 				<tbody>
 					{teams.map((teamInfo) => {
-						const pitScout = getPitScout(teamInfo.num);
+						const pitScouts = getPitScouts(teamInfo.num);
 						return (
 							<>
 								<tr>
@@ -52,9 +52,11 @@ export function TeamList() {
 											<a href={`/pit_entry/${teamInfo.num}`}>
 												Pit Scouting
 											</a>{" "}
-											{pitScout && (
+											{pitScouts.length > 0 && (
 												<Tooltip
-													title={`Scouted by ${pitScout}`}
+													title={`Scouted by ${pitScouts.join(
+														", ",
+													)}`}
 													style={{ marginLeft: "auto" }}
 												>
 													<Typography>✅</Typography>

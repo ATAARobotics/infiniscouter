@@ -3,7 +3,7 @@ use std::{collections::HashMap, path::Path};
 
 use image::imageops::FilterType;
 use image::{DynamicImage, ImageError};
-use log::info;
+use log::{info, warn};
 use serde::{Deserialize, Serialize};
 use sled::{Db, Tree};
 use thiserror::Error;
@@ -60,7 +60,7 @@ impl Database {
 				MatchEntryIdData {
 					match_id: match_id.to_string(),
 					team_id: team_id.to_string(),
-					data: serde_json::from_slice(&v).unwrap(),
+					data: Self::tidy_entry_data(serde_json::from_slice(&v).unwrap()),
 				}
 			})
 			.collect()
@@ -76,7 +76,7 @@ impl Database {
 				DriverEntryIdData {
 					match_id: match_id.to_string(),
 					team_id: team_id.to_string(),
-					data: serde_json::from_slice(&v).unwrap(),
+					data: Self::tidy_entry_data(serde_json::from_slice(&v).unwrap()),
 				}
 			})
 			.collect()
@@ -88,7 +88,10 @@ impl Database {
 			.map(|(k, v)| {
 				let mut key_parts = k.split(|n| *n == 255).skip(3);
 				let team_id = String::from_utf8_lossy(key_parts.next().unwrap());
-				(team_id.to_string(), serde_json::from_slice(&v).unwrap())
+				(
+					team_id.to_string(),
+					Self::tidy_entry_data(serde_json::from_slice(&v).unwrap()),
+				)
 			})
 			.collect()
 	}
@@ -106,7 +109,7 @@ impl Database {
 			.match_entries
 			.get(Self::match_entry_key(year, event, match_id, team))?;
 		Ok(if let Some(val) = value {
-			Some(serde_json::from_slice(&val)?)
+			Some(Self::tidy_entry_data(serde_json::from_slice(&val)?))
 		} else {
 			None
 		})
@@ -117,15 +120,21 @@ impl Database {
 		event: &str,
 		match_id: &str,
 		team: &str,
-		data: &MatchEntryData,
+		data: MatchEntryData,
 	) -> Result<(), DbError> {
-		info!(
-			"Updating MATCH scouting data for match {match_id} and team {team} by scout {}",
-			data.scout
-		);
-		let data = serde_json::to_vec(data)?;
-		self.match_entries
-			.insert(Self::match_entry_key(year, event, match_id, team), data)?;
+		if let Some(new_data) = Self::get_merged_data(
+			"MATCH",
+			team,
+			Some(match_id),
+			self.get_match_entry_data(year, event, match_id, team)
+				.unwrap(),
+			data,
+		) {
+			let data = serde_json::to_vec(&new_data)?;
+			self.match_entries
+				.insert(Self::match_entry_key(year, event, match_id, team), data)?;
+		}
+
 		Ok(())
 	}
 	pub fn get_driver_entry_data(
@@ -139,7 +148,7 @@ impl Database {
 			.driver_entries
 			.get(Self::driver_entry_key(year, event, match_id, team))?;
 		Ok(if let Some(val) = value {
-			Some(serde_json::from_slice(&val)?)
+			Some(Self::tidy_entry_data(serde_json::from_slice(&val)?))
 		} else {
 			None
 		})
@@ -150,15 +159,21 @@ impl Database {
 		event: &str,
 		match_id: &str,
 		team: &str,
-		data: &MatchEntryData,
+		data: MatchEntryData,
 	) -> Result<(), DbError> {
-		info!(
-			"Updating DRIVER scouting data for match {match_id} and team {team} by scout {}",
-			data.scout
-		);
-		let data = serde_json::to_vec(data)?;
-		self.driver_entries
-			.insert(Self::driver_entry_key(year, event, match_id, team), data)?;
+		if let Some(new_data) = Self::get_merged_data(
+			"DRIVER",
+			team,
+			Some(match_id),
+			self.get_driver_entry_data(year, event, match_id, team)
+				.unwrap(),
+			data,
+		) {
+			let data = serde_json::to_vec(&new_data)?;
+			self.driver_entries
+				.insert(Self::driver_entry_key(year, event, match_id, team), data)?;
+		}
+
 		Ok(())
 	}
 	pub fn get_pit_entry_data(
@@ -171,7 +186,7 @@ impl Database {
 			.pit_entries
 			.get(Self::pit_entry_key(year, event, team))?;
 		Ok(if let Some(val) = value {
-			Some(serde_json::from_slice(&val)?)
+			Some(Self::tidy_entry_data(serde_json::from_slice(&val)?))
 		} else {
 			None
 		})
@@ -181,15 +196,20 @@ impl Database {
 		year: u32,
 		event: &str,
 		team: &str,
-		data: &MatchEntryData,
+		data: MatchEntryData,
 	) -> Result<(), DbError> {
-		info!(
-			"Updating PIT scouting data for team {team} by scout {}",
-			data.scout
-		);
-		let data = serde_json::to_vec(data)?;
-		self.pit_entries
-			.insert(Self::pit_entry_key(year, event, team), data)?;
+		if let Some(new_data) = Self::get_merged_data(
+			"PIT",
+			team,
+			None,
+			self.get_pit_entry_data(year, event, team).unwrap(),
+			data,
+		) {
+			let data = serde_json::to_vec(&new_data)?;
+			self.pit_entries
+				.insert(Self::pit_entry_key(year, event, team), data)?;
+		}
+
 		Ok(())
 	}
 
@@ -296,6 +316,81 @@ impl Database {
 		let mut bytes = Self::pit_entry_prefix(year, event);
 		bytes.extend_from_slice(team.as_bytes());
 		bytes
+	}
+
+	fn get_merged_data(
+		data_type: &str,
+		team: &str,
+		match_id: Option<&str>,
+		old_data: Option<MatchEntryData>,
+		new_data: MatchEntryData,
+	) -> Option<MatchEntryData> {
+		let match_bit = if let Some(match_id) = match_id {
+			format!("match {match_id} and ")
+		} else {
+			"".to_string()
+		};
+
+		if new_data.entries.is_empty() {
+			warn!("Ignoring {data_type} scouting data for {match_bit}team {team} (no data)",);
+
+			return None;
+		}
+
+		let new_scout = new_data.get_latest_scout().unwrap();
+
+		let old_data = match old_data {
+			None => {
+				info!("Saving new {data_type} scouting data for {match_bit}team {team} by scout {new_scout}");
+
+				return Some(new_data);
+			}
+			Some(old_data) => old_data,
+		};
+
+		let mut count = 0;
+		let mut final_data = old_data;
+
+		for (id, new_value) in new_data.entries.into_iter() {
+			if let Some(old_value) = final_data.entries.get(&id) {
+				if new_value.get_timestamp() > old_value.get_timestamp()
+					&& new_value.is_different(old_value)
+				{
+					final_data.entries.insert(id, new_value);
+					count += 1;
+				}
+			} else {
+				final_data.entries.insert(id, new_value);
+				count += 1;
+			}
+		}
+
+		if count > 0 {
+			info!("Updating {data_type} scouting data for {match_bit}team {team} by scout {new_scout} ({count} new items)");
+
+			Some(final_data)
+		} else {
+			info!("Ignoring {data_type} scouting data for {match_bit}team {team} by scout {new_scout} (nothing new)");
+
+			None
+		}
+	}
+
+	fn tidy_entry_data(mut data: MatchEntryData) -> MatchEntryData {
+		if let Some(scout) = &data.scout {
+			for entry in data.entries.iter_mut() {
+				entry.1.set_scout_if_blank(scout);
+			}
+			data.scout = None;
+		}
+		if let Some(timestamp_ms) = &data.timestamp_ms {
+			for entry in data.entries.iter_mut() {
+				entry.1.set_timestamp_if_blank(*timestamp_ms);
+			}
+			data.timestamp_ms = None;
+		}
+
+		data
 	}
 }
 

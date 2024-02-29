@@ -76,7 +76,10 @@ export function SyncButton() {
 		const matchSaveTime = Date.now();
 		const matchArray = getAllMatchEntries();
 		const matchesToSave = matchArray.filter(
-			(entry) => entry.data.timestamp_ms > lastMatchSave,
+			(entry) =>
+				Object.values(entry.data.entries).findIndex(
+					(value) => value.timestamp_ms > lastMatchSave,
+				) >= 0,
 		);
 		if (matchesToSave.length > 0) {
 			await saveImageData(matchesToSave, (matchEntry) =>
@@ -99,7 +102,10 @@ export function SyncButton() {
 		const pitSaveTime = Date.now();
 		const pitArray = getAllPitEntries();
 		const pitEntriesToSave = pitArray.filter(
-			(entry) => entry.data.timestamp_ms > lastPitSave,
+			(entry) =>
+				Object.values(entry.data.entries).findIndex(
+					(value) => value.timestamp_ms > lastPitSave,
+				) >= 0,
 		);
 		if (pitEntriesToSave.length > 0) {
 			await saveImageData(pitEntriesToSave, (pitEntry) =>
@@ -122,7 +128,10 @@ export function SyncButton() {
 		const driverSaveTime = Date.now();
 		const driverArray = getAllDriverEntries();
 		const driverEntriesToSave = driverArray.filter(
-			(entry) => entry.data.timestamp_ms > lastDriverSave,
+			(entry) =>
+				Object.values(entry.data.entries).findIndex(
+					(value) => value.timestamp_ms > lastDriverSave,
+				) >= 0,
 		);
 		if (driverEntriesToSave.length > 0) {
 			await saveImageData(driverEntriesToSave, (driverEntry) =>
@@ -145,7 +154,11 @@ export function SyncButton() {
 		const knownMatchEntries = matchArray.map<MatchEntryTimedId>((entry) => ({
 			match_id: entry.match_id,
 			team_id: entry.team_id,
-			timestamp_ms: entry.data.timestamp_ms,
+			timestamp_ms: Object.values(entry.data.entries).reduce(
+				(max_timestamp, value) =>
+					Math.max(max_timestamp, value.timestamp_ms ?? 0),
+				0,
+			),
 		}));
 		await fetch("/api/match_entry/data/filtered", {
 			method: "POST",
@@ -163,7 +176,11 @@ export function SyncButton() {
 
 		const knownPitEntries = pitArray.map<PitEntryTimedId>((entry) => ({
 			team_id: entry.team_id,
-			timestamp_ms: entry.data.timestamp_ms,
+			timestamp_ms: Object.values(entry.data.entries).reduce(
+				(max_timestamp, value) =>
+					Math.max(max_timestamp, value.timestamp_ms ?? 0),
+				0,
+			),
 		}));
 		await fetch("/api/pit_entry/data/filtered", {
 			method: "POST",
@@ -180,7 +197,11 @@ export function SyncButton() {
 		const knownDriveres = driverArray.map<DriverEntryTimedId>((entry) => ({
 			match_id: entry.match_id,
 			team_id: entry.team_id,
-			timestamp_ms: entry.data.timestamp_ms,
+			timestamp_ms: Object.values(entry.data.entries).reduce(
+				(max_timestamp, value) =>
+					Math.max(max_timestamp, value.timestamp_ms ?? 0),
+				0,
+			),
 		}));
 		await fetch("/api/driver_entry/data/filtered", {
 			method: "POST",

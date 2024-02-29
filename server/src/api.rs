@@ -115,7 +115,7 @@ impl Api {
 				match known_timestamps.get(&(entry.match_id.to_string(), entry.team_id.to_string()))
 				{
 					None => true,
-					Some(known_timestamp) => entry.data.timestamp_ms > *known_timestamp,
+					Some(known_timestamp) => entry.data.get_timestamp() > *known_timestamp,
 				}
 			})
 			.collect::<Vec<_>>();
@@ -135,7 +135,7 @@ impl Api {
 				&self.config.get_server_config().current_event,
 				match_id,
 				team,
-				&data,
+				data,
 			)
 			.map_err(|e| poem::Error::new(e, StatusCode::INTERNAL_SERVER_ERROR))?;
 		Ok(())
@@ -213,7 +213,7 @@ impl Api {
 				match known_timestamps.get(&(entry.match_id.to_string(), entry.team_id.to_string()))
 				{
 					None => true,
-					Some(known_timestamp) => entry.data.timestamp_ms > *known_timestamp,
+					Some(known_timestamp) => entry.data.get_timestamp() > *known_timestamp,
 				}
 			})
 			.collect::<Vec<_>>();
@@ -233,7 +233,7 @@ impl Api {
 				&self.config.get_server_config().current_event,
 				match_id,
 				team,
-				&data,
+				data,
 			)
 			.map_err(|e| poem::Error::new(e, StatusCode::INTERNAL_SERVER_ERROR))?;
 		Ok(())
@@ -308,7 +308,7 @@ impl Api {
 			.filter_map(|(team, data)| {
 				let unknown = match known_timestamps.get(&team) {
 					None => true,
-					Some(known_timestamp) => data.timestamp_ms > *known_timestamp,
+					Some(known_timestamp) => data.get_timestamp() > *known_timestamp,
 				};
 				if unknown {
 					Some(PitEntryIdData {
@@ -330,7 +330,7 @@ impl Api {
 				self.config.get_server_config().current_year,
 				&self.config.get_server_config().current_event,
 				team,
-				&data,
+				data,
 			)
 			.map_err(|e| poem::Error::new(e, StatusCode::INTERNAL_SERVER_ERROR))?;
 		Ok(())

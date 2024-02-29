@@ -27,15 +27,14 @@ export function useEntries<T extends AnyEntryId>(
 	Record<string, MatchEntryValue>,
 	(id: string, value: MatchEntryValue | undefined) => void,
 ] {
-	const [data, setData] = useState<Omit<MatchEntryData, "scout">>({
+	const [data, setData] = useState<MatchEntryData>({
 		entries: {},
-		timestamp_ms: 0,
 	});
 	const [changed, setChanged] = useState<boolean>(false);
 
 	useEffect(() => {
 		if (changed && key && scoutName && Object.keys(data.entries).length > 0) {
-			const saveData: T = maker({ ...data, scout: scoutName });
+			const saveData: T = maker({ ...data });
 			localStorage.setItem(key, JSON.stringify(saveData));
 		}
 	}, [data, scoutName]);
@@ -51,7 +50,6 @@ export function useEntries<T extends AnyEntryId>(
 				setChanged(false);
 				setData({
 					entries: {},
-					timestamp_ms: 0,
 				});
 			}
 		}
@@ -68,7 +66,6 @@ export function useEntries<T extends AnyEntryId>(
 			}
 			setChanged(true);
 			setData({
-				timestamp_ms: Date.now(),
 				entries: newEntries,
 			});
 		},
@@ -160,10 +157,20 @@ export function getAllDriverEntries(): Array<DriverEntryIdData> {
 /**
  * Get scout that scouted a team in a match (if there is scouting data for that match and team).
  */
-export function getMatchScout(matchId: number, teamId: number): string | null {
+export function getMatchScouts(matchId: number, teamId: number): Array<string> {
 	const matchEntry = getMatchEntry(matchId, teamId);
 
-	return matchEntry ? matchEntry.data.scout : null;
+	if (!matchEntry) {
+		return [];
+	}
+
+	const scouts: Record<string, true> = {};
+
+	for (const value of Object.values(matchEntry.data.entries)) {
+		scouts[value.scout || "Unknown"] = true;
+	}
+
+	return Object.keys(scouts);
 }
 
 /**
@@ -191,10 +198,20 @@ export function getMatchKey(
 /**
  * Get scout that scouted a team in the pits (if there is scouting data for that team).
  */
-export function getPitScout(teamId: number): string | null {
+export function getPitScouts(teamId: number): Array<string> {
 	const pitEntry = getPitEntry(teamId);
 
-	return pitEntry ? pitEntry.data.scout : null;
+	if (!pitEntry) {
+		return [];
+	}
+
+	const scouts: Record<string, true> = {};
+
+	for (const value of Object.values(pitEntry.data.entries)) {
+		scouts[value.scout || "Unknown"] = true;
+	}
+
+	return Object.keys(scouts);
 }
 
 /**

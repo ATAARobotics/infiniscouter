@@ -366,7 +366,7 @@ fn get_single_metric(
 			if let Some(filter_metric) = filter_metric {
 				matches!(
 					match_entry.data.entries.get(filter_metric),
-					Some(MatchEntryValue::Bool(MatchBoolEntry { value: true })),
+					Some(MatchEntryValue::Bool(MatchBoolEntry { value: true, .. })),
 				)
 			} else {
 				true
@@ -843,8 +843,8 @@ fn get_match_entries(
 					team_id: team.to_string(),
 					data: MatchEntryData {
 						entries: custom_entries.clone(),
-						scout: "TBA".to_string(),
-						timestamp_ms: 0,
+						scout: None,
+						timestamp_ms: None,
 					},
 				})
 			}

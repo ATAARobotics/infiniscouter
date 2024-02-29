@@ -72,6 +72,7 @@ export function PitEntry(props: PitEntryProps) {
 				{teamId &&
 					fields.pages.map((page) => (
 						<MatchPage
+							scout={scoutName}
 							page={page}
 							entries={fields.entries}
 							setEntry={setEntry}
