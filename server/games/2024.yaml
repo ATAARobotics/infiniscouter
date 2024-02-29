@@ -97,7 +97,7 @@ categories:
         order: 70
         name: Low Bot
         description: Is it a low bot?
-        collect:pit_only
+        collect: pit_only
         metric:
           type: bool
   team:
