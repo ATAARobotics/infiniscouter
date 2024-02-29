@@ -78,17 +78,17 @@ export function useEntries<T extends AnyEntryId>(
 /**
  * Gets all image data that was stored in indexed DB for the given entries.
  */
-export async function getImageData<T extends AnyEntryId>(
+export async function saveImageData<T extends AnyEntryId>(
 	entries: Array<T>,
-): Promise<Array<ImageEntryData>> {
+	getKey: (entry: T) => string,
+): Promise<boolean> {
 	const images: Array<ImageEntryData> = [];
 	for (const entry of entries) {
 		for (const value of Object.values(entry.data.entries)) {
 			if (value.type === "image") {
-				console.log("Sending image..." + value.images);
 				for (const image of value.images) {
-					if ((image as unknown as {local: true | undefined}).local) {
-						(image as unknown as {local: boolean | undefined}).local = false;
+					if ((image as unknown as { local: true | undefined }).local) {
+						console.log("Sending image..." + image.image_id);
 						const imageData = await getImage(image.image_id);
 						images.push({
 							...image,
@@ -100,7 +100,37 @@ export async function getImageData<T extends AnyEntryId>(
 			}
 		}
 	}
-	return images;
+
+	if (images.length === 0) {
+		return true;
+	}
+
+	const response = await fetch("/api/images", {
+		method: "PUT",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(images),
+	});
+
+	if (response.ok) {
+		for (const entry of entries) {
+			let needToSave = false;
+			for (const value of Object.values(entry.data.entries)) {
+				if (value.type === "image") {
+					for (const image of value.images) {
+						(image as unknown as { local: boolean | undefined }).local =
+							false;
+					}
+					needToSave = true;
+				}
+			}
+
+			if (needToSave) {
+				localStorage.setItem(getKey(entry), JSON.stringify(entry));
+			}
+		}
+	}
+
+	return response.ok;
 }
 
 /**

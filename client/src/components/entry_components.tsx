@@ -136,9 +136,9 @@ function EnumEntry(props: EnumEntryProps) {
 		<ToggleButtonGroup
 			value={
 				props.value &&
-					(props.value.type === "enum" ||
-						props.value.type === "ability" ||
-						props.value.type === "bool")
+				(props.value.type === "enum" ||
+					props.value.type === "ability" ||
+					props.value.type === "bool")
 					? props.value.value.toString()
 					: ""
 			}
@@ -374,42 +374,48 @@ interface LocalImageProps {
 	mimeType: string;
 }
 
-
 /**
  * Display an image from the indexed db
  */
 function LocalImage(props: LocalImageProps) {
-	const [imageData, setImageData] = useState<{ id: string; data: ArrayBuffer }>();
+	const [imageData, setImageData] = useState<{
+		id: string;
+		data: ArrayBuffer;
+	}>();
 
 	useEffect(() => {
 		if (!imageData || imageData.id !== props.imageId) {
 			let cancel = false;
-			getImage(props.imageId)
-				.then(data => {
-					if (data && !cancel) {
-						setImageData({ id: props.imageId, data });
-					}
-				});
+			getImage(props.imageId).then((data) => {
+				if (data && !cancel) {
+					setImageData({ id: props.imageId, data });
+				}
+			});
 
 			return () => {
 				cancel = true;
 			};
 		}
 
-		return () => { };
+		return () => {};
 	}, [imageData, props]);
 
-	return (imageData && imageData.id === props.imageId)
-		? <img height="150" src=
-			{URL.createObjectURL(new Blob([imageData.data], { type: props.mimeType }))}
+	return imageData && imageData.id === props.imageId ? (
+		<img
+			height="150"
+			src={URL.createObjectURL(
+				new Blob([imageData.data], { type: props.mimeType }),
+			)}
 		></img>
-		: <CircularProgress
+	) : (
+		<CircularProgress
 			color="neutral"
 			determinate={false}
 			size="lg"
 			variant="solid"
 			thickness={18}
-		/>;
+		/>
+	);
 }
 
 interface ImageEntryProps {
@@ -479,38 +485,51 @@ function ImageEntry(props: ImageEntryProps) {
 				}}
 			/>
 			<Stack direction="row">
-				{
-					props.value?.type === "image" ? props.value.images.map(img =>
-						<Box id={img.image_id}>
-							<Button
-								color="danger"
-								sx={{
-									position: "absolute",
-									boxSizing: "border-box",
-									width: "32px",
-									height: "32px",
-									padding: 0,
-									borderRadius: "25%",
-								}}
-								onClick={() => {
-									props.setValue({
-										type: "image",
-										images: ((props.value?.type === "image"
-											? props.value?.images
-											: undefined) ?? [])
-											.filter(img2 => img2.image_id !== img.image_id),
-									});
-								}}
-							>⊗</Button>
-							{((img as unknown as { local: true | undefined }).local ?
-								<LocalImage imageId={img.image_id} mimeType={img.image_mime} /> :
-								<img height="150" src={`/image/small/${img.image_id}`}></img>
-							)}
-						</Box>,
-					) : "Invalid image data"
-				}
-			</Stack >
-		</Box >
+				{props.value?.type === "image"
+					? props.value.images.map((img) => (
+							<Box id={img.image_id}>
+								<Button
+									color="danger"
+									sx={{
+										position: "absolute",
+										boxSizing: "border-box",
+										width: "32px",
+										height: "32px",
+										padding: 0,
+										borderRadius: "25%",
+									}}
+									onClick={() => {
+										props.setValue({
+											type: "image",
+											images: (
+												(props.value?.type === "image"
+													? props.value?.images
+													: undefined) ?? []
+											).filter(
+												(img2) => img2.image_id !== img.image_id,
+											),
+										});
+									}}
+								>
+									⊗
+								</Button>
+								{(img as unknown as { local: true | undefined })
+									.local ? (
+									<LocalImage
+										imageId={img.image_id}
+										mimeType={img.image_mime}
+									/>
+								) : (
+									<img
+										height="150"
+										src={`/image/small/${img.image_id}`}
+									></img>
+								)}
+							</Box>
+					  ))
+					: "Invalid image data"}
+			</Stack>
+		</Box>
 	);
 }
 

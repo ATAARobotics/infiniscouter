@@ -243,8 +243,16 @@ fn get_pie_chart(
 fn number_entry(numbers: Vec<f32>, is_time: bool) -> TeamInfoEntry {
 	let value = numbers.iter().sum::<f32>() / numbers.len() as f32;
 	let std_dev = (numbers.iter().sum::<f32>() / numbers.len() as f32).sqrt();
-	let min = numbers.iter().copied().reduce(|a, b| a.min(b)).unwrap_or_default();
-	let max = numbers.iter().copied().reduce(|a, b| a.max(b)).unwrap_or_default();
+	let min = numbers
+		.iter()
+		.copied()
+		.reduce(|a, b| a.min(b))
+		.unwrap_or_default();
+	let max = numbers
+		.iter()
+		.copied()
+		.reduce(|a, b| a.max(b))
+		.unwrap_or_default();
 	TeamInfoEntry {
 		text: format!("{value:.2}"),
 		sort_value: value,

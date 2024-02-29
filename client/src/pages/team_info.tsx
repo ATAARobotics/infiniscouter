@@ -76,7 +76,7 @@ export function TeamInfo(props: TeamInfoProps) {
 											<DataValue
 												listView={false}
 												value={entry}
-											colorScheme={colorScheme}
+												colorScheme={colorScheme}
 											></DataValue>
 										</Stack>
 									</Card>

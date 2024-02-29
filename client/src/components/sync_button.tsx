@@ -15,8 +15,11 @@ import {
 	getAllDriverEntries,
 	getAllMatchEntries,
 	getAllPitEntries,
-	getImageData,
+	getDriverKey,
+	getMatchKey,
+	getPitKey,
 	saveDriver as saveDriverEntry,
+	saveImageData,
 	saveMatch as saveMatchEntry,
 	savePit as savePitEntry,
 } from "../data/entries";
@@ -76,21 +79,9 @@ export function SyncButton() {
 			(entry) => entry.data.timestamp_ms > lastMatchSave,
 		);
 		if (matchesToSave.length > 0) {
-			const images = await getImageData(matchesToSave);
-
-			await fetch("/api/images", {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(images),
-			}).then((response) => {
-				if (response.ok) {
-					for (const match of matchesToSave) {
-						for (const _ of match.data.entries) {
-
-						}
-					}
-				}
-			});
+			await saveImageData(matchesToSave, (matchEntry) =>
+				getMatchKey(matchEntry.match_id, matchEntry.team_id),
+			);
 
 			await fetch("/api/match_entry/data/all", {
 				method: "PUT",
@@ -111,13 +102,9 @@ export function SyncButton() {
 			(entry) => entry.data.timestamp_ms > lastPitSave,
 		);
 		if (pitEntriesToSave.length > 0) {
-			const images = await getImageData(pitEntriesToSave);
-
-			await fetch("/api/images", {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(images),
-			});
+			await saveImageData(pitEntriesToSave, (pitEntry) =>
+				getPitKey(pitEntry.team_id),
+			);
 
 			await fetch("/api/pit_entry/data/all", {
 				method: "PUT",
@@ -138,13 +125,9 @@ export function SyncButton() {
 			(entry) => entry.data.timestamp_ms > lastDriverSave,
 		);
 		if (driverEntriesToSave.length > 0) {
-			const images = await getImageData(pitEntriesToSave);
-
-			await fetch("/api/images", {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(images),
-			});
+			await saveImageData(driverEntriesToSave, (driverEntry) =>
+				getDriverKey(driverEntry.match_id, driverEntry.team_id),
+			);
 
 			fetch("/api/driver_entry/data/all", {
 				method: "PUT",
