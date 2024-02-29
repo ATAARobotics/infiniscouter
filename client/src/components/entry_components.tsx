@@ -527,7 +527,7 @@ function ImageEntry(props: ImageEntryProps) {
 								)}
 							</Box>
 					  ))
-					: "Invalid image data"}
+					: <></>}
 			</Stack>
 		</Box>
 	);
