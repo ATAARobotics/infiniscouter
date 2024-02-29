@@ -1,4 +1,4 @@
-import { CircularProgress } from "@mui/joy";
+import { Box, CircularProgress } from "@mui/joy";
 
 import { Navbar } from "./navbar";
 
@@ -13,7 +13,7 @@ export function LoadIndicator(props: LoadIndicatorProps) {
 	return (
 		<>
 			<Navbar title={props.title} />
-			<div style={{ padding: "10px" }}>
+			<Box padding="10px">
 				<CircularProgress
 					color="neutral"
 					determinate={false}
@@ -21,7 +21,7 @@ export function LoadIndicator(props: LoadIndicatorProps) {
 					variant="solid"
 					thickness={18}
 				/>
-			</div>
+			</Box>
 		</>
 	);
 }

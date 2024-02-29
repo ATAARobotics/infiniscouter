@@ -1,6 +1,7 @@
 import {
 	Box,
 	Button,
+	CircularProgress,
 	Input,
 	Stack,
 	Textarea,
@@ -18,7 +19,7 @@ import { MatchEntryPage } from "../generated/MatchEntryPage";
 import { MatchEntryValue } from "../generated/MatchEntryValue";
 import { TextEntryMetric } from "../generated/TextEntryMetric";
 import { TimerMetric } from "../generated/TimerMetric";
-import { saveImage } from "../images";
+import { getImage, saveImage } from "../images";
 
 interface MatchPageProps {
 	page: MatchEntryPage;
@@ -135,9 +136,9 @@ function EnumEntry(props: EnumEntryProps) {
 		<ToggleButtonGroup
 			value={
 				props.value &&
-				(props.value.type === "enum" ||
-					props.value.type === "ability" ||
-					props.value.type === "bool")
+					(props.value.type === "enum" ||
+						props.value.type === "ability" ||
+						props.value.type === "bool")
 					? props.value.value.toString()
 					: ""
 			}
@@ -368,6 +369,49 @@ function TextFieldEntry(props: TextFieldEntryProps) {
 	);
 }
 
+interface LocalImageProps {
+	imageId: string;
+	mimeType: string;
+}
+
+
+/**
+ * Display an image from the indexed db
+ */
+function LocalImage(props: LocalImageProps) {
+	const [imageData, setImageData] = useState<{ id: string; data: ArrayBuffer }>();
+
+	useEffect(() => {
+		if (!imageData || imageData.id !== props.imageId) {
+			let cancel = false;
+			getImage(props.imageId)
+				.then(data => {
+					if (data && !cancel) {
+						setImageData({ id: props.imageId, data });
+					}
+				});
+
+			return () => {
+				cancel = true;
+			};
+		}
+
+		return () => { };
+	}, [imageData, props]);
+
+	return (imageData && imageData.id === props.imageId)
+		? <img height="150" src=
+			{URL.createObjectURL(new Blob([imageData.data], { type: props.mimeType }))}
+		></img>
+		: <CircularProgress
+			color="neutral"
+			determinate={false}
+			size="lg"
+			variant="solid"
+			thickness={18}
+		/>;
+}
+
 interface ImageEntryProps {
 	value: MatchEntryValue | undefined;
 	setValue: (value: MatchEntryValue | undefined) => void;
@@ -405,36 +449,68 @@ function toMime(filename: string): string {
 function ImageEntry(props: ImageEntryProps) {
 	return (
 		<Box>
-			{
-				<input
-					type="file"
-					capture="environment"
-					accept="image/*"
-					onChange={(ev) => {
-						const files = (ev.target as HTMLInputElement).files;
-						for (let f = 0; f < (files?.length ?? 0); f++) {
-							const file = (files ?? [])[f];
-							if (file !== null) {
-								saveImage(file).then((imageUuid) => {
+			<input
+				type="file"
+				capture="environment"
+				accept="image/*"
+				onChange={(ev) => {
+					const files = (ev.target as HTMLInputElement).files;
+					for (let f = 0; f < (files?.length ?? 0); f++) {
+						const file = (files ?? [])[f];
+						if (file !== null) {
+							saveImage(file).then((imageUuid) => {
+								props.setValue({
+									type: "image",
+									images: [
+										...((props.value?.type === "image"
+											? props.value?.images
+											: undefined) ?? []),
+										{
+											image_mime: toMime(file.name),
+											image_id: imageUuid,
+											// @ts-expect-error: Hack
+											local: true,
+										},
+									],
+								});
+							});
+						}
+					}
+				}}
+			/>
+			<Stack direction="row">
+				{
+					props.value?.type === "image" ? props.value.images.map(img =>
+						<Box id={img.image_id}>
+							<Button
+								color="danger"
+								sx={{
+									position: "absolute",
+									boxSizing: "border-box",
+									width: "32px",
+									height: "32px",
+									padding: 0,
+									borderRadius: "25%",
+								}}
+								onClick={() => {
 									props.setValue({
 										type: "image",
-										images: [
-											...((props.value?.type === "image"
-												? props.value?.images
-												: undefined) ?? []),
-											{
-												image_mime: toMime(file.name),
-												image_id: imageUuid,
-											},
-										],
+										images: ((props.value?.type === "image"
+											? props.value?.images
+											: undefined) ?? [])
+											.filter(img2 => img2.image_id !== img.image_id),
 									});
-								});
-							}
-						}
-					}}
-				/>
-			}
-		</Box>
+								}}
+							>⊗</Button>
+							{((img as unknown as { local: true | undefined }).local ?
+								<LocalImage imageId={img.image_id} mimeType={img.image_mime} /> :
+								<img height="150" src={`/image/small/${img.image_id}`}></img>
+							)}
+						</Box>,
+					) : "Invalid image data"
+				}
+			</Stack >
+		</Box >
 	);
 }
 

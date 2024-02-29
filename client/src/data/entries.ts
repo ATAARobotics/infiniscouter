@@ -85,13 +85,17 @@ export async function getImageData<T extends AnyEntryId>(
 	for (const entry of entries) {
 		for (const value of Object.values(entry.data.entries)) {
 			if (value.type === "image") {
+				console.log("Sending image..." + value.images);
 				for (const image of value.images) {
-					const imageData = await getImage(image.image_id);
-					images.push({
-						...image,
-						// @ts-expect-error MY TYPESCRIPT BINDINGS ARE WRONG OWIEE!!!! -Papyrus from undertale
-						image_data: [...new Uint8Array(imageData)],
-					});
+					if ((image as unknown as {local: true | undefined}).local) {
+						(image as unknown as {local: boolean | undefined}).local = false;
+						const imageData = await getImage(image.image_id);
+						images.push({
+							...image,
+							// @ts-expect-error MY TYPESCRIPT BINDINGS ARE WRONG OWIEE!!!! -Papyrus from undertale
+							image_data: [...new Uint8Array(imageData)],
+						});
+					}
 				}
 			}
 		}

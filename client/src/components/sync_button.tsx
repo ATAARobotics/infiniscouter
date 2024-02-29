@@ -82,6 +82,14 @@ export function SyncButton() {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(images),
+			}).then((response) => {
+				if (response.ok) {
+					for (const match of matchesToSave) {
+						for (const _ of match.data.entries) {
+
+						}
+					}
+				}
 			});
 
 			await fetch("/api/match_entry/data/all", {
