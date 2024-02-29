@@ -66,6 +66,7 @@ export function PitEntry(props: PitEntryProps) {
 						onChange={(_ev, value) => {
 							setTeamId(value?.num ?? 0);
 						}}
+						isOptionEqualToValue={(a, b) => a.num === b.num}
 					/>
 				)}
 				{teamId &&
