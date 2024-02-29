@@ -21,11 +21,14 @@ import { TextEntryMetric } from "../generated/TextEntryMetric";
 import { TimerMetric } from "../generated/TimerMetric";
 import { getImage, saveImage } from "../images";
 
+export type OptionalEntryValue = MatchEntryValue | undefined;
+
 interface MatchPageProps {
+	scout: string;
 	page: MatchEntryPage;
 	entries: Record<string, MatchEntry>;
 	allEntries: Record<string, MatchEntryValue>;
-	setEntry: (id: string, value: MatchEntryValue | undefined) => void;
+	setEntry: (id: string, value: OptionalEntryValue) => void;
 }
 
 /**
@@ -44,6 +47,7 @@ export function MatchPage(props: MatchPageProps) {
 			</Typography>
 			{props.page.layout.map((entryName) => (
 				<MatchDetail
+					scout={props.scout}
 					entry={props.entries[entryName]}
 					setValue={(value) => {
 						props.setEntry(entryName, value);
@@ -56,9 +60,10 @@ export function MatchPage(props: MatchPageProps) {
 }
 
 interface MatchDetailProps {
+	scout: string;
 	entry: MatchEntry;
 	value: MatchEntryValue | undefined;
-	setValue: (value: MatchEntryValue | undefined) => void;
+	setValue: (value: OptionalEntryValue) => void;
 }
 
 /**
@@ -70,12 +75,14 @@ function MatchDetail(props: MatchDetailProps) {
 			<Typography level="h3">{props.entry.title}</Typography>
 			{props.entry.entry.type === "ability" ? (
 				<AbilityEntry
+					scout={props.scout}
 					entry={props.entry.entry}
 					value={props.value}
 					setValue={props.setValue}
 				></AbilityEntry>
 			) : props.entry.entry.type === "enum" ? (
 				<EnumEntry
+					scout={props.scout}
 					options={props.entry.entry.options.map((item) => ({
 						id: item,
 						display: item,
@@ -86,30 +93,35 @@ function MatchDetail(props: MatchDetailProps) {
 				></EnumEntry>
 			) : props.entry.entry.type === "bool" ? (
 				<BoolEntry
+					scout={props.scout}
 					entry={props.entry.entry}
 					value={props.value}
 					setValue={props.setValue}
 				></BoolEntry>
 			) : props.entry.entry.type === "timer" ? (
 				<TimerEntry
+					scout={props.scout}
 					entry={props.entry.entry}
 					value={props.value}
 					setValue={props.setValue}
 				></TimerEntry>
 			) : props.entry.entry.type === "counter" ? (
 				<CounterEntry
+					scout={props.scout}
 					entry={props.entry.entry}
 					value={props.value}
 					setValue={props.setValue}
 				/>
 			) : props.entry.entry.type === "text_entry" ? (
 				<TextFieldEntry
+					scout={props.scout}
 					entry={props.entry.entry}
 					value={props.value}
 					setValue={props.setValue}
 				/>
 			) : props.entry.entry.type === "image" ? (
 				<ImageEntry
+					scout={props.scout}
 					entry={props.entry.entry}
 					value={props.value}
 					setValue={props.setValue}
@@ -122,8 +134,9 @@ function MatchDetail(props: MatchDetailProps) {
 }
 
 interface EnumEntryProps {
+	scout: string;
 	value: MatchEntryValue | undefined;
-	setValue: (value: MatchEntryValue | undefined) => void;
+	setValue: (value: OptionalEntryValue) => void;
 	options: Array<{ id: string | boolean; display: string }>;
 	entryType: "ability" | "bool" | "enum";
 }
@@ -179,8 +192,9 @@ function EnumEntry(props: EnumEntryProps) {
 }
 
 interface AbilityEntryProps {
+	scout: string;
 	value: MatchEntryValue | undefined;
-	setValue: (value: MatchEntryValue | undefined) => void;
+	setValue: (value: OptionalEntryValue) => void;
 	entry: AbilityMetric;
 }
 
@@ -190,6 +204,7 @@ interface AbilityEntryProps {
 function AbilityEntry(props: AbilityEntryProps) {
 	return (
 		<EnumEntry
+			scout={props.scout}
 			options={[
 				{ id: "nothing", display: "Nothing" },
 				{ id: "attempted", display: "Attempted" },
@@ -203,8 +218,9 @@ function AbilityEntry(props: AbilityEntryProps) {
 }
 
 interface BoolEntryProps {
+	scout: string;
 	value: MatchEntryValue | undefined;
-	setValue: (value: MatchEntryValue | undefined) => void;
+	setValue: (value: OptionalEntryValue) => void;
 	entry: BoolMetric;
 }
 
@@ -214,6 +230,7 @@ interface BoolEntryProps {
 function BoolEntry(props: BoolEntryProps) {
 	return (
 		<EnumEntry
+			scout={props.scout}
 			options={[
 				{ id: false, display: "No" },
 				{ id: true, display: "Yes" },
@@ -226,8 +243,9 @@ function BoolEntry(props: BoolEntryProps) {
 }
 
 interface CounterEntryProps {
+	scout: string;
 	value: MatchEntryValue | undefined;
-	setValue: (value: MatchEntryValue | undefined) => void;
+	setValue: (value: OptionalEntryValue) => void;
 	entry: CounterMetric;
 }
 
@@ -255,6 +273,8 @@ function CounterEntry(props: CounterEntryProps) {
 							props.setValue({
 								count: props.entry.limit_range?.start ?? 0,
 								type: "counter",
+								timestamp_ms: Date.now(),
+								scout: props.scout,
 							});
 						} else if (
 							props.entry?.limit_range === null ||
@@ -264,6 +284,8 @@ function CounterEntry(props: CounterEntryProps) {
 							props.setValue({
 								count: props.value.count - 1,
 								type: "counter",
+								timestamp_ms: Date.now(),
+								scout: props.scout,
 							});
 						}
 					}}
@@ -292,7 +314,12 @@ function CounterEntry(props: CounterEntryProps) {
 								(value >= props.entry.limit_range.start &&
 									value <= props.entry.limit_range.end_inclusive))
 						) {
-							props.setValue({ type: "counter", count: value });
+							props.setValue({
+								type: "counter",
+								count: value,
+								timestamp_ms: Date.now(),
+								scout: props.scout,
+							});
 						} else {
 							props.setValue(undefined);
 						}
@@ -314,6 +341,8 @@ function CounterEntry(props: CounterEntryProps) {
 							props.setValue({
 								count: props.entry.limit_range?.start ?? 0,
 								type: "counter",
+								timestamp_ms: Date.now(),
+								scout: props.scout,
 							});
 						} else if (
 							props.entry?.limit_range === null ||
@@ -323,6 +352,8 @@ function CounterEntry(props: CounterEntryProps) {
 							props.setValue({
 								count: props.value.count + 1,
 								type: "counter",
+								timestamp_ms: Date.now(),
+								scout: props.scout,
 							});
 						}
 					}}
@@ -335,8 +366,9 @@ function CounterEntry(props: CounterEntryProps) {
 }
 
 interface TextFieldEntryProps {
+	scout: string;
 	value: MatchEntryValue | undefined;
-	setValue: (value: MatchEntryValue | undefined) => void;
+	setValue: (value: OptionalEntryValue) => void;
 	entry: TextEntryMetric;
 }
 
@@ -349,7 +381,12 @@ function TextFieldEntry(props: TextFieldEntryProps) {
 		if (!props.entry.multiline) {
 			value = value.replaceAll("\n", "");
 		}
-		props.setValue({ type: "text_entry", text: value });
+		props.setValue({
+			type: "text_entry",
+			text: value,
+			timestamp_ms: Date.now(),
+			scout: props.scout,
+		});
 	};
 	return (
 		// @ts-expect-error Input seems to want a component for some reason?
@@ -419,8 +456,9 @@ function LocalImage(props: LocalImageProps) {
 }
 
 interface ImageEntryProps {
+	scout: string;
 	value: MatchEntryValue | undefined;
-	setValue: (value: MatchEntryValue | undefined) => void;
+	setValue: (value: OptionalEntryValue) => void;
 	entry: ImageMetric;
 }
 
@@ -508,6 +546,8 @@ function ImageEntry(props: ImageEntryProps) {
 											).filter(
 												(img2) => img2.image_id !== img.image_id,
 											),
+											timestamp_ms: Date.now(),
+											scout: props.scout,
 										});
 									}}
 								>
@@ -534,8 +574,9 @@ function ImageEntry(props: ImageEntryProps) {
 }
 
 interface TimerEntryProps {
+	scout: string;
 	value: MatchEntryValue | undefined;
-	setValue: (value: MatchEntryValue | undefined) => void;
+	setValue: (value: OptionalEntryValue) => void;
 	entry: TimerMetric;
 }
 
@@ -598,7 +639,12 @@ function TimerEntry(props: TimerEntryProps) {
 				onClick={() => {
 					const time = Date.now() - state.startTime;
 					setState({ type: "value", totalTime: time });
-					props.setValue({ type: "timer", time_seconds: time / 1000 });
+					props.setValue({
+						type: "timer",
+						time_seconds: time / 1000,
+						timestamp_ms: Date.now(),
+						scout: props.scout,
+					});
 				}}
 			>
 				Stop

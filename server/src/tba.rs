@@ -352,10 +352,16 @@ fn custom_entries_for(
 					match prop.ty {
 						crate::config::TbaMatchPropType::Bool => {
 							if let RawTbaScoreBreakdownValue::Boolean(value) = *data {
-								MatchEntryValue::Bool(MatchBoolEntry { value })
+								MatchEntryValue::Bool(MatchBoolEntry {
+									value,
+									scout: "TBA".to_string(),
+									timestamp_ms: 0,
+								})
 							} else if let RawTbaScoreBreakdownValue::String(value) = data {
 								MatchEntryValue::Bool(MatchBoolEntry {
 									value: value.starts_with('Y') || value.starts_with('y'),
+									scout: "TBA".to_string(),
+									timestamp_ms: 0,
 								})
 							} else {
 								panic!("Expected TBA data of type bool for prop {name}, but found {data:?}");
@@ -373,6 +379,8 @@ fn custom_entries_for(
 								}
 								MatchEntryValue::Enum(MatchEnumEntry {
 									value: string.clone(),
+									scout: "TBA".to_string(),
+									timestamp_ms: 0,
 								})
 							} else {
 								panic!("Expected TBA data of type string (enum) for prop {name}, but found {data:?}");
@@ -380,7 +388,11 @@ fn custom_entries_for(
 						}
 						crate::config::TbaMatchPropType::Number => {
 							if let RawTbaScoreBreakdownValue::Number(count) = *data {
-								MatchEntryValue::Counter(CounterEntry { count })
+								MatchEntryValue::Counter(CounterEntry {
+									count,
+									scout: "TBA".to_string(),
+									timestamp_ms: 0,
+								})
 							} else {
 								panic!("Expected TBA data of type number for prop {name}, but found {data:?}");
 							}

@@ -3,7 +3,7 @@ use std::{collections::HashMap, path::Path};
 
 use image::imageops::FilterType;
 use image::{DynamicImage, ImageError};
-use log::info;
+use log::{info, warn};
 use serde::{Deserialize, Serialize};
 use sled::{Db, Tree};
 use thiserror::Error;
@@ -117,15 +117,41 @@ impl Database {
 		event: &str,
 		match_id: &str,
 		team: &str,
-		data: &MatchEntryData,
+		data: MatchEntryData,
 	) -> Result<(), DbError> {
-		info!(
-			"Updating MATCH scouting data for match {match_id} and team {team} by scout {}",
-			data.scout
-		);
-		let data = serde_json::to_vec(data)?;
-		self.match_entries
-			.insert(Self::match_entry_key(year, event, match_id, team), data)?;
+		if data.entries.is_empty() {
+			warn!("Ignoring MATCH scouting data for match {match_id} and team {team} with no data",);
+			return Ok(());
+		}
+		let new_scout = data.get_scouts().pop().unwrap().0;
+		match self
+			.get_match_entry_data(year, event, match_id, team)
+			.unwrap()
+		{
+			None => {
+				info!(
+				"Saving new MATCH scouting data for match {match_id} and team {team} by scout {new_scout}",
+			);
+				let data = serde_json::to_vec(&data)?;
+				self.match_entries
+					.insert(Self::match_entry_key(year, event, match_id, team), data)?;
+			}
+			Some(old_data) => {
+				if let Some((new_data, count)) = Self::add_new(old_data, data) {
+					info!(
+						"Updating MATCH scouting data for match {match_id} and team {team} by scout {new_scout} ({count} new items)",
+					);
+					let data = serde_json::to_vec(&new_data)?;
+					self.match_entries
+						.insert(Self::match_entry_key(year, event, match_id, team), data)?;
+				} else {
+					info!(
+						"Ignoring MATCH scouting data for match {match_id} and team {team} by scout {new_scout} (nothing new)",
+					);
+				}
+			}
+		}
+
 		Ok(())
 	}
 	pub fn get_driver_entry_data(
@@ -150,15 +176,41 @@ impl Database {
 		event: &str,
 		match_id: &str,
 		team: &str,
-		data: &MatchEntryData,
+		data: MatchEntryData,
 	) -> Result<(), DbError> {
-		info!(
-			"Updating DRIVER scouting data for match {match_id} and team {team} by scout {}",
-			data.scout
-		);
-		let data = serde_json::to_vec(data)?;
-		self.driver_entries
-			.insert(Self::driver_entry_key(year, event, match_id, team), data)?;
+		if data.entries.is_empty() {
+			warn!("Ignoring DRIVER scouting data for match {match_id} and team {team} (no data)",);
+			return Ok(());
+		}
+		let new_scout = data.get_scouts().pop().unwrap().0;
+		match self
+			.get_driver_entry_data(year, event, match_id, team)
+			.unwrap()
+		{
+			None => {
+				info!(
+				"Saving new DRIVER scouting data for match {match_id} and team {team} by scout {new_scout}",
+			);
+				let data = serde_json::to_vec(&data)?;
+				self.driver_entries
+					.insert(Self::driver_entry_key(year, event, match_id, team), data)?;
+			}
+			Some(old_data) => {
+				if let Some((new_data, count)) = Self::add_new(old_data, data) {
+					info!(
+						"Updating DRIVER scouting data for match {match_id} and team {team} by scout {new_scout} ({count} new items)",
+					);
+					let data = serde_json::to_vec(&new_data)?;
+					self.driver_entries
+						.insert(Self::driver_entry_key(year, event, match_id, team), data)?;
+				} else {
+					info!(
+						"Ignoring DRIVER scouting data for match {match_id} and team {team} by scout {new_scout} (nothing new)",
+					);
+				}
+			}
+		}
+
 		Ok(())
 	}
 	pub fn get_pit_entry_data(
@@ -181,15 +233,41 @@ impl Database {
 		year: u32,
 		event: &str,
 		team: &str,
-		data: &MatchEntryData,
+		data: MatchEntryData,
 	) -> Result<(), DbError> {
-		info!(
-			"Updating PIT scouting data for team {team} by scout {}",
-			data.scout
-		);
-		let data = serde_json::to_vec(data)?;
-		self.pit_entries
-			.insert(Self::pit_entry_key(year, event, team), data)?;
+		if data.entries.is_empty() {
+			warn!("Ignoring PIT scouting data for team {team} (no data)",);
+			return Ok(());
+		}
+		let new_scout = data.get_scouts().pop().unwrap().0;
+		match self
+			.get_pit_entry_data(year, event, team)
+			.unwrap()
+		{
+			None => {
+				info!(
+				"Saving new PIT scouting data for team {team} by scout {new_scout}",
+			);
+				let data = serde_json::to_vec(&data)?;
+				self.pit_entries
+					.insert(Self::pit_entry_key(year, event, team), data)?;
+			}
+			Some(old_data) => {
+				if let Some((new_data, count)) = Self::add_new(old_data, data) {
+					info!(
+						"Updating PIT scouting data for team {team} by scout {new_scout} ({count} new items)",
+					);
+					let data = serde_json::to_vec(&new_data)?;
+					self.pit_entries
+						.insert(Self::pit_entry_key(year, event, team), data)?;
+				} else {
+					info!(
+						"Ignoring PIT scouting data for team {team} by scout {new_scout} (nothing new)",
+					);
+				}
+			}
+		}
+
 		Ok(())
 	}
 
@@ -296,6 +374,34 @@ impl Database {
 		let mut bytes = Self::pit_entry_prefix(year, event);
 		bytes.extend_from_slice(team.as_bytes());
 		bytes
+	}
+
+	fn add_new(
+		old_data: MatchEntryData,
+		new_data: MatchEntryData,
+	) -> Option<(MatchEntryData, u32)> {
+		let mut count = 0;
+		let mut final_data = old_data;
+
+		for (id, new_value) in new_data.entries.into_iter() {
+			if let Some(old_value) = final_data.entries.get(&id) {
+				if new_value.get_timestamp() > old_value.get_timestamp()
+					&& new_value.is_different(old_value)
+				{
+					final_data.entries.insert(id, new_value);
+					count += 1;
+				}
+			} else {
+				final_data.entries.insert(id, new_value);
+				count += 1;
+			}
+		}
+
+		if count > 0 {
+			Some((final_data, count))
+		} else {
+			None
+		}
 	}
 }
 

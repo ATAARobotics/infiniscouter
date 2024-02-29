@@ -726,8 +726,6 @@ fn get_match_entries(
 					team_id: team.to_string(),
 					data: MatchEntryData {
 						entries: custom_entries.clone(),
-						scout: "TBA".to_string(),
-						timestamp_ms: 0,
 					},
 				})
 			}

@@ -19,6 +19,7 @@ pub struct LeaderboardPerson {
 	pub matches_scouted: usize,
 	pub pits_scouted: usize,
 	pub drivers_scouted: usize,
+	pub data_points: usize,
 	pub teams_scouted: HashMap<usize, usize>,
 }
 
@@ -63,24 +64,28 @@ pub fn get_leaderboard(db: &Database, team_config: &TeamConfig) -> LeaderboardIn
 					)
 				}),
 		) {
-		let scout = scouts
-			.entry(entry.data.scout.trim().to_lowercase())
-			.or_insert_with(|| LeaderboardPerson {
-				name: entry.data.scout.clone(),
-				matches_scouted: 0,
-				pits_scouted: 0,
-				drivers_scouted: 0,
-				teams_scouted: HashMap::new(),
-			});
-		match entry_type {
-			EntryType::Match => scout.matches_scouted += 1,
-			EntryType::Pit => scout.pits_scouted += 1,
-			EntryType::Driver => scout.drivers_scouted += 1,
+		for (scout, data_count) in entry.data.get_scouts() {
+			let scout = scouts
+				.entry(scout.trim().to_lowercase())
+				.or_insert_with(|| LeaderboardPerson {
+					name: scout,
+					matches_scouted: 0,
+					pits_scouted: 0,
+					drivers_scouted: 0,
+					data_points: 0,
+					teams_scouted: HashMap::new(),
+				});
+			match entry_type {
+				EntryType::Match => scout.matches_scouted += 1,
+				EntryType::Pit => scout.pits_scouted += 1,
+				EntryType::Driver => scout.drivers_scouted += 1,
+			}
+			scout.data_points += data_count;
+			*scout
+				.teams_scouted
+				.entry(entry.team_id.parse().unwrap())
+				.or_default() += 1;
 		}
-		*scout
-			.teams_scouted
-			.entry(entry.team_id.parse().unwrap())
-			.or_default() += 1;
 	}
 	LeaderboardInfo {
 		leaderboard: scouts,
