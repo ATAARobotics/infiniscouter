@@ -50,15 +50,15 @@ pub fn get_leaderboard(db: &Database, team_config: &TeamConfig) -> LeaderboardIn
 				}),
 		)
 		.chain(
-			db.get_all_pit_entries(team_config.current_year, &team_config.current_event)
+			db.get_all_driver_entries(team_config.current_year, &team_config.current_event)
 				.into_iter()
-				.map(|pe| {
+				.map(|de| {
 					(
 						EntryType::Driver,
 						MatchEntryIdData {
-							match_id: String::new(),
-							team_id: pe.0,
-							data: pe.1,
+							match_id: de.match_id,
+							team_id: de.team_id,
+							data: de.data,
 						},
 					)
 				}),
