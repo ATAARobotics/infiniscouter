@@ -263,7 +263,7 @@ struct RawTbaMatch {
 	set_number: u32,
 	match_number: u32,
 	#[serde(default)]
-	score_breakdown: RawTbaScoreBreakdowns,
+	score_breakdown: Option<RawTbaScoreBreakdowns>,
 	winning_alliance: Option<String>,
 }
 
@@ -327,8 +327,14 @@ impl RawTbaMatch {
 				_ => MatchResult::Tbd,
 			},
 			custom_entries: CustomEntries {
-				blue: custom_entries_for(game_config, self.score_breakdown.blue),
-				red: custom_entries_for(game_config, self.score_breakdown.red),
+				blue: custom_entries_for(
+					game_config,
+					self.score_breakdown.clone().map(|breakdown| breakdown.blue),
+				),
+				red: custom_entries_for(
+					game_config,
+					self.score_breakdown.map(|breakdown| breakdown.red.clone()),
+				),
 			},
 		})
 	}
@@ -336,57 +342,60 @@ impl RawTbaMatch {
 
 fn custom_entries_for(
 	game_config: &GameConfig,
-	value: HashMap<String, RawTbaScoreBreakdownValue>,
+	values: Option<HashMap<String, RawTbaScoreBreakdownValue>>,
 ) -> [HashMap<String, MatchEntryValue>; 3] {
 	[1, 2, 3].map(|n| {
 		game_config
 			.tba
 			.iter()
-			.map(|(prop_name, prop)| {
+			.filter_map(|(prop_name, prop)| {
 				let name = prop.property.replace("{N}", &n.to_string());
-				let data = value
-					.get(&name)
-					.expect("TBA Data wasn't included in report from TBA.");
-				(
-					format!("{TBA_PREFIX}{prop_name}"),
-					match prop.ty {
-						crate::config::TbaMatchPropType::Bool => {
-							if let RawTbaScoreBreakdownValue::Boolean(value) = *data {
-								MatchEntryValue::Bool(MatchBoolEntry { value })
-							} else if let RawTbaScoreBreakdownValue::String(value) = data {
-								MatchEntryValue::Bool(MatchBoolEntry {
-									value: value.starts_with('Y') || value.starts_with('y'),
-								})
-							} else {
-								panic!("Expected TBA data of type bool for prop {name}, but found {data:?}");
-							}
-						}
-						crate::config::TbaMatchPropType::Enum => {
-							if let RawTbaScoreBreakdownValue::String(string) = data {
-								if !prop
-									.options
-									.as_ref()
-									.map(|o| o.contains(string))
-									.unwrap_or_default()
-								{
-									panic!("Invalid enum string {string:?} for TBA prop {name}, expected one of: {:?}", prop.options);
+				if let Some(values) = &values {
+					values.get(&name).map(|data| {
+						(
+							format!("{TBA_PREFIX}{prop_name}"),
+							match prop.ty {
+								crate::config::TbaMatchPropType::Bool => {
+									if let RawTbaScoreBreakdownValue::Boolean(value) = *data {
+										MatchEntryValue::Bool(MatchBoolEntry { value })
+									} else if let RawTbaScoreBreakdownValue::String(value) = data {
+										MatchEntryValue::Bool(MatchBoolEntry {
+											value: value.starts_with('Y') || value.starts_with('y'),
+										})
+									} else {
+										panic!("Expected TBA data of type bool for prop {name}, but found {data:?}");
+									}
 								}
-								MatchEntryValue::Enum(MatchEnumEntry {
-									value: string.clone(),
-								})
-							} else {
-								panic!("Expected TBA data of type string (enum) for prop {name}, but found {data:?}");
-							}
-						}
-						crate::config::TbaMatchPropType::Number => {
-							if let RawTbaScoreBreakdownValue::Number(count) = *data {
-								MatchEntryValue::Counter(CounterEntry { count })
-							} else {
-								panic!("Expected TBA data of type number for prop {name}, but found {data:?}");
-							}
-						}
-					},
-				)
+								crate::config::TbaMatchPropType::Enum => {
+									if let RawTbaScoreBreakdownValue::String(string) = data {
+										if !prop
+											.options
+											.as_ref()
+											.map(|o| o.contains(string))
+											.unwrap_or_default()
+										{
+											panic!("Invalid enum string {string:?} for TBA prop {name}, expected one of: {:?}", prop.options);
+										}
+										MatchEntryValue::Enum(MatchEnumEntry {
+											value: string.clone(),
+										})
+									} else {
+										panic!("Expected TBA data of type string (enum) for prop {name}, but found {data:?}");
+									}
+								}
+								crate::config::TbaMatchPropType::Number => {
+									if let RawTbaScoreBreakdownValue::Number(count) = *data {
+										MatchEntryValue::Counter(CounterEntry { count })
+									} else {
+										panic!("Expected TBA data of type number for prop {name}, but found {data:?}");
+									}
+								}
+							},
+						)
+					})
+				} else {
+					None
+				}
 			})
 			.collect()
 	})
