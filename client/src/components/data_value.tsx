@@ -36,7 +36,9 @@ export function DataValue(props: DataValueProps) {
 	const chartsReady = useCharts();
 	switch (props.value.graphic?.type) {
 		case undefined:
-			return (
+			return props.value.pit_value ? (
+				<Typography level="h1">{props.value.pit_value}</Typography>
+			) : (
 				<Typography
 					level="h1"
 					style={{

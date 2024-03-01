@@ -36,6 +36,7 @@ pub struct InfoEntryWithSource {
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct TeamInfoEntry {
 	pub text: String,
+	pub pit_value: Option<String>,
 	pub sort_value: f32,
 	pub colour: [u8; 3],
 	pub graphic: Option<TeamInfoGraphic>,
@@ -176,7 +177,9 @@ pub const TBA_PREFIX: &str = "tba-";
 
 fn get_pie_chart(
 	data_points: &[&MatchEntryValue],
+	pit_data_point: Option<&MatchEntryValue>,
 	option_values: &[(&str, Option<f32>)],
+	get_text: fn(&[PieChartOption], f32) -> String,
 ) -> TeamInfoEntry {
 	let mut actual_values = data_points
 		.iter()
@@ -232,12 +235,27 @@ fn get_pie_chart(
 			})
 		})
 		.collect::<Vec<_>>();
+	let text = get_text(&options, sort_value);
 	TeamInfoEntry {
 		sort_value,
-		// TODO
-		text: "PIE CHART".to_string(),
+		text,
+		pit_value: pit_data_point.and_then(|value| match value {
+			MatchEntryValue::Enum(e) => Some(e.value.to_string()),
+			MatchEntryValue::Bool(b) => {
+				if b.value {
+					Some("Yes".to_string())
+				} else {
+					Some("No".to_string())
+				}
+			}
+			_ => None,
+		}),
 		colour: [255, 255, 255],
-		graphic: Some(TeamInfoGraphic::PieChart(PieChartEntry { options })),
+		graphic: if options.iter().all(|option| option.value == 0.0) {
+			None
+		} else {
+			Some(TeamInfoGraphic::PieChart(PieChartEntry { options }))
+		},
 	}
 }
 
@@ -256,6 +274,7 @@ fn number_entry(numbers: Vec<f32>, is_time: bool) -> TeamInfoEntry {
 		.unwrap_or_default();
 	TeamInfoEntry {
 		text: format!("{value:.2}"),
+		pit_value: None,
 		sort_value: value,
 		colour: [255, 255, 255],
 		graphic: Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry {
@@ -305,6 +324,7 @@ fn single_team_impl(
 			),
 			DisplayColumn::TeamName(_) => TeamInfoEntry {
 				sort_value: tba_data.team_infos[&team].num as f32,
+				pit_value: None,
 				text: format!(
 					"{} - {}",
 					tba_data.team_infos[&team].num, tba_data.team_infos[&team].name
@@ -318,8 +338,9 @@ fn single_team_impl(
 				})),
 			},
 			DisplayColumn::CommonYearSpecific(_) => TeamInfoEntry {
-				sort_value: 999999.0,
 				text: "ERROR".to_string(),
+				pit_value: None,
+				sort_value: 999999.0,
 				colour: [255, 255, 255],
 				graphic: None,
 			},
@@ -352,22 +373,18 @@ fn get_single_metric(
 		})
 		.filter_map(|match_entry| match_entry.data.entries.get(metric))
 		.chain(
-			pit_entry
-				.and_then(|pe| pe.entries.get(metric))
-				.iter()
-				.copied(),
-		)
-		.chain(
 			driver_entries
 				.iter()
 				.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team)
 				.filter_map(|match_entry| match_entry.data.entries.get(metric)),
 		)
 		.collect();
+	let pit_data_point = pit_entry.and_then(|pe| pe.entries.get(metric)).cloned();
+
 	if let Some(real_metric) = metric.strip_prefix(SB_PREFIX) {
 		if let Some(sb) = statbotics {
 			let total_matches = sb.wins as f32 + sb.losses as f32 + sb.ties as f32;
-			if let Some(pie_values) = match real_metric {
+			if let Some((pie_entry, sort_value, text)) = match real_metric {
 				"wlt-ratio" => Some((
 					PieChartEntry {
 						options: vec![
@@ -390,6 +407,11 @@ fn get_single_metric(
 					} else {
 						(sb.wins as f32 + sb.ties as f32 * 0.5) / total_matches
 					},
+					if sb.ties > 0 {
+						format!("{}-{}-{}", sb.wins, sb.losses, sb.ties)
+					} else {
+						format!("{}-{}", sb.wins, sb.losses)
+					},
 				)),
 				"rps-ratio" => Some((
 					PieChartEntry {
@@ -409,14 +431,16 @@ fn get_single_metric(
 						],
 					},
 					sb.rp_1_epa_end + sb.rp_2_epa_end,
+					"".to_string(),
 				)),
 				_ => None,
 			} {
 				TeamInfoEntry {
-					text: "PIE LOL".to_string(),
-					sort_value: pie_values.1,
+					text,
+					pit_value: None,
+					sort_value,
 					colour: [255, 255, 255],
-					graphic: Some(TeamInfoGraphic::PieChart(pie_values.0)),
+					graphic: Some(TeamInfoGraphic::PieChart(pie_entry)),
 				}
 			} else {
 				let value = match real_metric {
@@ -435,6 +459,7 @@ fn get_single_metric(
 				};
 				TeamInfoEntry {
 					text: format!("{value:.2}"),
+					pit_value: None,
 					colour: [255, 255, 255],
 					sort_value: value,
 					graphic: Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry {
@@ -457,6 +482,7 @@ fn get_single_metric(
 		} else {
 			TeamInfoEntry {
 				text: "ERROR: No statbotics for team".to_string(),
+				pit_value: None,
 				sort_value: 9999999.0,
 				colour: [255, 255, 255],
 				graphic: None,
@@ -487,11 +513,19 @@ fn get_single_metric(
 			}) {
 			Some(MatchEntryType::Ability(_)) => get_pie_chart(
 				&data_points,
+				pit_data_point.as_ref(),
 				&[
 					("Nothing", None),
 					("Attempted", Some(0.0)),
 					("Succeeded", Some(1.0)),
 				],
+				|options, pct| {
+					if options.iter().all(|option| option.value == 0.0) {
+						"".to_string()
+					} else {
+						format!("{pct:0}%")
+					}
+				},
 			),
 			Some(MatchEntryType::Enum(enum_metric)) => {
 				let count = enum_metric.options.len() as f32;
@@ -501,15 +535,47 @@ fn get_single_metric(
 					.enumerate()
 					.map(|(i, option)| (option.as_str(), Some((i as f32) / count)))
 					.collect::<Vec<_>>();
-				get_pie_chart(&data_points, &option_values)
+				get_pie_chart(
+					&data_points,
+					pit_data_point.as_ref(),
+					&option_values,
+					|options, _| {
+						if options.iter().all(|option| option.value == 0.0) {
+							"".to_string()
+						} else {
+							let non_zero_items = options
+								.iter()
+								.filter(|option| option.value > 0.0)
+								.collect::<Vec<_>>();
+							if non_zero_items.len() == 1 {
+								non_zero_items[0].label.to_string()
+							} else {
+								"Varies".to_string()
+							}
+						}
+					},
+				)
 			}
-			Some(MatchEntryType::Bool(_)) => {
-				get_pie_chart(&data_points, &[("No", Some(0.0)), ("Yes", Some(1.0))])
-			}
+			Some(MatchEntryType::Bool(_)) => get_pie_chart(
+				&data_points,
+				pit_data_point.as_ref(),
+				&[("No", Some(0.0)), ("Yes", Some(1.0))],
+				|options, pct| {
+					if options.iter().all(|option| option.value == 0.0) {
+						"".to_string()
+					} else {
+						format!("{pct:0}%")
+					}
+				},
+			),
 			Some(MatchEntryType::Timer(_)) => {
 				if data_points.is_empty() {
 					TeamInfoEntry {
 						text: String::new(),
+						pit_value: match pit_data_point {
+							Some(MatchEntryValue::Timer(t)) => Some(format!("{}s", t.time_seconds)),
+							_ => None,
+						},
 						sort_value: -420.0,
 						colour: [255, 255, 255],
 						graphic: None,
@@ -534,6 +600,10 @@ fn get_single_metric(
 				if data_points.is_empty() {
 					TeamInfoEntry {
 						text: String::new(),
+						pit_value: match pit_data_point {
+							Some(MatchEntryValue::Counter(c)) => Some(format!("{}", c.count)),
+							_ => None,
+						},
 						sort_value: -420.0,
 						colour: [255, 255, 255],
 						graphic: None,
@@ -557,6 +627,8 @@ fn get_single_metric(
 			Some(MatchEntryType::TextEntry(_)) => {
 				let strings = data_points
 					.iter()
+					.copied()
+					.chain(pit_data_point.iter())
 					.map(|dp| {
 						if let MatchEntryValue::TextEntry(te) = dp {
 							te.text.clone()
@@ -578,6 +650,7 @@ fn get_single_metric(
 					.sum();
 				TeamInfoEntry {
 					text: strings.first().map(|s| s.to_string()).unwrap_or_default(),
+					pit_value: None,
 					sort_value: if strings.is_empty() {
 						-420.0
 					} else {
@@ -593,6 +666,8 @@ fn get_single_metric(
 			Some(MatchEntryType::Image(_)) => {
 				let images = data_points
 					.iter()
+					.copied()
+					.chain(pit_data_point.iter())
 					.flat_map(|dp| {
 						if let MatchEntryValue::Image(im) = dp {
 							im.images.clone()
@@ -604,6 +679,7 @@ fn get_single_metric(
 					.collect::<Vec<_>>();
 				TeamInfoEntry {
 					text: "Image".to_string(),
+					pit_value: None,
 					sort_value: -(images.len() as f32),
 					colour: [255, 255, 255],
 					graphic: Some(TeamInfoGraphic::Images(ImagesEntry { images })),
@@ -611,6 +687,7 @@ fn get_single_metric(
 			}
 			ty => TeamInfoEntry {
 				text: format!("TODO: {metric} of type {ty:?}"),
+				pit_value: None,
 				sort_value: 999999.0,
 				colour: [255, 255, 255],
 				graphic: None,
