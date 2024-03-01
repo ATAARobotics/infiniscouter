@@ -20,6 +20,7 @@ import { MatchEntryValue } from "../generated/MatchEntryValue";
 import { TextEntryMetric } from "../generated/TextEntryMetric";
 import { TimerMetric } from "../generated/TimerMetric";
 import { getImage, saveImage } from "../images";
+import { JSXInternal } from "preact/src/jsx";
 
 interface MatchPageProps {
 	page: MatchEntryPage;
@@ -372,6 +373,7 @@ function TextFieldEntry(props: TextFieldEntryProps) {
 interface LocalImageProps {
 	imageId: string;
 	mimeType: string;
+	style?: JSXInternal.CSSProperties;
 }
 
 /**
@@ -406,6 +408,7 @@ function LocalImage(props: LocalImageProps) {
 			src={URL.createObjectURL(
 				new Blob([imageData.data], { type: props.mimeType }),
 			)}
+			style={props.style}
 		></img>
 	) : (
 		<CircularProgress
@@ -518,11 +521,13 @@ function ImageEntry(props: ImageEntryProps) {
 									<LocalImage
 										imageId={img.image_id}
 										mimeType={img.image_mime}
+										style={{ transform: "rotate(90deg)" }}
 									/>
 								) : (
 									<img
 										height="150"
 										src={`/image/small/${img.image_id}`}
+										style={{ transform: "rotate(90deg)" }}
 									></img>
 								)}
 							</Box>

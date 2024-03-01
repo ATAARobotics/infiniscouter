@@ -206,7 +206,8 @@ export function DataValue(props: DataValueProps) {
 						{props.value.graphic.images.map((image) => (
 							<a href={`/image/full/${image.image_id}`}>
 								<img
-									width={256}
+									width={100}
+									style={{ transform: "rotate(90deg)" }}
 									src={`/image/small/${image.image_id}`}
 								/>
 							</a>
