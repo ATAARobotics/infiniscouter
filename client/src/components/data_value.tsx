@@ -193,7 +193,8 @@ export function DataValue(props: DataValueProps) {
 							}}
 						>
 							<img
-								height={100}
+								width={100}
+								style={{ transform: "rotate(90deg)" }}
 								src={`/image/small/${props.value.graphic.images[0].image_id}`}
 							/>
 						</a>
