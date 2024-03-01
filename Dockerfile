@@ -5,14 +5,24 @@
 FROM docker.io/rustlang/rust:nightly AS build-rust
 WORKDIR /build
 
-COPY server/games /build/games
-COPY server/src /build/src
+ARG CARGO_UNSTABLE_SPARSE_REGISTRY=true
+
 COPY server/Cargo.toml /build/Cargo.toml
 COPY server/Cargo.lock /build/Cargo.lock
 
-ARG CARGO_UNSTABLE_SPARSE_REGISTRY=true
+# Perform a dummy build with an empty main.rs to build the dependencies as cached layer
+RUN mkdir /build/src
+RUN echo "fn main() {}" > /build/src/main.rs
+RUN cargo build --locked --release
 
-# run tests which also generate JSON types in TypeScript
+# Copy in the full sources for the real build
+COPY server/games /build/games
+COPY server/src /build/src
+
+# Ensure main timestamp is current so a new executable is built
+RUN touch /build/src/main.rs
+
+# Run tests which also generate JSON types in TypeScript
 RUN cargo test --locked --profile release
 
 RUN cargo build --locked --profile release
