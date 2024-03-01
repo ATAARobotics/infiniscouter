@@ -223,6 +223,8 @@ pub struct DisplayConfig {
 pub enum DisplayColumn {
 	/// Display a single metric
 	Single(SingleMetric),
+	/// Display a single metric, but filter the data by another metric
+	Filtered(FilteredMetric),
 	/// Team name
 	TeamName(TeamNameMetric),
 	/// Special variant used by the common config, don't use
@@ -238,6 +240,18 @@ pub enum DisplayColumn {
 pub struct SingleMetric {
 	/// The id of the metric
 	pub metric: String,
+	#[serde(default)]
+	#[oai(default)]
+	pub display: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct FilteredMetric {
+	/// The id of the metric
+	pub metric: String,
+	/// The id of the boolean metric to filter by
+	pub filter_by: String,
 	#[serde(default)]
 	#[oai(default)]
 	pub display: bool,
@@ -324,7 +338,7 @@ impl From<GameConfig> for GameConfigs {
 					collect: CollectionOption::Never,
 					description: "N/A".to_string(),
 					metric: CollectedMetricType::Bool(BoolMetric {
-						
+
 					})
 				}))
 				.collect(),

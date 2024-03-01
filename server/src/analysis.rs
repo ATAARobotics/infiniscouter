@@ -6,7 +6,7 @@ use poem_openapi::{Enum, Object, Union};
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
-use crate::api::data::ImageEntryItem;
+use crate::api::data::{ImageEntryItem, MatchBoolEntry};
 use crate::{
 	api::data::{DriverEntryIdData, MatchEntryData, MatchEntryIdData, MatchEntryValue},
 	config::{
@@ -290,6 +290,17 @@ fn single_team_impl(
 				statbotics,
 				team,
 				&metric.metric,
+				None,
+			),
+			DisplayColumn::Filtered(metric) => get_single_metric(
+				config,
+				match_entries,
+				driver_entries,
+				pit_entry,
+				statbotics,
+				team,
+				&metric.metric,
+				Some(&metric.filter_by),
 			),
 			DisplayColumn::TeamName(_) => TeamInfoEntry {
 				sort_value: tba_data.team_infos[&team].num as f32,
@@ -323,10 +334,21 @@ fn get_single_metric(
 	statbotics: Option<&StatboticsTeam>,
 	team: u32,
 	metric: &str,
+	filter_metric: Option<&str>,
 ) -> TeamInfoEntry {
 	let data_points: Vec<_> = match_entries
 		.iter()
 		.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team)
+		.filter(|match_entry| {
+			if let Some(filter_metric) = filter_metric {
+				matches!(
+					match_entry.data.entries.get(filter_metric),
+					Some(MatchEntryValue::Bool(MatchBoolEntry { value: true })),
+				)
+			} else {
+				true
+			}
+		})
 		.filter_map(|match_entry| match_entry.data.entries.get(metric))
 		.chain(
 			pit_entry
