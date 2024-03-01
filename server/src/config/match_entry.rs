@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use ts_rs::TS;
 
-use super::TbaMatchPropType;
+use super::{CounterRange, TbaMatchPropType};
 
 // TODO: Rename the following types
 
@@ -166,8 +166,23 @@ impl MatchEntryFields {
 							page: "The Blue Alliance".to_string(),
 							entry: match prop.ty {
 								TbaMatchPropType::Bool => MatchEntryType::Bool(BoolMetric {}),
+								TbaMatchPropType::Sum => MatchEntryType::Counter(CounterMetric {
+									limit_range: Some(CounterRange {
+										start: 0,
+										end_inclusive: prop
+											.options
+											.as_ref()
+											.map(|o| o.len() as i32)
+											.unwrap_or_default(),
+									}),
+								}),
 								TbaMatchPropType::Enum => MatchEntryType::Enum(EnumMetric {
-									options: prop.options.clone().unwrap_or_default(),
+									options: prop
+										.options
+										.iter()
+										.flatten()
+										.map(|o| o.name.as_ref().unwrap_or(&o.id).clone())
+										.collect::<Vec<_>>(),
 								}),
 								TbaMatchPropType::Number => {
 									MatchEntryType::Counter(CounterMetric { limit_range: None })

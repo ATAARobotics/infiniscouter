@@ -120,16 +120,25 @@ tba:
     endgame:
       type: enum
       options:
-        - None
-        - Parked
-        - StageRight
-        - StageLeft
-        - CenterStage
+        - id: None
+          name: Nothing
+        - id: Parked
+          name: Parked
+        - id: StageRight
+          name: Climbed
+        - id: StageLeft
+          name: Climbed
+        - id: CenterStage
+          name: Climbed
       property: endGameRobot{N}
       name: "Endgame State"
     spotlight:
-      type: number
-      property: endGameSpotLightBonusPoints
+      type: sum
+      property: micCenterStage
+      options:
+        - id: micCenterStage
+        - id: micStageLeft
+        - id: micStageRight
       name: "High Notes"
     coopertition:
       type: bool

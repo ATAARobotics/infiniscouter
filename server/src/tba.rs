@@ -367,19 +367,42 @@ fn custom_entries_for(
 										panic!("Expected TBA data of type bool for prop {name}, but found {data:?}");
 									}
 								}
+								crate::config::TbaMatchPropType::Sum => {
+									// This is hacky but like I'm really lazy rn
+									MatchEntryValue::Counter(CounterEntry {
+										count: prop
+											.options
+											.iter()
+											.flatten()
+											.filter(|v| match values.get(&v.id) {
+												Some(RawTbaScoreBreakdownValue::Boolean(true)) => {
+													true
+												}
+												Some(RawTbaScoreBreakdownValue::String(s))
+													if s.starts_with('Y') || s.starts_with('y') =>
+												{
+													true
+												}
+												_ => false,
+											})
+											.count() as i32,
+									})
+								}
 								crate::config::TbaMatchPropType::Enum => {
 									if let RawTbaScoreBreakdownValue::String(string) = data {
-										if !prop
-											.options
-											.as_ref()
-											.map(|o| o.contains(string))
-											.unwrap_or_default()
+										if let Some(entry) =
+											prop.options.iter().flatten().find(|v| &v.id == string)
 										{
+											MatchEntryValue::Enum(MatchEnumEntry {
+												value: entry
+													.name
+													.as_ref()
+													.unwrap_or(&entry.id)
+													.clone(),
+											})
+										} else {
 											panic!("Invalid enum string {string:?} for TBA prop {name}, expected one of: {:?}", prop.options);
 										}
-										MatchEntryValue::Enum(MatchEnumEntry {
-											value: string.clone(),
-										})
 									} else {
 										panic!("Expected TBA data of type string (enum) for prop {name}, but found {data:?}");
 									}

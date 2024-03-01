@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
 use crate::api::data::{ImageEntryItem, MatchBoolEntry};
+use crate::config::FilteredMetric;
 use crate::{
 	api::data::{DriverEntryIdData, MatchEntryData, MatchEntryIdData, MatchEntryValue},
 	config::{
@@ -625,7 +626,10 @@ fn table_labels(config: &GameConfigs) -> Vec<NameAndSource> {
 		.team_row
 		.iter()
 		.map(|column| match column {
-			DisplayColumn::Single(metric) => get_metric_name(config, &metric.metric),
+			DisplayColumn::Single(SingleMetric { metric, .. })
+			| DisplayColumn::Filtered(FilteredMetric { metric, .. }) => {
+				get_metric_name(config, &metric)
+			}
 			DisplayColumn::TeamName(_) => NameAndSource {
 				name: "Team Name".to_string(),
 				page: "N/A".to_string(),
@@ -806,6 +810,7 @@ pub async fn get_single_team_analysis(
 					statbotics_team.as_deref(),
 					team,
 					metric,
+					None,
 				),
 			})
 			.collect(),
@@ -1046,6 +1051,7 @@ fn get_single_team_match_preview(
 				statbotics,
 				*team,
 				metric,
+				None,
 			)
 		})
 		.collect();
@@ -1063,6 +1069,7 @@ fn get_single_team_match_preview(
 				statbotics,
 				*team,
 				&graph_element.metric,
+				None,
 			)
 			.sort_value,
 		})
@@ -1080,6 +1087,7 @@ fn get_single_team_match_preview(
 			statbotics,
 			*team,
 			&pre_match_display.score,
+			None,
 		)
 		.sort_value,
 		expected_score_parts,

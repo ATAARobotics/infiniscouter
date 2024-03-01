@@ -192,7 +192,7 @@ pub struct TbaMatchProp {
 	pub ty: TbaMatchPropType,
 	pub property: String,
 	pub name: String,
-	pub options: Option<Vec<String>>,
+	pub options: Option<Vec<TbaMatchPropOption>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Enum, TS)]
@@ -203,6 +203,14 @@ pub enum TbaMatchPropType {
 	Bool,
 	Enum,
 	Number,
+	Sum
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct TbaMatchPropOption {
+	pub id: String,
+	pub name: Option<String>,
 }
 
 /// Configure how the data is processed and displayed
