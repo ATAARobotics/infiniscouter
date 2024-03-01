@@ -167,8 +167,9 @@ display:
     - source: single
       metric: note-pickup
       display: true
-    - source: single
+    - source: filtered
       metric: tba-coopertition
+      filter_by: human-player
       display: true
     - source: single
       metric: climb
@@ -176,8 +177,9 @@ display:
     - source: single
       metric: tba-endgame
       display: true
-    - source: single
+    - source: filtered
       metric: tba-spotlight
+      filter_by: human-player
     - source: single
       metric: trap
       display: true
