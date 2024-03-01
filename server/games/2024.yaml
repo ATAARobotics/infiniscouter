@@ -4,13 +4,6 @@ categories:
   auto:
     name: Auto
     metrics:
-      moved:
-        order: 20
-        name: Taxi
-        description: Moved from the starting line in the auto period
-        collect: match_only
-        metric:
-          type: ability
       auto-notes:
         order: 30
         name: Auto Notes
