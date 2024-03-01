@@ -23,6 +23,7 @@ import { NameAndSource } from "../generated/NameAndSource";
 import { TeamInfoDisplay } from "../generated/TeamInfoDisplay";
 import { TeamInfoEntry } from "../generated/TeamInfoEntry";
 import { TeamInfoList } from "../generated/TeamInfoList";
+import { SyntheticEvent } from "react";
 
 /**
  * Return the sort value for a table based on index
@@ -68,8 +69,17 @@ export function Analysis() {
 		return <LoadIndicator title="Analysis"></LoadIndicator>;
 	}
 
+	const [menuOpen, setMenuOpen] = useState(false);
+	const handleOpen = (ev: SyntheticEvent | null, isOpen: boolean) => {
+		if (isOpen) {
+			setMenuOpen(true);
+		} else if (ev?.type !== "click" || ev?.target?.type !== "checkbox") {
+			// Ignore "click" events on the checkboxes in the menu
+			setMenuOpen(false);
+		}
+	};
 	const enabledColsPicker = (
-		<Dropdown>
+		<Dropdown open={menuOpen} onOpenChange={handleOpen}>
 			<MenuButton
 				slots={{ root: IconButton }}
 				slotProps={{ root: { variant: "outlined", color: "neutral" } }}
