@@ -17,10 +17,8 @@ function sortScouts(a: LeaderboardPerson, b: LeaderboardPerson): number {
 		return -1;
 	}
 	return (
-		b.matches_scouted +
-		b.pits_scouted +
-		b.drivers_scouted -
-		(a.matches_scouted + a.pits_scouted + a.drivers_scouted)
+		(b.matches_scouted + b.drivers_scouted) -
+		(a.matches_scouted + a.drivers_scouted)
 	);
 }
 
@@ -59,7 +57,7 @@ export function Leaderboard() {
 						<th>Scout Name</th>
 						<th>Total Scouted</th>
 						<th>Matches Scouted</th>
-						<th>(Inaccurate) Pits Scouted</th>
+						{/* <th>(Inaccurate) Pits Scouted</th> */}
 						<th>Driver Scouted</th>
 						<th>Unique Teams Scouted</th>
 						<th>Team Most Scouted</th>
@@ -74,7 +72,7 @@ export function Leaderboard() {
 									<Typography
 										color={
 											scout.name.trim().toLowerCase() ===
-											currentScout?.trim().toLowerCase()
+												currentScout?.trim().toLowerCase()
 												? "primary"
 												: "neutral"
 										}
@@ -86,7 +84,7 @@ export function Leaderboard() {
 								</td>
 								<td>{scout.matches_scouted + scout.drivers_scouted}</td>
 								<td>{scout.matches_scouted}</td>
-								<td>{scout.pits_scouted} (inaccurate)</td>
+								{/* <td>{scout.pits_scouted} (inaccurate)</td> */}
 								<td>{scout.drivers_scouted}</td>
 								<td>{Object.entries(scout.teams_scouted).length}</td>
 								<td>
@@ -94,9 +92,8 @@ export function Leaderboard() {
 										const team = Object.entries(
 											scout.teams_scouted,
 										).sort((a, b) => b[1] - a[1])[0];
-										return `Team ${team[0]}, ${team[1]} Time${
-											team[1] !== 1 ? "s" : ""
-										}`;
+										return `Team ${team[0]}, ${team[1]} Time${team[1] !== 1 ? "s" : ""
+											}`;
 									})()}
 								</td>
 							</tr>

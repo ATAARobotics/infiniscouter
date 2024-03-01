@@ -110,6 +110,10 @@ export function Navbar(props: NavbarProps) {
 								path: "/config",
 								name: "Configuration",
 							},
+							{
+								path: "/leaderboard",
+								name: "Scout Leaderboard",
+							},
 						].map((item) => (
 							<NavbarItem {...item}></NavbarItem>
 						))}

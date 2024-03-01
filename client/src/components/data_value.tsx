@@ -70,7 +70,7 @@ export function DataValue(props: DataValueProps) {
 						width: "100px",
 						height: "100px",
 						marginLeft: "50%",
-						translate: "-50%",
+						transform: "translateX(-50%)",
 					}}
 				>
 					{chartsReady && (
