@@ -627,9 +627,7 @@ fn table_labels(config: &GameConfigs) -> Vec<NameAndSource> {
 		.iter()
 		.map(|column| match column {
 			DisplayColumn::Single(SingleMetric { metric, .. })
-			| DisplayColumn::Filtered(FilteredMetric { metric, .. }) => {
-				get_metric_name(config, &metric)
-			}
+			| DisplayColumn::Filtered(FilteredMetric { metric, .. }) => get_metric_name(config, metric),
 			DisplayColumn::TeamName(_) => NameAndSource {
 				name: "Team Name".to_string(),
 				page: "N/A".to_string(),

@@ -203,7 +203,7 @@ pub enum TbaMatchPropType {
 	Bool,
 	Enum,
 	Number,
-	Sum
+	Sum,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -340,15 +340,18 @@ impl From<GameConfig> for GameConfigs {
 				.keys()
 				.cloned()
 				.enumerate()
-				.map(|(idx, prop)| (format!("{TBA_PREFIX}{prop}"), CollectedMetric {
-					name: "N/A".to_string(),
-					order: idx as u32,
-					collect: CollectionOption::Never,
-					description: "N/A".to_string(),
-					metric: CollectedMetricType::Bool(BoolMetric {
-
-					})
-				}))
+				.map(|(idx, prop)| {
+					(
+						format!("{TBA_PREFIX}{prop}"),
+						CollectedMetric {
+							name: "N/A".to_string(),
+							order: idx as u32,
+							collect: CollectionOption::Never,
+							description: "N/A".to_string(),
+							metric: CollectedMetricType::Bool(BoolMetric {}),
+						},
+					)
+				})
 				.collect(),
 		});
 		all_categories.sort_by_key(|c| c.order);
