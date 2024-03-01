@@ -9,6 +9,7 @@ import {
 	Typography,
 } from "@mui/joy";
 import { useEffect, useState } from "preact/hooks";
+import { JSXInternal } from "preact/src/jsx";
 
 import { AbilityMetric } from "../generated/AbilityMetric";
 import { BoolMetric } from "../generated/BoolMetric";
@@ -20,7 +21,6 @@ import { MatchEntryValue } from "../generated/MatchEntryValue";
 import { TextEntryMetric } from "../generated/TextEntryMetric";
 import { TimerMetric } from "../generated/TimerMetric";
 import { getImage, saveImage } from "../images";
-import { JSXInternal } from "preact/src/jsx";
 
 interface MatchPageProps {
 	page: MatchEntryPage;
@@ -488,51 +488,52 @@ function ImageEntry(props: ImageEntryProps) {
 				}}
 			/>
 			<Stack direction="row">
-				{props.value?.type === "image"
-					? props.value.images.map((img) => (
-							<Box id={img.image_id}>
-								<Button
-									color="danger"
-									sx={{
-										position: "absolute",
-										boxSizing: "border-box",
-										width: "32px",
-										height: "32px",
-										padding: 0,
-										borderRadius: "25%",
-									}}
-									onClick={() => {
-										props.setValue({
-											type: "image",
-											images: (
-												(props.value?.type === "image"
-													? props.value?.images
-													: undefined) ?? []
-											).filter(
-												(img2) => img2.image_id !== img.image_id,
-											),
-										});
-									}}
-								>
-									⊗
-								</Button>
-								{(img as unknown as { local: true | undefined })
-									.local ? (
-									<LocalImage
-										imageId={img.image_id}
-										mimeType={img.image_mime}
-										style={{ transform: "rotate(90deg)" }}
-									/>
-								) : (
-									<img
-										height="150"
-										src={`/image/small/${img.image_id}`}
-										style={{ transform: "rotate(90deg)" }}
-									></img>
-								)}
-							</Box>
-					  ))
-					: <></>}
+				{props.value?.type === "image" ? (
+					props.value.images.map((img) => (
+						<Box id={img.image_id}>
+							<Button
+								color="danger"
+								sx={{
+									position: "absolute",
+									boxSizing: "border-box",
+									width: "32px",
+									height: "32px",
+									padding: 0,
+									borderRadius: "25%",
+								}}
+								onClick={() => {
+									props.setValue({
+										type: "image",
+										images: (
+											(props.value?.type === "image"
+												? props.value?.images
+												: undefined) ?? []
+										).filter(
+											(img2) => img2.image_id !== img.image_id,
+										),
+									});
+								}}
+							>
+								⊗
+							</Button>
+							{(img as unknown as { local: true | undefined }).local ? (
+								<LocalImage
+									imageId={img.image_id}
+									mimeType={img.image_mime}
+									style={{ transform: "rotate(90deg)" }}
+								/>
+							) : (
+								<img
+									height="150"
+									src={`/image/small/${img.image_id}`}
+									style={{ transform: "rotate(90deg)" }}
+								></img>
+							)}
+						</Box>
+					))
+				) : (
+					<></>
+				)}
 			</Stack>
 		</Box>
 	);

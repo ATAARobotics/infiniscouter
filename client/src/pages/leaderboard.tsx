@@ -84,10 +84,7 @@ export function Leaderboard() {
 											: scout.name}
 									</Typography>
 								</td>
-								<td>
-									{scout.matches_scouted +
-										scout.drivers_scouted}
-								</td>
+								<td>{scout.matches_scouted + scout.drivers_scouted}</td>
 								<td>{scout.matches_scouted}</td>
 								<td>{scout.pits_scouted} (inaccurate)</td>
 								<td>{scout.drivers_scouted}</td>

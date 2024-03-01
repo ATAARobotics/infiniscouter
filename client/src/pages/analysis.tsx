@@ -23,7 +23,6 @@ import { NameAndSource } from "../generated/NameAndSource";
 import { TeamInfoDisplay } from "../generated/TeamInfoDisplay";
 import { TeamInfoEntry } from "../generated/TeamInfoEntry";
 import { TeamInfoList } from "../generated/TeamInfoList";
-import { SyntheticEvent } from "react";
 
 /**
  * Return the sort value for a table based on index
@@ -70,7 +69,10 @@ export function Analysis() {
 	}
 
 	const [menuOpen, setMenuOpen] = useState(false);
-	const handleOpen = (ev: SyntheticEvent | null, isOpen: boolean) => {
+	const handleOpen = (
+		ev: { type?: string; target?: { type?: string } },
+		isOpen: boolean,
+	) => {
 		if (isOpen) {
 			setMenuOpen(true);
 		} else if (ev?.type !== "click" || ev?.target?.type !== "checkbox") {
