@@ -111,32 +111,30 @@ categories:
         metric:
           type: bool
 tba:
-  auto-line:
-    type: bool
-    property: autoLineRobot{N}
-    name: "Auto Moved"
-  endgame:
-    type: enum
-    options:
-      - None
-      - Parked
-      - StageRight
-      - StageLeft
-      - CenterStage
-    property: endGameRobot{N}
-    name: "Endgame State"
-  spotlight:
-    type: number
-    property: endGameSpotLightBonusPoints
-    name: "High Notes"
-  coopertition-criteria-met:
-    type: bool
-    property: coopertitionCriteriaMet
-    name: "Coopertition Criteria Met"
-  coopertition:
-    type: bool
-    property: coopertitionBonusAchieved
-    name: "Coopertition"
+  order: 15
+  props:
+    auto-line:
+      type: bool
+      property: autoLineRobot{N}
+      name: "Auto Moved"
+    endgame:
+      type: enum
+      options:
+        - None
+        - Parked
+        - StageRight
+        - StageLeft
+        - CenterStage
+      property: endGameRobot{N}
+      name: "Endgame State"
+    spotlight:
+      type: number
+      property: endGameSpotLightBonusPoints
+      name: "High Notes"
+    coopertition-criteria-met:
+      type: bool
+      property: coopertitionCriteriaMet
+      name: "Did Coopertition"
 ranking_points:
   - Melody
   - Ensemble

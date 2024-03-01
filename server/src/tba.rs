@@ -347,6 +347,7 @@ fn custom_entries_for(
 	[1, 2, 3].map(|n| {
 		game_config
 			.tba
+			.props
 			.iter()
 			.filter_map(|(prop_name, prop)| {
 				let name = prop.property.replace("{N}", &n.to_string());

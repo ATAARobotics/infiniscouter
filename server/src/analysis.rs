@@ -652,7 +652,7 @@ fn get_metric_name(config: &GameConfigs, metric: &str) -> NameAndSource {
 		}
 	} else if let Some(metric) = metric.strip_prefix(TBA_PREFIX) {
 		NameAndSource {
-			name: config.game_config.tba[metric].name.clone(),
+			name: config.game_config.tba.props[metric].name.clone(),
 			page: "The Blue Alliance".to_string(),
 			source: DataSource::Tba,
 		}

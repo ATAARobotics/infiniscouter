@@ -188,6 +188,8 @@ categories:
           type: text_entry
           multiline: true
 tba:
+  order: 15
+  props:
 ranking_points:
 display:
   team_row:

@@ -157,7 +157,7 @@ impl MatchEntryFields {
 							)
 						})
 				})
-				.chain(game_config.tba.iter().map(|(name, prop)| {
+				.chain(game_config.tba.props.iter().map(|(name, prop)| {
 					(
 						format!("{TBA_PREFIX}{name}"),
 						MatchEntry {

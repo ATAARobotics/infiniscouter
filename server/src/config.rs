@@ -25,7 +25,7 @@ pub struct GameConfig {
 	/// Metric categories
 	pub categories: HashMap<String, MetricCategory>,
 	/// Names of stats to get from the blue alliance
-	pub tba: HashMap<String, TbaMatchProp>,
+	pub tba: TbaConfig,
 	/// Names of the numbered ranking points, usually 2
 	pub ranking_points: Vec<String>,
 	/// Configuration on how to display collected information
@@ -175,6 +175,15 @@ pub struct StatboticsTeamMetric {
 	pub props: Vec<String>,
 }
 
+/// Configuration for The Blue Alliance
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct TbaConfig {
+	pub order: u32,
+	/// The set of TBA match data properties
+	pub props: HashMap<String, TbaMatchProp>,
+}
+
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct TbaMatchProp {
@@ -300,6 +309,26 @@ pub struct GameConfigs {
 impl From<GameConfig> for GameConfigs {
 	fn from(value: GameConfig) -> Self {
 		let mut all_categories = value.categories.values().cloned().collect::<Vec<_>>();
+		all_categories.push(MetricCategory {
+			name: "TBA".to_string(),
+			order: Some(value.tba.order),
+			metrics: value
+				.tba
+				.props
+				.keys()
+				.cloned()
+				.enumerate()
+				.map(|(idx, prop)| (format!("{TBA_PREFIX}{prop}"), CollectedMetric {
+					name: "N/A".to_string(),
+					order: idx as u32,
+					collect: CollectionOption::Never,
+					description: "N/A".to_string(),
+					metric: CollectedMetricType::Bool(BoolMetric {
+						
+					})
+				}))
+				.collect(),
+		});
 		all_categories.sort_by_key(|c| c.order);
 
 		GameConfigs {
@@ -332,7 +361,6 @@ impl From<GameConfig> for GameConfigs {
 						})
 						.collect::<Vec<_>>()
 				})
-				.chain(value.tba.keys().map(|prop| format!("{TBA_PREFIX}{prop}")))
 				.collect(),
 			game_config: value,
 		}

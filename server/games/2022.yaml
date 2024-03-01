@@ -119,6 +119,8 @@ categories:
           type: image
           allow_video: true
 tba:
+  order: 15
+  props:
 ranking_points:
   - Ball Threshold
   - Climb Threshold
