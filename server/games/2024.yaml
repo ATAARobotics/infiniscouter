@@ -94,7 +94,7 @@ categories:
     name: Robot
     metrics:
       low-bot:
-        order: 70
+        order: 40
         name: Low Bot
         description: Is it a low bot?
         collect: pit_only
@@ -131,7 +131,7 @@ tba:
       type: number
       property: endGameSpotLightBonusPoints
       name: "High Notes"
-    coopertition-criteria-met:
+    coopertition:
       type: bool
       property: coopertitionCriteriaMet
       name: "Did Coopertition"
@@ -194,4 +194,4 @@ display:
     - teleop-amp
     - teleop-speaker
     - note-pickup
-    - climb
+    - tba-endgame

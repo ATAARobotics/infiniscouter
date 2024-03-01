@@ -152,7 +152,7 @@ categories:
           type: enum
           options: ["Other", "Tank", "Swerve"]
       robot-picture:
-        order: 40
+        order: 100
         name: Robot Pictures
         description: Take a good picture of their robot
         collect: pit_only
