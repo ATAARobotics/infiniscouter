@@ -348,6 +348,7 @@ fn single_team_impl(
 		.collect()
 }
 
+#[allow(clippy::too_many_arguments)]
 fn get_single_metric(
 	config: &GameConfigs,
 	match_entries: &[MatchEntryIdData],
