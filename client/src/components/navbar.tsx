@@ -13,6 +13,7 @@ import { useLocation } from "preact-iso";
 import * as React from "react";
 
 import { SyncButton } from "./sync_button";
+import { useEffect } from "react";
 
 interface NavbarItemProps {
 	name: string;
@@ -46,6 +47,10 @@ interface NavbarProps {
  */
 export function Navbar(props: NavbarProps) {
 	const [navbarOpen, setNavbarOpen] = React.useState(false);
+
+	useEffect(() => {
+		document.title = `Infiniscouter · ${props.title}`;
+	}, [props.title]);
 
 	const toggleDrawer = (inOpen: boolean) => () => {
 		setNavbarOpen(inOpen);

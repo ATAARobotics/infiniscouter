@@ -29,7 +29,7 @@ export function TeamInfo(props: TeamInfoProps) {
 	}, []);
 
 	if (!data) {
-		return <LoadIndicator title="Team Info"></LoadIndicator>;
+		return <LoadIndicator title={`${props.team} Team Info`}></LoadIndicator>;
 	}
 
 	const pages: Array<Array<InfoEntryWithSource>> = [];
