@@ -7,7 +7,7 @@ use crate::{
 };
 use poem_openapi::{Object, Union};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use ts_rs::TS;
 
 use super::{CounterRange, TbaMatchPropType};
@@ -176,14 +176,22 @@ impl MatchEntryFields {
 											.unwrap_or_default(),
 									}),
 								}),
-								TbaMatchPropType::Enum => MatchEntryType::Enum(EnumMetric {
-									options: prop
+								TbaMatchPropType::Enum => {
+									let mut options = Vec::new();
+									let mut options_set = HashSet::new();
+									for option in prop
 										.options
 										.iter()
 										.flatten()
 										.map(|o| o.name.as_ref().unwrap_or(&o.id).clone())
-										.collect::<Vec<_>>(),
-								}),
+									{
+										if !options_set.contains(&option) {
+											options.push(option.clone());
+											options_set.insert(option);
+										}
+									}
+									MatchEntryType::Enum(EnumMetric { options })
+								}
 								TbaMatchPropType::Number => {
 									MatchEntryType::Counter(CounterMetric { limit_range: None })
 								}
