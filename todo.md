@@ -8,7 +8,7 @@
 7. [x] Organize single team analysis page
 8. [ ] Send notes to ChatGPT
 9. [x] Fix counter double click
-10. [ ] Show pit things as non-pie chart things
+10. [x] Show pit things as non-pie chart things
 11. [x] Show some number values differently (max, distribution, etc)
 12. [ ] Scout scheduling
 13. [x] Scount leaderboard
@@ -25,4 +25,10 @@
 24. [ ] Allow selecting colour pallette in config
 25. [x] Improve column selection (menu with submenus for pages)
 26. [ ] Allow user to select text instead of chart
-27. [ ] Fix the interface for adding images
+27. [x] Fix the interface for adding images
+28. [ ] Allow image rotating post-upload
+29. [ ] Prevent scouting stealing somehow
+30. [ ] Add popup for scout name that works on cell phone
+31. [ ] Format match list to work on a phone
+32. [ ] Add attempt/success counter (maybe for auto, maybe for more?)
+33. [ ] Make it so wins and RPs are pulled from TBA (it updates faster)
