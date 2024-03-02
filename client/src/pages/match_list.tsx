@@ -55,20 +55,17 @@ function TeamCell(props: TeamCellProps) {
 				) : (
 					props.team
 				)}{" "}
-				{isQuals &&
-					props.match.result !== "Tbd" &&
-					(scout ? (
-						<a
-							title={`Scouted by ${scout}`}
-							style={{ marginLeft: "auto" }}
-						>
-							✅
-						</a>
-					) : (
+				{isQuals && scout ? (
+					<a title={`Scouted by ${scout}`} style={{ marginLeft: "auto" }}>
+						✅
+					</a>
+				) : (
+					props.match.result !== "Tbd" && (
 						<a title="No scouting data" style={{ marginLeft: "auto" }}>
 							❌
 						</a>
-					))}
+					)
+				)}
 			</Stack>
 		</td>
 	);
