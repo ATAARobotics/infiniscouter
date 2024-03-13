@@ -11,9 +11,9 @@ import {
 } from "@mui/joy";
 import { useLocation } from "preact-iso";
 import * as React from "react";
+import { useEffect } from "react";
 
 import { SyncButton } from "./sync_button";
-import { useEffect } from "react";
 
 interface NavbarItemProps {
 	name: string;

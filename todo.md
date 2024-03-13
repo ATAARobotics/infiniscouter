@@ -28,7 +28,7 @@
 27. [x] Fix the interface for adding images
 28. [ ] Allow image rotating post-upload
 29. [ ] Prevent scouting stealing somehow
-30. [ ] Add popup for scout name that works on cell phone
+30. [x] Add popup for scout name that works on cell phone
 31. [ ] Format match list to work on a phone
 32. [ ] Add attempt/success counter (maybe for auto, maybe for more?)
 33. [ ] Make it so wins and RPs are pulled from TBA (it updates faster)

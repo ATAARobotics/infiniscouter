@@ -17,7 +17,8 @@ function sortScouts(a: LeaderboardPerson, b: LeaderboardPerson): number {
 		return -1;
 	}
 	return (
-		(b.matches_scouted + b.drivers_scouted) -
+		b.matches_scouted +
+		b.drivers_scouted -
 		(a.matches_scouted + a.drivers_scouted)
 	);
 }
@@ -72,7 +73,7 @@ export function Leaderboard() {
 									<Typography
 										color={
 											scout.name.trim().toLowerCase() ===
-												currentScout?.trim().toLowerCase()
+											currentScout?.trim().toLowerCase()
 												? "primary"
 												: "neutral"
 										}
@@ -92,8 +93,9 @@ export function Leaderboard() {
 										const team = Object.entries(
 											scout.teams_scouted,
 										).sort((a, b) => b[1] - a[1])[0];
-										return `Team ${team[0]}, ${team[1]} Time${team[1] !== 1 ? "s" : ""
-											}`;
+										return `Team ${team[0]}, ${team[1]} Time${
+											team[1] !== 1 ? "s" : ""
+										}`;
 									})()}
 								</td>
 							</tr>

@@ -1,4 +1,4 @@
-import { Box, Stack, Table } from "@mui/joy";
+import { Box, Stack, Table, Tooltip, Typography } from "@mui/joy";
 import { useAtomValue } from "jotai/react";
 
 import { Navbar } from "../components/navbar";
@@ -52,20 +52,13 @@ export function TeamList() {
 											<a href={`/pit_entry/${teamInfo.num}`}>
 												Pit Scouting
 											</a>{" "}
-											{pitScout ? (
-												<a
+											{pitScout && (
+												<Tooltip
 													title={`Scouted by ${pitScout}`}
 													style={{ marginLeft: "auto" }}
 												>
-													✅
-												</a>
-											) : (
-												<a
-													title="No scouting data"
-													style={{ marginLeft: "auto" }}
-												>
-													❌
-												</a>
+													<Typography>✅</Typography>
+												</Tooltip>
 											)}
 										</Stack>
 									</td>

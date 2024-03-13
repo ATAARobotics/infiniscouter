@@ -1,4 +1,4 @@
-import { Box, Stack, Table } from "@mui/joy";
+import { Box, Stack, Table, Tooltip, Typography } from "@mui/joy";
 import { useAtomValue } from "jotai/react";
 
 import { Navbar } from "../components/navbar";
@@ -55,16 +55,13 @@ function TeamCell(props: TeamCellProps) {
 				) : (
 					props.team
 				)}{" "}
-				{isQuals && scout ? (
-					<a title={`Scouted by ${scout}`} style={{ marginLeft: "auto" }}>
-						✅
-					</a>
-				) : (
-					props.match.result !== "Tbd" && (
-						<a title="No scouting data" style={{ marginLeft: "auto" }}>
-							❌
-						</a>
-					)
+				{scout && (
+					<Tooltip
+						title={`Scouted by ${scout}`}
+						style={{ marginLeft: "auto" }}
+					>
+						<Typography>✅</Typography>
+					</Tooltip>
 				)}
 			</Stack>
 		</td>
