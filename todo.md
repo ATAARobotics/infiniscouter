@@ -24,7 +24,7 @@
 23. [x] Make images separate URLs and include in analysis page(s)
 24. [ ] Allow selecting colour pallette in config
 25. [x] Improve column selection (menu with submenus for pages)
-26. [ ] Allow user to select text instead of chart
+26. [x] Allow user to select text instead of chart
 27. [x] Fix the interface for adding images
 28. [ ] Allow image rotating post-upload
 29. [ ] Prevent scouting stealing somehow

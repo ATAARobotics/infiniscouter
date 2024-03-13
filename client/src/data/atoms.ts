@@ -25,6 +25,7 @@ export const analysisColumnsAtom = atomWithStorage<Array<number> | null>(
 	null,
 );
 export const scoutNameAtom = atomWithStorage<string | null>("scoutName", null);
+export const textModeAtom = atomWithStorage<boolean>("textMode", false);
 
 export const lastMatchSaveAtom = atomWithStorage<number>("lastMatchSave", 0);
 export const lastPitSaveAtom = atomWithStorage<number>("lastPitSave", 0);

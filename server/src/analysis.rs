@@ -524,7 +524,7 @@ fn get_single_metric(
 					if options.iter().all(|option| option.value == 0.0) {
 						"".to_string()
 					} else {
-						format!("{pct:0}%")
+						format!("{:.0}%", pct * 100.0)
 					}
 				},
 			),
@@ -541,7 +541,8 @@ fn get_single_metric(
 					pit_data_point.as_ref(),
 					&option_values,
 					|options, _| {
-						if options.iter().all(|option| option.value == 0.0) {
+						let option_sum = options.iter().map(|option| option.value).sum::<f32>();
+						if option_sum == 0.0 {
 							"".to_string()
 						} else {
 							let non_zero_items = options
@@ -551,7 +552,17 @@ fn get_single_metric(
 							if non_zero_items.len() == 1 {
 								non_zero_items[0].label.to_string()
 							} else {
-								"Varies".to_string()
+								let top_item = non_zero_items
+									.iter()
+									.max_by(|option_a, option_b| {
+										option_a.value.total_cmp(&option_b.value)
+									})
+									.unwrap();
+								format!(
+									"{:.0}% {}",
+									top_item.value / option_sum * 100.0,
+									top_item.label
+								)
 							}
 						}
 					},
@@ -565,7 +576,7 @@ fn get_single_metric(
 					if options.iter().all(|option| option.value == 0.0) {
 						"".to_string()
 					} else {
-						format!("{pct:0}%")
+						format!("{:.0}%", pct * 100.0)
 					}
 				},
 			),
@@ -679,7 +690,11 @@ fn get_single_metric(
 					})
 					.collect::<Vec<_>>();
 				TeamInfoEntry {
-					text: "Image".to_string(),
+					text: match images.len() {
+						0 => "".to_string(),
+						1 => "1 image".to_string(),
+						count => format!("{count} images"),
+					},
 					pit_value: None,
 					sort_value: -(images.len() as f32),
 					colour: [255, 255, 255],

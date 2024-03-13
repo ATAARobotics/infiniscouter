@@ -1,7 +1,9 @@
 import { Box, Typography } from "@mui/joy";
 import { WordCloudController } from "chartjs-chart-wordcloud";
+import { useAtomValue } from "jotai";
 import { Chart, Pie } from "react-chartjs-2";
 
+import { textModeAtom } from "../data/atoms";
 import { useCharts } from "../data/hooks";
 import { TeamInfoEntry } from "../generated/TeamInfoEntry";
 
@@ -34,13 +36,15 @@ const excludeWords = [
  */
 export function DataValue(props: DataValueProps) {
 	const chartsReady = useCharts();
+	const textMode = useAtomValue(textModeAtom);
+
 	switch (props.value.graphic?.type) {
 		case undefined:
 			return props.value.pit_value ? (
-				<Typography level="h1">{props.value.pit_value}</Typography>
+				<Typography level="h2">Pit: {props.value.pit_value}</Typography>
 			) : (
 				<Typography
-					level="h1"
+					level="h2"
 					style={{
 						color: `rgb(${props.value.colour})`,
 					}}
@@ -64,7 +68,16 @@ export function DataValue(props: DataValueProps) {
 				</a>
 			);
 		case "pie_chart": {
-			return (
+			return textMode ? (
+				<Typography
+					level="h2"
+					style={{
+						color: `rgb(${props.value.colour})`,
+					}}
+				>
+					{props.value.text}
+				</Typography>
+			) : (
 				<Box
 					sx={{
 						width: "100px",
@@ -194,24 +207,32 @@ export function DataValue(props: DataValueProps) {
 								marginLeft: "50%",
 							}}
 						>
-							<img
-								width={100}
-								style={{ transform: "rotate(90deg)" }}
-								src={`/image/small/${props.value.graphic.images[0].image_id}`}
-							/>
+							{textMode ? (
+								<Typography level="h2">Open</Typography>
+							) : (
+								<img
+									width={100}
+									style={{ transform: "rotate(90deg)" }}
+									src={`/image/small/${props.value.graphic.images[0].image_id}`}
+								/>
+							)}
 						</a>
 					)
 				);
 			} else {
 				return (
 					<>
-						{props.value.graphic.images.map((image) => (
+						{props.value.graphic.images.map((image, idx) => (
 							<a href={`/image/full/${image.image_id}`}>
-								<img
-									width={100}
-									style={{ transform: "rotate(90deg)" }}
-									src={`/image/small/${image.image_id}`}
-								/>
+								{textMode ? (
+									<Typography level="h2">Image {idx + 1}</Typography>
+								) : (
+									<img
+										width={100}
+										style={{ transform: "rotate(90deg)" }}
+										src={`/image/small/${image.image_id}`}
+									/>
+								)}
 							</a>
 						))}
 					</>
