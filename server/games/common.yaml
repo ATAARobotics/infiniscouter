@@ -88,24 +88,6 @@ categories:
         collect: pit_only
         metric:
           type: bool
-      pit-picture:
-        order: 25
-        name: Pit Pictures
-        description: Take a picture of their pit
-        collect: pit_only
-        metric:
-          type: image
-          allow_video: true
-      battery-count:
-        order: 30
-        name: Battery Count
-        description: How many batteries does the team have on hand?
-        collect: pit_only
-        metric:
-          type: counter
-          limit_range:
-            start: 1
-            end_inclusive: 12
       overpromised:
         order: 40
         name: Overpromised
@@ -129,20 +111,6 @@ categories:
     name: Robot
     order: 100
     metrics:
-      reversable-bumpers:
-        order: 10
-        name: Reversable Bumpers
-        description: Are the bumpers reversable
-        collect: pit_only
-        metric:
-          type: bool
-      vision:
-        order: 20
-        name: Has Vision
-        description: Does the robot use vision in any way?
-        collect: pit_only
-        metric:
-          type: bool
       drive-train:
         order: 30
         name: Drive Train Type

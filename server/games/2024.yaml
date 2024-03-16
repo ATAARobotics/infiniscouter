@@ -47,27 +47,9 @@ categories:
         collect: match_pit
         metric:
           type: ability
-      note-pickup:
-        order: 40
-        name: Note Pickup
-        description: Can pick up notes from various sources?
-        collect: match_pit
-        metric:
-          type: enum
-          options:
-            - None
-            - Chute
-            - Field
   endgame:
     name: Endgame
     metrics:
-      climb:
-        order: 20
-        name: Climb
-        description: Can they climb?
-        collect: match_pit
-        metric:
-          type: ability
       trap:
         order: 30
         name: Trap
@@ -75,14 +57,6 @@ categories:
         collect: match_pit
         metric:
           type: ability
-      harmony:
-        order: 40
-        name: Harmony
-        description: Can climb with others
-        collect: match_pit
-        metric:
-          type: ability
-          implies: [climb]
   robot:
     name: Robot
     metrics:
@@ -91,16 +65,6 @@ categories:
         name: Low Bot
         description: Is it a low bot?
         collect: pit_only
-        metric:
-          type: bool
-  team:
-    name: Team
-    metrics:
-      human-player:
-        order: 20
-        name: Human Player
-        description: Was this team's human player the active human player for this match?
-        collect: match_only
         metric:
           type: bool
 tba:
