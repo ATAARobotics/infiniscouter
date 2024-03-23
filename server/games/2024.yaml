@@ -47,9 +47,27 @@ categories:
         collect: match_pit
         metric:
           type: ability
+      note-pickup:
+        order: 40
+        name: Note Pickup
+        description: Can pick up notes from various sources?
+        collect: pit_only
+        metric:
+          type: enum
+          options:
+            - None
+            - Chute
+            - Field
   endgame:
     name: Endgame
     metrics:
+      climb:
+        order: 20
+        name: Climb
+        description: Can they climb?
+        collect: pit_only
+        metric:
+          type: ability
       trap:
         order: 30
         name: Trap
@@ -57,6 +75,14 @@ categories:
         collect: match_pit
         metric:
           type: ability
+      harmony:
+        order: 40
+        name: Harmony
+        description: Can climb with others
+        collect: pit_only
+        metric:
+          type: ability
+          implies: [climb]
   robot:
     name: Robot
     metrics:
@@ -109,8 +135,6 @@ display:
     - source: single
       metric: tba-auto-line
     - source: single
-      metric: moved
-    - source: single
       metric: auto-notes
       display: true
     - source: single
@@ -123,28 +147,17 @@ display:
       metric: teleop-speaker
     - source: single
       metric: note-pickup
-      display: true
-    - source: filtered
+    - source: single
       metric: tba-coopertition
-      filter_by: human-player
-      display: true
     - source: single
       metric: climb
-      display: true
     - source: single
       metric: tba-endgame
       display: true
-    - source: filtered
-      metric: tba-spotlight
-      filter_by: human-player
     - source: single
       metric: trap
-      display: true
     - source: single
       metric: harmony
-      display: true
-    - source: single
-      metric: human-player
     - source: single
       metric: present
       display: true
