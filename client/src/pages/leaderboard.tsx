@@ -58,9 +58,10 @@ export function Leaderboard() {
 						<th>Scout Name</th>
 						<th>Total Scouted</th>
 						<th>Matches Scouted</th>
-						{/* <th>(Inaccurate) Pits Scouted</th> */}
+						<th>Pits Scouted</th>
 						<th>Driver Scouted</th>
 						<th>Unique Teams Scouted</th>
+						<th>Data Points Entered</th>
 						<th>Team Most Scouted</th>
 					</tr>
 				</thead>
@@ -85,9 +86,10 @@ export function Leaderboard() {
 								</td>
 								<td>{scout.matches_scouted + scout.drivers_scouted}</td>
 								<td>{scout.matches_scouted}</td>
-								{/* <td>{scout.pits_scouted} (inaccurate)</td> */}
+								<td>{scout.pits_scouted}</td>
 								<td>{scout.drivers_scouted}</td>
 								<td>{Object.entries(scout.teams_scouted).length}</td>
+								<td>{scout.data_points}</td>
 								<td>
 									{(() => {
 										const team = Object.entries(
