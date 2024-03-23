@@ -202,12 +202,6 @@ display:
     - source: single
       metric: exists
     - source: single
-      metric: battery-count
-    - source: single
-      metric: reversable-bumpers
-    - source: single
-      metric: vision
-    - source: single
       metric: drive-train
     - source: single
       metric: overpromised
