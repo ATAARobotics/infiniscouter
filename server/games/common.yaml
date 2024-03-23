@@ -88,6 +88,13 @@ categories:
         collect: pit_only
         metric:
           type: bool
+      swag:
+        order: 30
+        name: Swag
+        description: Do they have any swag for you?
+        collect: pit_only
+        metric:
+          type: bool
       overpromised:
         order: 40
         name: Overpromised
@@ -201,6 +208,8 @@ display:
       display: true
     - source: single
       metric: exists
+    - source: single
+      metric: swag
     - source: single
       metric: drive-train
     - source: single
