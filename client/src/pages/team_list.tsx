@@ -49,19 +49,19 @@ export function TeamList() {
 									</td>
 									<td>
 										<Stack direction="row">
-											<a href={`/pit_entry/${teamInfo.num}`}>
-												Pit Scouting
-											</a>{" "}
 											{pitScouts.length > 0 && (
 												<Tooltip
 													title={`Scouted by ${pitScouts.join(
 														", ",
 													)}`}
-													style={{ marginLeft: "auto" }}
+													style={{ marginRight: "5px" }}
 												>
 													<Typography>✅</Typography>
 												</Tooltip>
 											)}
+											<a href={`/pit_entry/${teamInfo.num}`}>
+												Pit Scouting
+											</a>{" "}
 										</Stack>
 									</td>
 								</tr>

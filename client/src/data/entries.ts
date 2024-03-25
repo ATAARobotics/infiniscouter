@@ -29,6 +29,8 @@ export function useEntries<T extends AnyEntryId>(
 ] {
 	const [data, setData] = useState<MatchEntryData>({
 		entries: {},
+		scout: null,
+		timestamp_ms: 0,
 	});
 	const [changed, setChanged] = useState<boolean>(false);
 
@@ -50,6 +52,8 @@ export function useEntries<T extends AnyEntryId>(
 				setChanged(false);
 				setData({
 					entries: {},
+					scout: null,
+					timestamp_ms: 0,
 				});
 			}
 		}
@@ -67,6 +71,8 @@ export function useEntries<T extends AnyEntryId>(
 			setChanged(true);
 			setData({
 				entries: newEntries,
+				scout: null,
+				timestamp_ms: 0,
 			});
 		},
 	];

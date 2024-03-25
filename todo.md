@@ -29,6 +29,6 @@
 28. [ ] Allow image rotating post-upload
 29. [x] Prevent scouting stealing by crediting data per field
 30. [x] Add popup for scout name that works on cell phone
-31. [ ] Format match list to work on a phone
+31. [x] Format match list to work on a phone
 32. [ ] Add attempt/success counter (maybe for auto, maybe for more?)
 33. [ ] Make it so wins and RPs are pulled from TBA (it updates faster)

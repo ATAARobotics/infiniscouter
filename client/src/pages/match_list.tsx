@@ -46,25 +46,23 @@ function TeamCell(props: TeamCellProps) {
 	const isQuals = props.match.id.match_type === "qualification";
 	const scouts = isQuals ? getMatchScouts(props.match.id.num, props.team) : [];
 	return (
-		<td>
-			<Stack direction="row">
-				{team_info ? (
-					<a href={`/team/${team_info.num}`} title={team_info.name}>
-						{team_info.num}
-					</a>
-				) : (
-					props.team
-				)}{" "}
-				{scouts.length > 0 && (
-					<Tooltip
-						title={`Scouted by ${scouts.join(", ")}`}
-						style={{ marginLeft: "auto" }}
-					>
-						<Typography>✅</Typography>
-					</Tooltip>
-				)}
-			</Stack>
-		</td>
+		<Stack direction="row" width="100%">
+			{scouts.length > 0 && (
+				<Tooltip
+					title={`Scouted by ${scouts.join(", ")}`}
+					style={{ marginRight: "5px" }}
+				>
+					<Typography>✅</Typography>
+				</Tooltip>
+			)}
+			{team_info ? (
+				<a href={`/team/${team_info.num}`} title={team_info.name}>
+					{team_info.num}
+				</a>
+			) : (
+				props.team
+			)}{" "}
+		</Stack>
 	);
 }
 
@@ -83,12 +81,10 @@ export function MatchList() {
 			<Navbar title="Match List" />
 			<Table hoverRow stickyHeader borderAxis="y" stripe="even">
 				<thead>
-					<th style={{ width: "150px" }}>Match</th>
-					<th colSpan={3}>Red Alliance</th>
-					<th style={{ width: "50px" }}></th>
-					<th colSpan={3}>Blue Alliance</th>
-					<th style={{ width: "50px" }}></th>
-					<th style={{ width: "100px" }}>Winner</th>
+					<th style={{ width: "100px" }}>Match</th>
+					<th>Red Alliance</th>
+					<th>Blue Alliance</th>
+					<th style={{ width: "75px" }}>Winner</th>
 				</thead>
 				<tbody>
 					{matchList.match_infos.map((match) => (
@@ -108,53 +104,89 @@ export function MatchList() {
 									></TbaMatchLink>
 								</Stack>
 							</td>
-							<TeamCell
-								team={match.teams_red[0]}
-								match={match}
-								matchList={matchList}
-							></TeamCell>
-							<TeamCell
-								team={match.teams_red[1]}
-								match={match}
-								matchList={matchList}
-							></TeamCell>
-							<TeamCell
-								team={match.teams_red[2]}
-								match={match}
-								matchList={matchList}
-							></TeamCell>
-							<td style={{ textAlign: "right" }}>
-								{match.result === "Red" ? (
-									<b>{match.score_red}</b>
-								) : match.result === "Blue" ? (
-									match.score_red
-								) : (
-									""
-								)}
+							<td>
+								<Stack direction="row">
+									<Stack
+										direction={{ xs: "column", sm: "row" }}
+										width="100%"
+									>
+										<TeamCell
+											team={match.teams_red[0]}
+											match={match}
+											matchList={matchList}
+										></TeamCell>
+										<TeamCell
+											team={match.teams_red[1]}
+											match={match}
+											matchList={matchList}
+										></TeamCell>
+										<TeamCell
+											team={match.teams_red[2]}
+											match={match}
+											matchList={matchList}
+										></TeamCell>
+									</Stack>
+									<Typography
+										style={{
+											textAlign: "right",
+											width: "50px",
+											marginLeft: "auto",
+											marginTop: "auto",
+											marginBottom: "auto",
+										}}
+										gridArea="score"
+									>
+										{match.result === "Red" ? (
+											<b>{match.score_red}</b>
+										) : match.result === "Blue" ? (
+											match.score_red
+										) : (
+											""
+										)}
+									</Typography>
+								</Stack>
 							</td>
-							<TeamCell
-								team={match.teams_blue[0]}
-								match={match}
-								matchList={matchList}
-							></TeamCell>
-							<TeamCell
-								team={match.teams_blue[1]}
-								match={match}
-								matchList={matchList}
-							></TeamCell>
-							<TeamCell
-								team={match.teams_blue[2]}
-								match={match}
-								matchList={matchList}
-							></TeamCell>
-							<td style={{ textAlign: "right" }}>
-								{match.result === "Blue" ? (
-									<b>{match.score_blue}</b>
-								) : match.result === "Red" ? (
-									match.score_blue
-								) : (
-									""
-								)}
+							<td>
+								<Stack direction="row">
+									<Stack
+										direction={{ xs: "column", sm: "row" }}
+										width="100%"
+									>
+										<TeamCell
+											team={match.teams_blue[0]}
+											match={match}
+											matchList={matchList}
+										></TeamCell>
+										<TeamCell
+											team={match.teams_blue[1]}
+											match={match}
+											matchList={matchList}
+										></TeamCell>
+										<TeamCell
+											team={match.teams_blue[2]}
+											match={match}
+											matchList={matchList}
+										></TeamCell>
+									</Stack>
+									<Typography
+										style={{
+											textAlign: "right",
+											width: "50px",
+											marginLeft: "auto",
+											marginTop: "auto",
+											marginBottom: "auto",
+										}}
+										gridArea="score"
+									>
+										{match.result === "Blue" ? (
+											<b>{match.score_blue}</b>
+										) : match.result === "Red" ? (
+											match.score_blue
+										) : (
+											""
+										)}
+									</Typography>
+								</Stack>
 							</td>
 							<td>{match.result === "Tbd" ? "" : match.result}</td>
 						</tr>
