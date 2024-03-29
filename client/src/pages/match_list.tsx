@@ -138,10 +138,8 @@ export function MatchList() {
 									>
 										{match.result === "Red" ? (
 											<b>{match.score_red}</b>
-										) : match.result === "Blue" ? (
-											match.score_red
 										) : (
-											""
+											match.score_red ?? ""
 										)}
 									</Typography>
 								</Stack>
@@ -180,10 +178,8 @@ export function MatchList() {
 									>
 										{match.result === "Blue" ? (
 											<b>{match.score_blue}</b>
-										) : match.result === "Red" ? (
-											match.score_blue
 										) : (
-											""
+											match.score_blue ?? ""
 										)}
 									</Typography>
 								</Stack>

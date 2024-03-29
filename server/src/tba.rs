@@ -269,6 +269,20 @@ struct RawTbaMatch {
 
 impl RawTbaMatch {
 	fn into_match(self, game_config: &GameConfig) -> Result<MatchInfo> {
+		let score_blue = self.alliances.blue.score.and_then(|score| {
+			if score >= 0 {
+				Some(score as u16)
+			} else {
+				None
+			}
+		});
+		let score_red = self.alliances.red.score.and_then(|score| {
+			if score >= 0 {
+				Some(score as u16)
+			} else {
+				None
+			}
+		});
 		Ok(MatchInfo {
 			id: match self.comp_level.as_str() {
 				"q" | "qm" => MatchId::Qualification(SetMatch {
@@ -307,24 +321,18 @@ impl RawTbaMatch {
 				.into_iter()
 				.map(|t| t.trim_start_matches("frc").parse().unwrap())
 				.collect(),
-			score_blue: self.alliances.blue.score.and_then(|score| {
-				if score >= 0 {
-					Some(score as u16)
-				} else {
-					None
-				}
-			}),
-			score_red: self.alliances.red.score.and_then(|score| {
-				if score >= 0 {
-					Some(score as u16)
-				} else {
-					None
-				}
-			}),
+			score_blue,
+			score_red,
 			result: match self.winning_alliance.as_deref() {
 				Some("red") => MatchResult::Red,
 				Some("blue") => MatchResult::Blue,
-				_ => MatchResult::Tbd,
+				_ => {
+					if score_blue.is_some() && score_red.is_some() && score_blue == score_red {
+						MatchResult::Tie
+					} else {
+						MatchResult::Tbd
+					}
+				},
 			},
 			custom_entries: CustomEntries {
 				blue: custom_entries_for(
@@ -526,6 +534,7 @@ pub enum MatchResult {
 	Tbd,
 	Red,
 	Blue,
+	Tie,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
