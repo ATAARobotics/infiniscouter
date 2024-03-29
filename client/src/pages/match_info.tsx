@@ -32,7 +32,9 @@ function TeamPreview(props: TeamPreviewProps) {
 				{props.team_icon_uri && (
 					<img width={40} height={40} src={props.team_icon_uri} />
 				)}
-				{props.team_number}
+				<a href={`/team/${props.team_number}`} title={props.team_name}>
+					{props.team_number}
+				</a>
 			</Typography>
 			<Stack direction="row" flexWrap={"wrap"} gap={"25px"}>
 				{props.other_data.map((data, idx) => {
@@ -66,6 +68,7 @@ const rainbow = [
 interface AlliancePreviewProps {
 	alliance: "red" | "blue";
 	teams: Array<MatchAnalysisTeamInfo>;
+	highestScore: number;
 	other_data_names: Array<string>;
 	colors: Array<Array<string>>;
 }
@@ -121,6 +124,7 @@ function AlliancePreview(props: AlliancePreviewProps) {
 							x: {
 								stacked: true,
 								display: false,
+								max: props.highestScore,
 							},
 							y: {
 								stacked: true,
@@ -177,6 +181,12 @@ export function MatchInfo(props: MatchInfoProps) {
 		return <LoadIndicator title="Match Preview"></LoadIndicator>;
 	}
 
+	const highestScore = Math.max(
+		...matchAnalysis.blue_teams
+			.concat(matchAnalysis.red_teams)
+			.map((info) => info.expected_score),
+	);
+
 	return (
 		<Box>
 			<Navbar
@@ -198,12 +208,14 @@ export function MatchInfo(props: MatchInfoProps) {
 				<AlliancePreview
 					alliance="red"
 					teams={matchAnalysis.red_teams}
+					highestScore={highestScore}
 					other_data_names={matchAnalysis.other_data_names}
 					colors={colors}
 				></AlliancePreview>
 				<AlliancePreview
 					alliance="blue"
 					teams={matchAnalysis.blue_teams}
+					highestScore={highestScore}
 					other_data_names={matchAnalysis.other_data_names}
 					colors={colors}
 				></AlliancePreview>
