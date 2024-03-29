@@ -18,8 +18,9 @@ function sortScouts(a: LeaderboardPerson, b: LeaderboardPerson): number {
 	}
 	return (
 		b.matches_scouted +
-		b.drivers_scouted -
-		(a.matches_scouted + a.drivers_scouted)
+		b.drivers_scouted +
+		b.pits_scouted -
+		(a.matches_scouted + a.pits_scouted + a.drivers_scouted)
 	);
 }
 
@@ -84,7 +85,11 @@ export function Leaderboard() {
 											: scout.name}
 									</Typography>
 								</td>
-								<td>{scout.matches_scouted + scout.drivers_scouted}</td>
+								<td>
+									{scout.matches_scouted +
+										scout.pits_scouted +
+										scout.drivers_scouted}
+								</td>
 								<td>{scout.matches_scouted}</td>
 								<td>{scout.pits_scouted}</td>
 								<td>{scout.drivers_scouted}</td>
