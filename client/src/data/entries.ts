@@ -92,12 +92,16 @@ export async function saveImageData<T extends AnyEntryId>(
 				for (const image of value.images) {
 					if ((image as unknown as { local: true | undefined }).local) {
 						console.log("Sending image..." + image.image_id);
-						const imageData = await getImage(image.image_id);
-						images.push({
-							...image,
-							// @ts-expect-error MY TYPESCRIPT BINDINGS ARE WRONG OWIEE!!!! -Papyrus from undertale
-							image_data: [...new Uint8Array(imageData)],
-						});
+						try {
+							const imageData = await getImage(image.image_id);
+							images.push({
+								...image,
+								// @ts-expect-error MY TYPESCRIPT BINDINGS ARE WRONG OWIEE!!!! -Papyrus from undertale
+								image_data: [...new Uint8Array(imageData)],
+							});
+						} catch {
+							// ignore for now...
+						}
 					}
 				}
 			}
