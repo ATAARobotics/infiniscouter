@@ -1,7 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 
 import { DriverEntryIdData } from "../generated/DriverEntryIdData";
-import { ImageEntryData } from "../generated/ImageEntryData";
 import { MatchEntryData } from "../generated/MatchEntryData";
 import { MatchEntryIdData } from "../generated/MatchEntryIdData";
 import { MatchEntryValue } from "../generated/MatchEntryValue";
@@ -85,7 +84,6 @@ export async function saveImageData<T extends AnyEntryId>(
 	entries: Array<T>,
 	getKey: (entry: T) => string,
 ): Promise<boolean> {
-	const images: Array<ImageEntryData> = [];
 	for (const entry of entries) {
 		for (const value of Object.values(entry.data.entries)) {
 			if (value.type === "image") {
@@ -94,11 +92,22 @@ export async function saveImageData<T extends AnyEntryId>(
 						console.log("Sending image..." + image.image_id);
 						try {
 							const imageData = await getImage(image.image_id);
-							images.push({
-								...image,
-								// @ts-expect-error MY TYPESCRIPT BINDINGS ARE WRONG OWIEE!!!! -Papyrus from undertale
-								image_data: [...new Uint8Array(imageData)],
+
+							const response = await fetch("/api/images", {
+								method: "PUT",
+								headers: { "Content-Type": "application/json" },
+								body: JSON.stringify([imageData]),
 							});
+
+							if (response.ok) {
+								(
+									image as unknown as { local: boolean | undefined }
+								).local = false;
+								localStorage.setItem(
+									getKey(entry),
+									JSON.stringify(entry),
+								);
+							}
 						} catch {
 							// ignore for now...
 						}
@@ -108,36 +117,36 @@ export async function saveImageData<T extends AnyEntryId>(
 		}
 	}
 
-	if (images.length === 0) {
-		return true;
-	}
+	// if (images.length === 0) {
+	// 	return true;
+	// }
 
-	const response = await fetch("/api/images", {
-		method: "PUT",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(images),
-	});
+	// const response = await fetch("/api/images", {
+	// 	method: "PUT",
+	// 	headers: { "Content-Type": "application/json" },
+	// 	body: JSON.stringify(images),
+	// });
 
-	if (response.ok) {
-		for (const entry of entries) {
-			let needToSave = false;
-			for (const value of Object.values(entry.data.entries)) {
-				if (value.type === "image") {
-					for (const image of value.images) {
-						(image as unknown as { local: boolean | undefined }).local =
-							false;
-					}
-					needToSave = true;
-				}
-			}
+	// if (response.ok) {
+	// 	for (const entry of entries) {
+	// 		let needToSave = false;
+	// 		for (const value of Object.values(entry.data.entries)) {
+	// 			if (value.type === "image") {
+	// 				for (const image of value.images) {
+	// 					(image as unknown as { local: boolean | undefined }).local =
+	// 						false;
+	// 				}
+	// 				needToSave = true;
+	// 			}
+	// 		}
 
-			if (needToSave) {
-				localStorage.setItem(getKey(entry), JSON.stringify(entry));
-			}
-		}
-	}
+	// 		if (needToSave) {
+	// 			localStorage.setItem(getKey(entry), JSON.stringify(entry));
+	// 		}
+	// 	}
+	// }
 
-	return response.ok;
+	return true;
 }
 
 /**
