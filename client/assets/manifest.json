@@ -1,0 +1,18 @@
+{
+	"name": "Infiniscouter",
+	"short_name": "Infiniscouter",
+	"start_url": ".",
+	"display": "standalone",
+	"background_color": "#000000",
+	"theme_color": "#004daa",
+	"description": "An FRC scouting app by team 4421 Forge",
+	"icons": [
+		{
+			"src": "favicon.png",
+			"sizes": "461x461",
+			"type": "image/png",
+			"purpose": "any maskable"
+		}
+	],
+	"related_applications": []
+}
