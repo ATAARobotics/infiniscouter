@@ -1,0 +1,195 @@
+name: Reefscape
+year: 2025
+categories:
+  auto:
+    name: Auto
+    metrics:
+      auto-coral-best:
+        order: 30
+        name: Auto Coral Best
+        description: What coral level are you best at scoring in auto?
+        collect: pit_only
+        metric:
+          type: enum
+          options:
+            - None
+            - L1
+            - L2
+            - L3
+            - L4
+      auto-coral:
+        order: 40
+        name: Auto Coral
+        description: Number of coral scored in auto period
+        collect: match_pit
+        metric:
+          type: counter
+          limit_range:
+            start: 0
+            end_inclusive: 8
+      auto-processor:
+        order: 50
+        name: Auto Processor
+        description: Number of algae scored in the processor in auto period
+        collect: match_pit
+        metric:
+          type: counter
+          limit_range:
+            start: 0
+            end_inclusive: 9
+      auto-net:
+        order: 60
+        name: Auto Net
+        description: Number of algae scored in the net in auto period
+        collect: match_pit
+        metric:
+          type: counter
+          limit_range:
+            start: 0
+            end_inclusive: 9
+  teleop:
+    name: Teleop
+    metrics:
+      teleop-coral:
+        order: 20
+        name: Teleop Coral
+        description: Scored coral in teleop
+        collect: match_pit
+        metric:
+          type: ability
+      teleop-processor:
+        order: 30
+        name: Teleop Processor
+        description: Scored in the processor in teleop
+        collect: match_pit
+        metric:
+          type: ability
+      teleop-net:
+        order: 40
+        name: Teleop Net
+        description: Scored in the net in teleop
+        collect: match_pit
+        metric:
+          type: ability
+      note-pickup:
+        order: 50
+        name: Note Pickup
+        description: Can pick up notes from various sources?
+        collect: pit_only
+        metric:
+          type: enum
+          options:
+            - None
+            - Chute
+            - Field
+  endgame:
+    name: Endgame
+    metrics:
+      climb:
+        order: 20
+        name: Deep Climb
+        description: Can they climb on a deep cage?
+        collect: pit_only
+        metric:
+          type: ability
+      climb:
+        order: 30
+        name: Shallow Climb
+        description: Can they climb on a shallow cage?
+        collect: pit_only
+        metric:
+          type: ability
+  robot:
+    name: Robot
+    metrics:
+      low-bot:
+        order: 40
+        name: Low Bot
+        description: Is it a low bot?
+        collect: pit_only
+        metric:
+          type: bool
+tba:
+  order: 15
+  props:
+    auto-line:
+      type: bool
+      property: autoLineRobot{N}
+      name: "Auto Moved"
+    endgame:
+      type: enum
+      options:
+        - id: None
+          name: Nothing
+        - id: Parked
+          name: Parked
+        - id: StageRight
+          name: Climbed
+        - id: StageLeft
+          name: Climbed
+        - id: CenterStage
+          name: Climbed
+      property: endGameRobot{N}
+      name: "Endgame State"
+    spotlight:
+      type: sum
+      property: micCenterStage
+      options:
+        - id: micCenterStage
+        - id: micStageLeft
+        - id: micStageRight
+      name: "High Notes"
+    coopertition:
+      type: bool
+      property: coopertitionCriteriaMet
+      name: "Did Coopertition"
+ranking_points:
+  - Melody
+  - Ensemble
+display:
+  team_row:
+    - source: single
+      metric: tba-auto-line
+    - source: single
+      metric: auto-notes
+      display: true
+    - source: single
+      metric: auto-amp
+    - source: single
+      metric: auto-speaker
+    - source: single
+      metric: teleop-amp
+    - source: single
+      metric: teleop-speaker
+    - source: single
+      metric: note-pickup
+    - source: single
+      metric: tba-coopertition
+    - source: single
+      metric: climb
+    - source: single
+      metric: tba-endgame
+      display: true
+    - source: single
+      metric: trap
+    - source: single
+      metric: harmony
+    - source: single
+      metric: present
+      display: true
+  pre_match:
+    score: statbotics-points
+    graph:
+    - name: Auto
+      metric: statbotics-auto-points
+    - name: Teleop
+      metric: statbotics-teleop-points
+    - name: Endgame
+      metric: statbotics-endgame-points
+    metrics:
+    - auto-coral-best
+    - teleop-amp
+    - teleop-speaker
+    - note-pickup
+    - tba-endgame
+    - tba-coopertition
