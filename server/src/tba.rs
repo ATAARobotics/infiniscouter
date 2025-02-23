@@ -119,7 +119,7 @@ impl EventInfo {
 			last_update: DefaultInstant(Instant::now()),
 		}
 	}
-	
+
 	pub fn get_team_info(&self, team_id: u32) -> TeamNameEntry {
 		if let Some(team_info) = self.team_infos.get(&team_id) {
 			TeamNameEntry {

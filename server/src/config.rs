@@ -375,19 +375,27 @@ impl From<GameConfig> for GameConfigs {
 					metrics
 						.into_iter()
 						.flat_map(|(metric_name, metric)| {
-							if let CollectedMetricType::BaseTeam(props_list) = &metric.metric
-							{
+							if let CollectedMetricType::BaseTeam(props_list) = &metric.metric {
 								props_list
 									.props
 									.iter()
 									.map(|prop| format!("base-{prop}"))
 									.collect()
-							} else 							if let CollectedMetricType::StatboticsTeam(props_list) = &metric.metric
+							} else if let CollectedMetricType::StatboticsTeam(props_list) =
+								&metric.metric
 							{
 								props_list
 									.props
 									.iter()
-									.map(|prop| format!("statbotics-{prop}"))
+									.flat_map(|prop| {
+										if prop == "rp-all" {
+											value.ranking_points.iter().enumerate()
+												.map(|(i, _)| format!("statbotics-rp-{}", i + 1))
+												.collect()
+										} else {
+											vec![format!("statbotics-{prop}")]
+										}
+									})
 									.collect()
 							} else {
 								vec![metric_name]
@@ -456,7 +464,11 @@ impl ConfigManager {
 					}
 					for cat in config.categories.values_mut() {
 						for met in cat.metrics.values_mut() {
-							if matches!(met.metric, CollectedMetricType::StatboticsTeam(_) | CollectedMetricType::BaseTeam(_)) {
+							if matches!(
+								met.metric,
+								CollectedMetricType::StatboticsTeam(_)
+									| CollectedMetricType::BaseTeam(_)
+							) {
 								met.collect = CollectionOption::Never;
 							}
 						}

@@ -28,9 +28,7 @@ categories:
             - auto-points
             - teleop-points
             - endgame-points
-            - games
-            - rp-1
-            - rp-2
+            - rp-all
   auto:
     name: Auto
     order: 20

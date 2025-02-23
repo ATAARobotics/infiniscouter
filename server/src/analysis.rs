@@ -329,17 +329,14 @@ fn single_team_impl(
 			DisplayColumn::TeamName(_) => {
 				let team_info = tba_data.get_team_info(team);
 				TeamInfoEntry {
-				sort_value: team_info.number as f32,
-				pit_value: None,
-				text: format!(
-					"{} - {}",
-					team_info.number, team_info.name
-				),
-				// TODO: Team colour owo?
-				colour: [255, 255, 255],
-				graphic: Some(TeamInfoGraphic::TeamName(team_info)),
-			}}
-			,
+					sort_value: team_info.number as f32,
+					pit_value: None,
+					text: format!("{} - {}", team_info.number, team_info.name),
+					// TODO: Team colour owo?
+					colour: [255, 255, 255],
+					graphic: Some(TeamInfoGraphic::TeamName(team_info)),
+				}
+			}
 			DisplayColumn::CommonYearSpecific(_) => TeamInfoEntry {
 				text: "ERROR".to_string(),
 				pit_value: None,
@@ -458,34 +455,34 @@ fn get_single_metric(
 				}
 			}
 		} else if let Some(sb) = statbotics {
-			let played_games = sb.wins + sb.losses + sb.ties;
 			if let Some((pie_entry, sort_value, text)) = match real_metric {
 				"wlt-ratio" => Some((
 					PieChartEntry {
 						options: vec![
 							PieChartOption {
 								label: "Wins".to_string(),
-								value: sb.wins as f32,
+								value: sb.record.wins as f32,
 							},
 							PieChartOption {
 								label: "Losses".to_string(),
-								value: sb.losses as f32,
+								value: sb.record.losses as f32,
 							},
 							PieChartOption {
 								label: "Ties".to_string(),
-								value: sb.ties as f32,
+								value: sb.record.ties as f32,
 							},
 						],
 					},
-					if played_games == 0 {
+					if sb.record.count == 0 {
 						-420.0
 					} else {
-						(sb.wins as f32 + sb.ties as f32 * 0.5) / played_games as f32
+						(sb.record.wins as f32 + sb.record.ties as f32 * 0.5)
+							/ sb.record.count as f32
 					},
-					if sb.ties > 0 {
-						format!("{}-{}-{}", sb.wins, sb.losses, sb.ties)
+					if sb.record.ties > 0 {
+						format!("{}-{}-{}", sb.record.wins, sb.record.losses, sb.record.ties)
 					} else {
-						format!("{}-{}", sb.wins, sb.losses)
+						format!("{}-{}", sb.record.wins, sb.record.losses)
 					},
 				)),
 				_ => None,
@@ -498,11 +495,11 @@ fn get_single_metric(
 					graphic: Some(TeamInfoGraphic::PieChart(pie_entry)),
 				}
 			} else if let Some(value) = match real_metric {
-				"wins" => Some(sb.wins as f32),
-				"losses" => Some(sb.losses as f32),
-				"ties" => Some(sb.ties as f32),
-				"games" => Some(played_games as f32),
-				"rps" => Some(sb.rps as f32),
+				"wins" => Some(sb.record.wins as f32),
+				"losses" => Some(sb.record.losses as f32),
+				"ties" => Some(sb.record.ties as f32),
+				"games" => Some(sb.record.count as f32),
+				"rps" => Some(sb.record.rps as f32),
 				_ => None,
 			} {
 				TeamInfoEntry {
@@ -538,43 +535,14 @@ fn get_single_metric(
 		}
 	} else if let Some(real_metric) = metric.strip_prefix(SB_PREFIX) {
 		if let Some(sb) = statbotics {
-			if let Some((pie_entry, sort_value, text)) = match real_metric {
-				"rps-ratio" => Some((
-					PieChartEntry {
-						options: vec![
-							PieChartOption {
-								label: "None".to_string(),
-								value: (1.0 - (sb.rp_1_epa_end + sb.rp_2_epa_end)).max(0.0),
-							},
-							PieChartOption {
-								label: "RP 1".to_string(),
-								value: sb.rp_1_epa_end,
-							},
-							PieChartOption {
-								label: "RP 2".to_string(),
-								value: sb.rp_2_epa_end,
-							},
-						],
-					},
-					sb.rp_1_epa_end + sb.rp_2_epa_end,
-					"".to_string(),
-				)),
-				_ => None,
-			} {
-				TeamInfoEntry {
-					text,
-					pit_value: None,
-					sort_value,
-					colour: [255, 255, 255],
-					graphic: Some(TeamInfoGraphic::PieChart(pie_entry)),
-				}
-			} else if let Some(value) = match real_metric {
-				"points" => Some(sb.epa_end),
-				"auto-points" => Some(sb.auto_epa_end),
-				"teleop-points" => Some(sb.teleop_epa_end),
-				"endgame-points" => Some(sb.endgame_epa_end),
-				"rp-1" => Some(sb.rp_1_epa_end),
-				"rp-2" => Some(sb.rp_2_epa_end),
+			if let Some(value) = match real_metric {
+				"points" => Some(sb.epa.total_points.mean),
+				"auto-points" => Some(sb.epa.breakdown.auto_points),
+				"teleop-points" => Some(sb.epa.breakdown.teleop_points),
+				"endgame-points" => Some(sb.epa.breakdown.endgame_points),
+				"rp-1" => Some(sb.epa.breakdown.rp_1),
+				"rp-2" => Some(sb.epa.breakdown.rp_2),
+				"rp-3" => sb.epa.breakdown.rp_3,
 				_ => None,
 			} {
 				TeamInfoEntry {
@@ -585,15 +553,11 @@ fn get_single_metric(
 					graphic: Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry {
 						number: value,
 						collected_std_dev: if real_metric == "points" {
-							sb.epa_diff
+							Some(sb.epa.total_points.sd)
 						} else {
 							None
 						},
-						collected_min_max: if real_metric == "points" {
-							sb.epa_min.and_then(|min| sb.epa_max.map(|max| [min, max]))
-						} else {
-							None
-						},
+						collected_min_max: None,
 						compare_other_numbers: None,
 						is_time: false,
 					})),
@@ -902,6 +866,12 @@ fn get_metric_name(config: &GameConfigs, metric: &str) -> NameAndSource {
 					.get(1)
 					.cloned()
 					.unwrap_or("RP 2".to_string()),
+				"rp-3" => config
+					.game_config
+					.ranking_points
+					.get(2)
+					.cloned()
+					.unwrap_or("RP 3".to_string()),
 				_ => "Unknown Statbotics".to_string(),
 			},
 			page: "Data".to_string(),

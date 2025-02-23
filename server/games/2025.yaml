@@ -135,8 +135,9 @@ tba:
       property: coopertitionCriteriaMet
       name: "Did Coopertition"
 ranking_points:
-  - Melody
-  - Ensemble
+  - Auto
+  - Coral
+  - Barge
 display:
   team_row:
     - source: single
