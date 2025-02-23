@@ -71,34 +71,45 @@ categories:
         collect: match_pit
         metric:
           type: ability
-      note-pickup:
+      coral-pickup:
         order: 50
-        name: Note Pickup
-        description: Can pick up notes from various sources?
+        name: Coral Pickup
+        description: Which location can you pick up coral from?
         collect: pit_only
         metric:
           type: enum
           options:
             - None
-            - Chute
-            - Field
+            - Human Player
+            - Ground
+            - Human Player and Ground
+      algae-pickup:
+        order: 60
+        name: Algae Pickup
+        description: Which location can you pick up algae from?
+        collect: pit_only
+        metric:
+          type: enum
+          options:
+            - None
+            - Reef
+            - Ground
+            - Reef and Ground
   endgame:
     name: Endgame
     metrics:
       climb:
         order: 20
-        name: Deep Climb
-        description: Can they climb on a deep cage?
+        name: Climb
+        description: Which cage can they climb on?
         collect: pit_only
         metric:
-          type: ability
-      climb:
-        order: 30
-        name: Shallow Climb
-        description: Can they climb on a shallow cage?
-        collect: pit_only
-        metric:
-          type: ability
+          type: enum
+          options:
+            - None
+            - Shallow Cage
+            - Deep Cage
+            - Either Cage
   robot:
     name: Robot
     metrics:
@@ -123,22 +134,12 @@ tba:
           name: Nothing
         - id: Parked
           name: Parked
-        - id: StageRight
-          name: Climbed
-        - id: StageLeft
-          name: Climbed
-        - id: CenterStage
-          name: Climbed
+        - id: ShallowCage
+          name: Shallow Cage
+        - id: DeepCage
+          name: Deep Cage
       property: endGameRobot{N}
       name: "Endgame State"
-    spotlight:
-      type: sum
-      property: micCenterStage
-      options:
-        - id: micCenterStage
-        - id: micStageLeft
-        - id: micStageRight
-      name: "High Notes"
     coopertition:
       type: bool
       property: coopertitionCriteriaMet
@@ -154,15 +155,21 @@ display:
       metric: auto-notes
       display: true
     - source: single
-      metric: auto-amp
+      metric: auto-coral
     - source: single
-      metric: auto-speaker
+      metric: auto-processor
     - source: single
-      metric: teleop-amp
+      metric: auto-net
     - source: single
-      metric: teleop-speaker
+      metric: teleop-coral
     - source: single
-      metric: note-pickup
+      metric: teleop-processor
+    - source: single
+      metric: teleop-net
+    - source: single
+      metric: coral-pickup
+    - source: single
+      metric: algae-pickup
     - source: single
       metric: tba-coopertition
     - source: single
@@ -170,10 +177,6 @@ display:
     - source: single
       metric: tba-endgame
       display: true
-    - source: single
-      metric: trap
-    - source: single
-      metric: harmony
     - source: single
       metric: present
       display: true
@@ -188,8 +191,10 @@ display:
       metric: statbotics-endgame-points
     metrics:
     - auto-coral-best
-    - teleop-amp
-    - teleop-speaker
-    - note-pickup
+    - coral-pickup
+    - teleop-coral
+    - algae-pickup
+    - teleop-processor
+    - teleop-net
     - tba-endgame
     - tba-coopertition
