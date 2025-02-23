@@ -110,16 +110,6 @@ categories:
             - Shallow Cage
             - Deep Cage
             - Either Cage
-  robot:
-    name: Robot
-    metrics:
-      low-bot:
-        order: 40
-        name: Low Bot
-        description: Is it a low bot?
-        collect: pit_only
-        metric:
-          type: bool
 tba:
   order: 15
   props:

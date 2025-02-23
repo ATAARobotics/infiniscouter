@@ -18,7 +18,7 @@ use tokio::spawn;
 use tokio::sync::{Mutex, RwLock};
 use ts_rs::TS;
 
-use crate::analysis::TBA_PREFIX;
+use crate::analysis::{TeamNameEntry, TBA_PREFIX};
 use crate::api::data::{CounterEntry, MatchBoolEntry, MatchEntryValue, MatchEnumEntry};
 use crate::config::{GameConfig, GameConfigs};
 use crate::DefaultInstant;
@@ -117,6 +117,22 @@ impl EventInfo {
 			event: event.to_string(),
 			year,
 			last_update: DefaultInstant(Instant::now()),
+		}
+	}
+	
+	pub fn get_team_info(&self, team_id: u32) -> TeamNameEntry {
+		if let Some(team_info) = self.team_infos.get(&team_id) {
+			TeamNameEntry {
+				number: team_info.num,
+				name: team_info.name.clone(),
+				icon_uri: team_info.get_icon_url(),
+			}
+		} else {
+			TeamNameEntry {
+				number: team_id,
+				name: "".to_string(),
+				icon_uri: None,
+			}
 		}
 	}
 }

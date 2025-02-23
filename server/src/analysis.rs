@@ -310,7 +310,8 @@ fn single_team_impl(
 				driver_entries,
 				pit_entry,
 				statbotics,
-				&tba_data.team_infos[&team],
+				team,
+				tba_data.team_infos.get(&team),
 				&metric.metric,
 				None,
 			),
@@ -320,25 +321,25 @@ fn single_team_impl(
 				driver_entries,
 				pit_entry,
 				statbotics,
-				&tba_data.team_infos[&team],
+				team,
+				tba_data.team_infos.get(&team),
 				&metric.metric,
 				Some(&metric.filter_by),
 			),
-			DisplayColumn::TeamName(_) => TeamInfoEntry {
-				sort_value: tba_data.team_infos[&team].num as f32,
+			DisplayColumn::TeamName(_) => {
+				let team_info = tba_data.get_team_info(team);
+				TeamInfoEntry {
+				sort_value: team_info.number as f32,
 				pit_value: None,
 				text: format!(
 					"{} - {}",
-					tba_data.team_infos[&team].num, tba_data.team_infos[&team].name
+					team_info.number, team_info.name
 				),
 				// TODO: Team colour owo?
 				colour: [255, 255, 255],
-				graphic: Some(TeamInfoGraphic::TeamName(TeamNameEntry {
-					number: tba_data.team_infos[&team].num,
-					name: tba_data.team_infos[&team].name.clone(),
-					icon_uri: tba_data.team_infos[&team].get_icon_url(),
-				})),
-			},
+				graphic: Some(TeamInfoGraphic::TeamName(team_info)),
+			}}
+			,
 			DisplayColumn::CommonYearSpecific(_) => TeamInfoEntry {
 				text: "ERROR".to_string(),
 				pit_value: None,
@@ -357,13 +358,14 @@ fn get_single_metric(
 	driver_entries: &[DriverEntryIdData],
 	pit_entry: Option<&MatchEntryData>,
 	statbotics: Option<&StatboticsTeam>,
-	team_info: &TeamInfo,
+	team_number: u32,
+	team_info: Option<&TeamInfo>,
 	metric: &str,
 	filter_metric: Option<&str>,
 ) -> TeamInfoEntry {
 	let data_points: Vec<_> = match_entries
 		.iter()
-		.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team_info.num)
+		.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team_number)
 		.filter(|match_entry| {
 			if let Some(filter_metric) = filter_metric {
 				matches!(
@@ -378,76 +380,156 @@ fn get_single_metric(
 		.chain(
 			driver_entries
 				.iter()
-				.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team_info.num)
+				.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team_number)
 				.filter_map(|match_entry| match_entry.data.entries.get(metric)),
 		)
 		.collect();
 	let pit_data_point = pit_entry.and_then(|pe| pe.entries.get(metric)).cloned();
-	let played_games = team_info.wins + team_info.losses + team_info.ties;
 
 	if let Some(real_metric) = metric.strip_prefix(BASE_PREFIX) {
-		if let Some((pie_entry, sort_value, text)) = match real_metric {
-			"wlt-ratio" => Some((
-				PieChartEntry {
-					options: vec![
-						PieChartOption {
-							label: "Wins".to_string(),
-							value: team_info.wins as f32,
-						},
-						PieChartOption {
-							label: "Losses".to_string(),
-							value: team_info.losses as f32,
-						},
-						PieChartOption {
-							label: "Ties".to_string(),
-							value: team_info.ties as f32,
-						},
-					],
-				},
-				if played_games == 0 {
-					-420.0
-				} else {
-					(team_info.wins as f32 + team_info.ties as f32 * 0.5) / played_games as f32
-				},
-				if team_info.ties > 0 {
-					format!("{}-{}-{}", team_info.wins, team_info.losses, team_info.ties)
-				} else {
-					format!("{}-{}", team_info.wins, team_info.losses)
-				},
-			)),
-			_ => None,
-		} {
-			TeamInfoEntry {
-				text,
-				pit_value: None,
-				sort_value,
-				colour: [255, 255, 255],
-				graphic: Some(TeamInfoGraphic::PieChart(pie_entry)),
+		if let Some(team_info) = team_info {
+			let played_games = team_info.wins + team_info.losses + team_info.ties;
+			if let Some((pie_entry, sort_value, text)) = match real_metric {
+				"wlt-ratio" => Some((
+					PieChartEntry {
+						options: vec![
+							PieChartOption {
+								label: "Wins".to_string(),
+								value: team_info.wins as f32,
+							},
+							PieChartOption {
+								label: "Losses".to_string(),
+								value: team_info.losses as f32,
+							},
+							PieChartOption {
+								label: "Ties".to_string(),
+								value: team_info.ties as f32,
+							},
+						],
+					},
+					if played_games == 0 {
+						-420.0
+					} else {
+						(team_info.wins as f32 + team_info.ties as f32 * 0.5) / played_games as f32
+					},
+					if team_info.ties > 0 {
+						format!("{}-{}-{}", team_info.wins, team_info.losses, team_info.ties)
+					} else {
+						format!("{}-{}", team_info.wins, team_info.losses)
+					},
+				)),
+				_ => None,
+			} {
+				TeamInfoEntry {
+					text,
+					pit_value: None,
+					sort_value,
+					colour: [255, 255, 255],
+					graphic: Some(TeamInfoGraphic::PieChart(pie_entry)),
+				}
+			} else if let Some(value) = match real_metric {
+				"wins" => Some(team_info.wins as f32),
+				"losses" => Some(team_info.losses as f32),
+				"ties" => Some(team_info.ties as f32),
+				"games" => Some(played_games as f32),
+				"rps" => Some(team_info.ranking_points as f32),
+				_ => None,
+			} {
+				TeamInfoEntry {
+					text: format!("{value:.2}"),
+					pit_value: None,
+					colour: [255, 255, 255],
+					sort_value: value,
+					graphic: Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry {
+						number: value,
+						collected_std_dev: None,
+						collected_min_max: None,
+						compare_other_numbers: None,
+						is_time: false,
+					})),
+				}
+			} else {
+				TeamInfoEntry {
+					text: format!("ERROR: Invalid metric '{metric}'"),
+					pit_value: None,
+					sort_value: 0.0,
+					colour: [255, 255, 255],
+					graphic: None,
+				}
 			}
-		} else if let Some(value) = match real_metric {
-			"wins" => Some(team_info.wins as f32),
-			"losses" => Some(team_info.losses as f32),
-			"ties" => Some(team_info.ties as f32),
-			"games" => Some(played_games as f32),
-			"rps" => Some(team_info.ranking_points as f32),
-			_ => None,
-		} {
-			TeamInfoEntry {
-				text: format!("{value:.2}"),
-				pit_value: None,
-				colour: [255, 255, 255],
-				sort_value: value,
-				graphic: Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry {
-					number: value,
-					collected_std_dev: None,
-					collected_min_max: None,
-					compare_other_numbers: None,
-					is_time: false,
-				})),
+		} else if let Some(sb) = statbotics {
+			let played_games = sb.wins + sb.losses + sb.ties;
+			if let Some((pie_entry, sort_value, text)) = match real_metric {
+				"wlt-ratio" => Some((
+					PieChartEntry {
+						options: vec![
+							PieChartOption {
+								label: "Wins".to_string(),
+								value: sb.wins as f32,
+							},
+							PieChartOption {
+								label: "Losses".to_string(),
+								value: sb.losses as f32,
+							},
+							PieChartOption {
+								label: "Ties".to_string(),
+								value: sb.ties as f32,
+							},
+						],
+					},
+					if played_games == 0 {
+						-420.0
+					} else {
+						(sb.wins as f32 + sb.ties as f32 * 0.5) / played_games as f32
+					},
+					if sb.ties > 0 {
+						format!("{}-{}-{}", sb.wins, sb.losses, sb.ties)
+					} else {
+						format!("{}-{}", sb.wins, sb.losses)
+					},
+				)),
+				_ => None,
+			} {
+				TeamInfoEntry {
+					text,
+					pit_value: None,
+					sort_value,
+					colour: [255, 255, 255],
+					graphic: Some(TeamInfoGraphic::PieChart(pie_entry)),
+				}
+			} else if let Some(value) = match real_metric {
+				"wins" => Some(sb.wins as f32),
+				"losses" => Some(sb.losses as f32),
+				"ties" => Some(sb.ties as f32),
+				"games" => Some(played_games as f32),
+				"rps" => Some(sb.rps as f32),
+				_ => None,
+			} {
+				TeamInfoEntry {
+					text: format!("{value:.2}"),
+					pit_value: None,
+					colour: [255, 255, 255],
+					sort_value: value,
+					graphic: Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry {
+						number: value,
+						collected_std_dev: None,
+						collected_min_max: None,
+						compare_other_numbers: None,
+						is_time: false,
+					})),
+				}
+			} else {
+				TeamInfoEntry {
+					text: format!("ERROR: Invalid metric '{metric}'"),
+					pit_value: None,
+					sort_value: 0.0,
+					colour: [255, 255, 255],
+					graphic: None,
+				}
 			}
 		} else {
 			TeamInfoEntry {
-				text: format!("ERROR: Invalid metric '{metric}'"),
+				text: "Unknown".to_string(),
 				pit_value: None,
 				sort_value: 0.0,
 				colour: [255, 255, 255],
@@ -937,8 +1019,8 @@ pub async fn get_single_team_analysis(
 	let statbotics_team = statbotics.get(team).await;
 	SingleTeamInfo {
 		team_number: team,
-		team_name: tba_data.team_infos[&team].name.clone(),
-		team_icon_uri: tba_data.team_infos[&team].get_icon_url(),
+		team_name: tba_data.get_team_info(team).name,
+		team_icon_uri: tba_data.get_team_info(team).icon_uri,
 		data: config
 			.all_metrics
 			.iter()
@@ -957,7 +1039,8 @@ pub async fn get_single_team_analysis(
 						.unwrap()
 						.as_ref(),
 					statbotics_team.as_deref(),
-					&tba_data.team_infos[&team],
+					team,
+					tba_data.team_infos.get(&team),
 					metric,
 					None,
 				),
@@ -1198,7 +1281,8 @@ fn get_single_team_match_preview(
 				driver_entries,
 				pit_entry.as_ref(),
 				statbotics,
-				&tba_data.team_infos[&team_number],
+				team_number,
+				tba_data.team_infos.get(&team_number),
 				metric,
 				None,
 			)
@@ -1216,7 +1300,8 @@ fn get_single_team_match_preview(
 				driver_entries,
 				pit_entry.as_ref(),
 				statbotics,
-				&tba_data.team_infos[&team_number],
+				team_number,
+				tba_data.team_infos.get(&team_number),
 				&graph_element.metric,
 				None,
 			)
@@ -1234,7 +1319,8 @@ fn get_single_team_match_preview(
 			driver_entries,
 			pit_entry.as_ref(),
 			statbotics,
-			&tba_data.team_infos[&team_number],
+			team_number,
+			tba_data.team_infos.get(&team_number),
 			&pre_match_display.score,
 			None,
 		)
