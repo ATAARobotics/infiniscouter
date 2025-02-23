@@ -258,7 +258,7 @@ impl Tba {
 struct RawTbaMatch {
 	alliances: RawTbaAlliances,
 	actual_time: Option<u64>,
-	predicted_time: u64,
+	predicted_time: Option<u64>,
 	comp_level: String,
 	set_number: u32,
 	match_number: u32,
@@ -306,7 +306,7 @@ impl RawTbaMatch {
 					bail!("Unknown comp level: '{lvl}'")
 				}
 			},
-			start_time: self.actual_time.unwrap_or(self.predicted_time),
+			start_time: self.actual_time.or(self.predicted_time).unwrap_or_default(),
 			teams_blue: self
 				.alliances
 				.blue
@@ -465,8 +465,7 @@ enum RawTbaScoreBreakdownValue {
 	Number(i32),
 	String(String),
 	Boolean(bool),
-	//#[serde(default)]
-	//Unknown,
+	Unknown(serde_json::Value),
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Deserialize)]
