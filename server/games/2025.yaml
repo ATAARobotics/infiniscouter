@@ -152,9 +152,6 @@ display:
     - source: single
       metric: tba-auto-line
     - source: single
-      metric: auto-notes
-      display: true
-    - source: single
       metric: auto-coral
     - source: single
       metric: auto-processor

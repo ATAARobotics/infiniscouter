@@ -8,6 +8,7 @@ use ts_rs::TS;
 
 use crate::api::data::{ImageEntryItem, MatchBoolEntry};
 use crate::config::FilteredMetric;
+use crate::tba::TeamInfo;
 use crate::{
 	api::data::{DriverEntryIdData, MatchEntryData, MatchEntryIdData, MatchEntryValue},
 	config::{
@@ -172,6 +173,7 @@ pub struct TeamInfoList {
 	default_display: Vec<usize>,
 }
 
+pub const BASE_PREFIX: &str = "base-";
 pub const SB_PREFIX: &str = "statbotics-";
 pub const TBA_PREFIX: &str = "tba-";
 
@@ -308,7 +310,7 @@ fn single_team_impl(
 				driver_entries,
 				pit_entry,
 				statbotics,
-				team,
+				&tba_data.team_infos[&team],
 				&metric.metric,
 				None,
 			),
@@ -318,7 +320,7 @@ fn single_team_impl(
 				driver_entries,
 				pit_entry,
 				statbotics,
-				team,
+				&tba_data.team_infos[&team],
 				&metric.metric,
 				Some(&metric.filter_by),
 			),
@@ -355,13 +357,13 @@ fn get_single_metric(
 	driver_entries: &[DriverEntryIdData],
 	pit_entry: Option<&MatchEntryData>,
 	statbotics: Option<&StatboticsTeam>,
-	team: u32,
+	team_info: &TeamInfo,
 	metric: &str,
 	filter_metric: Option<&str>,
 ) -> TeamInfoEntry {
 	let data_points: Vec<_> = match_entries
 		.iter()
-		.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team)
+		.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team_info.num)
 		.filter(|match_entry| {
 			if let Some(filter_metric) = filter_metric {
 				matches!(
@@ -376,44 +378,85 @@ fn get_single_metric(
 		.chain(
 			driver_entries
 				.iter()
-				.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team)
+				.filter(|match_entry| match_entry.team_id.parse::<u32>().unwrap() == team_info.num)
 				.filter_map(|match_entry| match_entry.data.entries.get(metric)),
 		)
 		.collect();
 	let pit_data_point = pit_entry.and_then(|pe| pe.entries.get(metric)).cloned();
+	let played_games = team_info.wins + team_info.losses + team_info.ties;
 
-	if let Some(real_metric) = metric.strip_prefix(SB_PREFIX) {
+	if let Some(real_metric) = metric.strip_prefix(BASE_PREFIX) {
+		if let Some((pie_entry, sort_value, text)) = match real_metric {
+			"wlt-ratio" => Some((
+				PieChartEntry {
+					options: vec![
+						PieChartOption {
+							label: "Wins".to_string(),
+							value: team_info.wins as f32,
+						},
+						PieChartOption {
+							label: "Losses".to_string(),
+							value: team_info.losses as f32,
+						},
+						PieChartOption {
+							label: "Ties".to_string(),
+							value: team_info.ties as f32,
+						},
+					],
+				},
+				if played_games == 0 {
+					-420.0
+				} else {
+					(team_info.wins as f32 + team_info.ties as f32 * 0.5) / played_games as f32
+				},
+				if team_info.ties > 0 {
+					format!("{}-{}-{}", team_info.wins, team_info.losses, team_info.ties)
+				} else {
+					format!("{}-{}", team_info.wins, team_info.losses)
+				},
+			)),
+			_ => None,
+		} {
+			TeamInfoEntry {
+				text,
+				pit_value: None,
+				sort_value,
+				colour: [255, 255, 255],
+				graphic: Some(TeamInfoGraphic::PieChart(pie_entry)),
+			}
+		} else if let Some(value) = match real_metric {
+			"wins" => Some(team_info.wins as f32),
+			"losses" => Some(team_info.losses as f32),
+			"ties" => Some(team_info.ties as f32),
+			"games" => Some(played_games as f32),
+			"rps" => Some(team_info.ranking_points as f32),
+			_ => None,
+		} {
+			TeamInfoEntry {
+				text: format!("{value:.2}"),
+				pit_value: None,
+				colour: [255, 255, 255],
+				sort_value: value,
+				graphic: Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry {
+					number: value,
+					collected_std_dev: None,
+					collected_min_max: None,
+					compare_other_numbers: None,
+					is_time: false,
+				})),
+			}
+		} else {
+			TeamInfoEntry {
+				text: format!("ERROR: Invalid metric '{metric}'"),
+				pit_value: None,
+				sort_value: 0.0,
+				colour: [255, 255, 255],
+				graphic: None,
+			}
+		}
+	} else if let Some(real_metric) = metric.strip_prefix(SB_PREFIX) {
 		if let Some(sb) = statbotics {
-			let total_matches = sb.wins as f32 + sb.losses as f32 + sb.ties as f32;
 			if let Some((pie_entry, sort_value, text)) = match real_metric {
-				"wlt-ratio" => Some((
-					PieChartEntry {
-						options: vec![
-							PieChartOption {
-								label: "Wins".to_string(),
-								value: sb.wins as f32,
-							},
-							PieChartOption {
-								label: "Losses".to_string(),
-								value: sb.losses as f32,
-							},
-							PieChartOption {
-								label: "Ties".to_string(),
-								value: sb.ties as f32,
-							},
-						],
-					},
-					if total_matches == 0.0 {
-						-420.0
-					} else {
-						(sb.wins as f32 + sb.ties as f32 * 0.5) / total_matches
-					},
-					if sb.ties > 0 {
-						format!("{}-{}-{}", sb.wins, sb.losses, sb.ties)
-					} else {
-						format!("{}-{}", sb.wins, sb.losses)
-					},
-				)),
 				"rps-ratio" => Some((
 					PieChartEntry {
 						options: vec![
@@ -443,21 +486,15 @@ fn get_single_metric(
 					colour: [255, 255, 255],
 					graphic: Some(TeamInfoGraphic::PieChart(pie_entry)),
 				}
-			} else {
-				let value = match real_metric {
-					"points" => sb.epa_end,
-					"auto-points" => sb.auto_epa_end,
-					"teleop-points" => sb.teleop_epa_end,
-					"endgame-points" => sb.endgame_epa_end,
-					"wins" => sb.wins as f32,
-					"losses" => sb.losses as f32,
-					"ties" => sb.ties as f32,
-					"rps" => sb.rps as f32,
-					"games" => (sb.wins + sb.losses + sb.ties) as f32,
-					"rp-1" => sb.rp_1_epa_end,
-					"rp-2" => sb.rp_2_epa_end,
-					_ => panic!("That's not a statbotics thing bruh"),
-				};
+			} else if let Some(value) = match real_metric {
+				"points" => Some(sb.epa_end),
+				"auto-points" => Some(sb.auto_epa_end),
+				"teleop-points" => Some(sb.teleop_epa_end),
+				"endgame-points" => Some(sb.endgame_epa_end),
+				"rp-1" => Some(sb.rp_1_epa_end),
+				"rp-2" => Some(sb.rp_2_epa_end),
+				_ => None,
+			} {
 				TeamInfoEntry {
 					text: format!("{value:.2}"),
 					pit_value: None,
@@ -479,12 +516,20 @@ fn get_single_metric(
 						is_time: false,
 					})),
 				}
+			} else {
+				TeamInfoEntry {
+					text: format!("ERROR: Invalid metric '{metric}'"),
+					pit_value: None,
+					sort_value: 0.0,
+					colour: [255, 255, 255],
+					graphic: None,
+				}
 			}
 		} else {
 			TeamInfoEntry {
 				text: "ERROR: No statbotics for team".to_string(),
 				pit_value: None,
-				sort_value: 9999999.0,
+				sort_value: 0.0,
 				colour: [255, 255, 255],
 				graphic: None,
 			}
@@ -702,9 +747,9 @@ fn get_single_metric(
 				}
 			}
 			ty => TeamInfoEntry {
-				text: format!("TODO: {metric} of type {ty:?}"),
+				text: format!("ERROR: Invalid metric '{metric}' of type '{ty:?}'"),
 				pit_value: None,
-				sort_value: 999999.0,
+				sort_value: 0.0,
 				colour: [255, 255, 255],
 				graphic: None,
 			},
@@ -736,7 +781,20 @@ fn table_labels(config: &GameConfigs) -> Vec<NameAndSource> {
 }
 
 fn get_metric_name(config: &GameConfigs, metric: &str) -> NameAndSource {
-	if metric.starts_with(SB_PREFIX) {
+	if metric.starts_with(BASE_PREFIX) {
+		NameAndSource {
+			name: match metric.trim_start_matches(BASE_PREFIX) {
+				"wlt-ratio" => "W/L/T".to_string(),
+				"wins" => "Wins".to_string(),
+				"losses" => "Losses".to_string(),
+				"ties" => "Ties".to_string(),
+				"rps" => "RPs".to_string(),
+				_ => "Unknown Base Stat".to_string(),
+			},
+			page: "Data".to_string(),
+			source: DataSource::Tba,
+		}
+	} else if metric.starts_with(SB_PREFIX) {
 		NameAndSource {
 			name: match metric.trim_start_matches(SB_PREFIX) {
 				"wlt-ratio" => "W/L/T".to_string(),
@@ -899,7 +957,7 @@ pub async fn get_single_team_analysis(
 						.unwrap()
 						.as_ref(),
 					statbotics_team.as_deref(),
-					team,
+					&tba_data.team_infos[&team],
 					metric,
 					None,
 				),
@@ -1140,7 +1198,7 @@ fn get_single_team_match_preview(
 				driver_entries,
 				pit_entry.as_ref(),
 				statbotics,
-				*team,
+				&tba_data.team_infos[&team_number],
 				metric,
 				None,
 			)
@@ -1158,7 +1216,7 @@ fn get_single_team_match_preview(
 				driver_entries,
 				pit_entry.as_ref(),
 				statbotics,
-				*team,
+				&tba_data.team_infos[&team_number],
 				&graph_element.metric,
 				None,
 			)
@@ -1176,7 +1234,7 @@ fn get_single_team_match_preview(
 			driver_entries,
 			pit_entry.as_ref(),
 			statbotics,
-			*team,
+			&tba_data.team_infos[&team_number],
 			&pre_match_display.score,
 			None,
 		)

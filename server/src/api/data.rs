@@ -66,14 +66,13 @@ pub struct MatchEntryData {
 
 impl MatchEntryData {
 	pub fn get_latest_scout(&self) -> Option<String> {
-		self
-			.entries
+		self.entries
 			.values()
 			.map(|value| (value.get_scout(), value.get_timestamp()))
 			.max_by_key(|(_, t)| *t)
 			.map(|(s, _)| s.to_string())
 	}
-	
+
 	pub fn get_scouts(&self) -> Vec<(String, usize)> {
 		let mut scouts = self
 			.entries

@@ -117,7 +117,9 @@ pub enum CollectedMetricType {
 	/// An picture field, for example for pit scouting robot pictures
 	Image(ImageMetric),
 	/// A metric that represents data fetched from statbotics' team api
-	StatboticsTeam(StatboticsTeamMetric),
+	BaseTeam(TeamPropertiesList),
+	/// A metric that represents data fetched from statbotics' team api
+	StatboticsTeam(TeamPropertiesList),
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -170,8 +172,8 @@ pub struct ImageMetric {
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
-pub struct StatboticsTeamMetric {
-	/// The Statbotics properties to include
+pub struct TeamPropertiesList {
+	/// The properties to include
 	pub props: Vec<String>,
 }
 
@@ -373,9 +375,16 @@ impl From<GameConfig> for GameConfigs {
 					metrics
 						.into_iter()
 						.flat_map(|(metric_name, metric)| {
-							if let CollectedMetricType::StatboticsTeam(statbotics) = &metric.metric
+							if let CollectedMetricType::BaseTeam(props_list) = &metric.metric
 							{
-								statbotics
+								props_list
+									.props
+									.iter()
+									.map(|prop| format!("base-{prop}"))
+									.collect()
+							} else 							if let CollectedMetricType::StatboticsTeam(props_list) = &metric.metric
+							{
+								props_list
 									.props
 									.iter()
 									.map(|prop| format!("statbotics-{prop}"))
@@ -386,13 +395,6 @@ impl From<GameConfig> for GameConfigs {
 						})
 						.collect::<Vec<_>>()
 				})
-				.chain(
-					value
-						.tba
-						.props
-						.keys()
-						.map(|prop| format!("{TBA_PREFIX}{prop}")),
-				)
 				.collect(),
 			game_config: value,
 		}
@@ -454,7 +456,7 @@ impl ConfigManager {
 					}
 					for cat in config.categories.values_mut() {
 						for met in cat.metrics.values_mut() {
-							if matches!(met.metric, CollectedMetricType::StatboticsTeam(_)) {
+							if matches!(met.metric, CollectedMetricType::StatboticsTeam(_) | CollectedMetricType::BaseTeam(_)) {
 								met.collect = CollectionOption::Never;
 							}
 						}

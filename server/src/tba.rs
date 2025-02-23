@@ -51,7 +51,7 @@ pub struct EventInfo {
 impl EventInfo {
 	async fn new(
 		match_infos: Vec<RawTbaMatch>,
-		team_infos: Vec<TeamInfo>,
+		team_infos: Vec<RawTbaTeamInfo>,
 		year: u32,
 		event: &str,
 		game_config: &GameConfig,
@@ -62,11 +62,58 @@ impl EventInfo {
 			.collect();
 		match_infos.sort_by_key(|m| m.start_time);
 		EventInfo {
-			match_infos,
 			team_infos: team_infos
 				.into_iter()
-				.map(|team_info| (team_info.num, team_info))
+				.map(|team_info| {
+					(
+						team_info.num,
+						TeamInfo {
+							name: team_info.name,
+							num: team_info.num,
+							has_avatar: team_info.has_avatar,
+							wins: match_infos
+								.iter()
+								.filter(|mi| {
+									mi.teams_blue.contains(&team_info.num)
+										&& mi.result == MatchResult::Blue
+										|| mi.teams_red.contains(&team_info.num)
+											&& mi.result == MatchResult::Red
+								})
+								.count() as u32,
+							losses: match_infos
+								.iter()
+								.filter(|mi| {
+									mi.teams_blue.contains(&team_info.num)
+										&& mi.result == MatchResult::Red
+										|| mi.teams_red.contains(&team_info.num)
+											&& mi.result == MatchResult::Blue
+								})
+								.count() as u32,
+							ties: match_infos
+								.iter()
+								.filter(|mi| {
+									(mi.teams_blue.contains(&team_info.num)
+										|| mi.teams_red.contains(&team_info.num))
+										&& mi.result == MatchResult::Tie
+								})
+								.count() as u32,
+							ranking_points: match_infos
+								.iter()
+								.filter_map(|mi| {
+									if mi.teams_blue.contains(&team_info.num) {
+										mi.rp_blue
+									} else if mi.teams_red.contains(&team_info.num) {
+										mi.rp_red
+									} else {
+										None
+									}
+								})
+								.sum::<u16>() as u32,
+						},
+					)
+				})
 				.collect(),
+			match_infos,
 			event: event.to_string(),
 			year,
 			last_update: DefaultInstant(Instant::now()),
@@ -222,7 +269,7 @@ impl Tba {
 			.await?;
 		teams.retain(|t| !(9990..=9999).contains(&t.team_number));
 		let team_infos: Vec<_> = future::join_all(teams.into_iter().map(|raw_team| async move {
-			TeamInfo {
+			RawTbaTeamInfo {
 				num: raw_team.team_number,
 				name: raw_team
 					.nickname
@@ -269,20 +316,26 @@ struct RawTbaMatch {
 
 impl RawTbaMatch {
 	fn into_match(self, game_config: &GameConfig) -> Result<MatchInfo> {
-		let score_blue = self.alliances.blue.score.and_then(|score| {
-			if score >= 0 {
-				Some(score as u16)
-			} else {
-				None
-			}
-		});
-		let score_red = self.alliances.red.score.and_then(|score| {
-			if score >= 0 {
-				Some(score as u16)
-			} else {
-				None
-			}
-		});
+		let score_blue =
+			self.alliances.blue.score.and_then(
+				|score| {
+					if score >= 0 {
+						Some(score as u16)
+					} else {
+						None
+					}
+				},
+			);
+		let score_red =
+			self.alliances.red.score.and_then(
+				|score| {
+					if score >= 0 {
+						Some(score as u16)
+					} else {
+						None
+					}
+				},
+			);
 		Ok(MatchInfo {
 			id: match self.comp_level.as_str() {
 				"q" | "qm" => MatchId::Qualification(SetMatch {
@@ -323,6 +376,22 @@ impl RawTbaMatch {
 				.collect(),
 			score_blue,
 			score_red,
+			rp_blue: self
+				.score_breakdown
+				.as_ref()
+				.and_then(|sb| sb.blue.get("rp"))
+				.and_then(|rpv| match rpv {
+					RawTbaScoreBreakdownValue::Number(rp) => Some(*rp as u16),
+					_ => None,
+				}),
+			rp_red: self
+				.score_breakdown
+				.as_ref()
+				.and_then(|sb| sb.red.get("rp"))
+				.and_then(|rpv| match rpv {
+					RawTbaScoreBreakdownValue::Number(rp) => Some(*rp as u16),
+					_ => None,
+				}),
 			result: match self.winning_alliance.as_deref() {
 				Some("red") => MatchResult::Red,
 				Some("blue") => MatchResult::Blue,
@@ -332,7 +401,7 @@ impl RawTbaMatch {
 					} else {
 						MatchResult::Tbd
 					}
-				},
+				}
 			},
 			custom_entries: CustomEntries {
 				blue: custom_entries_for(
@@ -494,12 +563,23 @@ struct RawTbaImageDetails {
 	base64_image: Option<String>,
 }
 
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+pub struct RawTbaTeamInfo {
+	pub num: u32,
+	pub name: String,
+	pub has_avatar: bool,
+}
+
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct TeamInfo {
 	pub num: u32,
 	pub name: String,
 	pub has_avatar: bool,
+	pub wins: u32,
+	pub losses: u32,
+	pub ties: u32,
+	pub ranking_points: u32,
 }
 
 impl TeamInfo {
@@ -556,5 +636,7 @@ pub struct MatchInfo {
 	pub result: MatchResult,
 	pub score_blue: Option<u16>,
 	pub score_red: Option<u16>,
+	pub rp_blue: Option<u16>,
+	pub rp_red: Option<u16>,
 	pub custom_entries: CustomEntries,
 }

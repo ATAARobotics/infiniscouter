@@ -5,6 +5,18 @@ categories:
     name: Data
     order: 10
     metrics:
+      base:
+        order: 10
+        name: Base Data
+        description: This represents all of the data from TBA
+        metric:
+          type: base_team
+          props:
+            - wlt-ratio
+            - wins
+            - losses
+            - ties
+            - rps
       statbotics:
         order: 10
         name: Statbotics Data
@@ -12,15 +24,10 @@ categories:
         metric:
           type: statbotics_team
           props:
-            - wlt-ratio
             - points
             - auto-points
             - teleop-points
             - endgame-points
-            - wins
-            - losses
-            - ties
-            - rps
             - games
             - rp-1
             - rp-2
@@ -173,16 +180,16 @@ display:
     - source: single
       metric: robot-picture
     - source: single
-      metric: statbotics-wlt-ratio
+      metric: base-wlt-ratio
       display: true
     - source: single
-      metric: statbotics-wins
+      metric: base-wins
     - source: single
-      metric: statbotics-losses
+      metric: base-losses
     - source: single
-      metric: statbotics-ties
+      metric: base-ties
     - source: single
-      metric: statbotics-rps
+      metric: base-rps
       display: true
     - source: single
       metric: statbotics-points

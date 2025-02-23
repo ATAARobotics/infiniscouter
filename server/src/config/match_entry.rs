@@ -93,8 +93,8 @@ impl MatchEntryType {
 			CollectedMetricType::Counter(c) => Self::Counter(c.clone()),
 			CollectedMetricType::TextEntry(t) => Self::TextEntry(t.clone()),
 			CollectedMetricType::Image(i) => Self::Image(i.clone()),
-			CollectedMetricType::StatboticsTeam(_) => {
-				unimplemented!("Statbotics metrics aren't collectable per-match.");
+			CollectedMetricType::BaseTeam(_) | CollectedMetricType::StatboticsTeam(_) => {
+				unimplemented!("These metrics aren't collectable per-match.");
 			}
 		}
 	}
