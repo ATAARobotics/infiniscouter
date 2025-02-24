@@ -2,8 +2,8 @@ name: _
 year: 0
 categories:
   data:
-    name: Data
-    order: 10
+    name: Record
+    order: 8
     metrics:
       base:
         order: 10
@@ -17,6 +17,10 @@ categories:
             - losses
             - ties
             - rps
+  data:
+    name: Statbotics
+    order: 10
+    metrics:
       statbotics:
         order: 10
         name: Statbotics Data
@@ -167,6 +171,8 @@ categories:
         metric:
           type: text_entry
           multiline: true
+statbotics:
+  props:
 tba:
   order: 15
   props:

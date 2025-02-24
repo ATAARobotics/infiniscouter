@@ -1,18 +1,22 @@
-use color_eyre::Result;
-use log::{error, info};
-use reqwest::Client;
-use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::sync::Arc;
 use std::time::Instant;
 use std::{collections::HashMap, time::Duration};
+
+use color_eyre::Result;
+use log::{error, info};
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
 use tokio::spawn;
 use tokio::sync::{Mutex, RwLock};
+
+use crate::config::{MatchStatisticsPropType, StatboticsConfig};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct StatboticsTeam {
 	pub epa: StatboticsEpa,
 	pub record: StatboticsRecordQuals,
+	pub other_details: HashMap<String, f32>,
 	pub last_update: Instant,
 }
 
@@ -49,6 +53,8 @@ pub struct StatboticsEpaBreakdown {
 	pub rp_1: f32,
 	pub rp_2: f32,
 	pub rp_3: Option<f32>,
+	#[serde(flatten)]
+	pub extra: HashMap<String, f32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
@@ -82,10 +88,11 @@ pub struct StatboticsCache {
 	teams_loading: Arc<Mutex<HashSet<u32>>>,
 	event: String,
 	year: u32,
+	config: StatboticsConfig,
 }
 
 impl StatboticsCache {
-	pub fn new(event: &str, year: u32) -> Self {
+	pub fn new(event: &str, year: u32, config: StatboticsConfig) -> Self {
 		Self {
 			teams: Arc::new(RwLock::new(HashMap::new())),
 			teams_loading: Arc::new(Mutex::new(HashSet::new())),
@@ -95,13 +102,16 @@ impl StatboticsCache {
 				.unwrap(),
 			event: event.to_string(),
 			year,
+			config,
 		}
 	}
 	pub async fn get(&self, team: u32) -> Option<Arc<StatboticsTeam>> {
 		let team_stats = self.teams.read().await.get(&team).cloned();
 
 		match team_stats {
-			None => match Self::load_team(&self.client, team, &self.event, self.year).await {
+			None => match Self::load_team(&self.client, team, &self.event, self.year, &self.config)
+				.await
+			{
 				Ok(team_stats) => {
 					info!("Statbotics ({team}): load complete");
 					self.teams.write().await.insert(team, team_stats.clone());
@@ -121,11 +131,41 @@ impl StatboticsCache {
 			}
 		}
 	}
+	async fn trigger_load_team(&self, team: u32) {
+		let mut lock = self.teams_loading.lock().await;
+
+		if !lock.contains(&team) {
+			lock.insert(team);
+			drop(lock);
+
+			let client_clone = self.client.clone();
+			let teams_clone = self.teams.clone();
+			let teams_loading_clone = self.teams_loading.clone();
+			let event = self.event.clone();
+			let year = self.year;
+			let config = self.config.clone();
+			spawn(async move {
+				match Self::load_team(&client_clone, team, &event, year, &config).await {
+					Ok(data) => {
+						info!("Statbotics ({team}): background load complete");
+						teams_clone.write().await.insert(team, data);
+					}
+					Err(err) => {
+						error!("Statbotics ({team}): background load error: {err}");
+					}
+				}
+
+				teams_loading_clone.lock().await.remove(&team);
+			});
+		}
+	}
+
 	async fn load_team(
 		client: &Client,
 		team: u32,
 		event: &str,
 		year: u32,
+		config: &StatboticsConfig,
 	) -> Result<Arc<StatboticsTeam>> {
 		info!("Statbotics ({team}): Loading data");
 
@@ -139,6 +179,7 @@ impl StatboticsCache {
 			.await
 		{
 			return Ok(Arc::new(StatboticsTeam {
+				other_details: Self::get_other_details(&team_event.epa.breakdown, config),
 				epa: team_event.epa,
 				record: StatboticsRecordQuals {
 					wins: team_event.record.total.wins,
@@ -161,6 +202,7 @@ impl StatboticsCache {
 			.await?;
 
 		Ok(Arc::new(StatboticsTeam {
+			other_details: Self::get_other_details(&team_year.epa.breakdown, config),
 			epa: team_year.epa,
 			record: StatboticsRecordQuals {
 				wins: team_year.record.wins,
@@ -172,31 +214,36 @@ impl StatboticsCache {
 			last_update: Instant::now(),
 		}))
 	}
-	async fn trigger_load_team(&self, team: u32) {
-		let mut lock = self.teams_loading.lock().await;
-
-		if !lock.contains(&team) {
-			lock.insert(team);
-			drop(lock);
-
-			let client_clone = self.client.clone();
-			let teams_clone = self.teams.clone();
-			let teams_loading_clone = self.teams_loading.clone();
-			let event = self.event.clone();
-			let year = self.year;
-			spawn(async move {
-				match Self::load_team(&client_clone, team, &event, year).await {
-					Ok(data) => {
-						info!("Statbotics ({team}): background load complete");
-						teams_clone.write().await.insert(team, data);
-					}
-					Err(err) => {
-						error!("Statbotics ({team}): background load error: {err}");
+	fn get_other_details(
+		epa: &StatboticsEpaBreakdown,
+		config: &StatboticsConfig,
+	) -> HashMap<String, f32> {
+		config
+			.props
+			.iter()
+			.filter_map(|(key, prop)| {
+				match prop.ty {
+					MatchStatisticsPropType::Number => prop
+						.property
+						.as_ref()
+						.and_then(|p| epa.extra.get(p))
+						.map(|value| (key.clone(), *value)),
+					MatchStatisticsPropType::Sum => prop
+						.properties
+						.as_ref()
+						.map(|properties| {
+							properties
+								.iter()
+								.filter_map(|p| epa.extra.get(p))
+								.sum::<f32>()
+						})
+						.map(|value| (key.clone(), value)),
+					MatchStatisticsPropType::Bool | MatchStatisticsPropType::Enum => {
+						// TODO
+						None
 					}
 				}
-
-				teams_loading_clone.lock().await.remove(&team);
-			});
-		}
+			})
+			.collect()
 	}
 }

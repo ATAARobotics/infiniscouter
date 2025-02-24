@@ -1,6 +1,24 @@
 name: Reefscape
 year: 2025
 categories:
+  data:
+    name: Statbotics
+    metrics:
+      statbotics-year:
+        order: 20
+        name: Statbotics Year-Specific Data
+        description: This represents all of the statbotics data specific to this year
+        metric:
+          type: statbotics_team
+          props:
+            - auto-coral
+            - telop-coral
+            - telop-coral-l1
+            - telop-coral-l2
+            - telop-coral-l3
+            - telop-coral-l4
+            - telop-processor
+            - telop-net
   auto:
     name: Auto
     metrics:
@@ -71,30 +89,38 @@ categories:
         collect: match_pit
         metric:
           type: ability
-      coral-pickup:
+      coral-human-intake:
         order: 50
-        name: Coral Pickup
-        description: Which location can you pick up coral from?
+        name: Coral Intake from Station
+        description: Can they pick up from the coral station?
         collect: pit_only
         metric:
           type: enum
           options:
-            - None
-            - Human Player
-            - Ground
-            - Human Player and Ground
-      algae-pickup:
+            - No
+            - Yes, thin intake
+            - Yes, wide intake
+      coral-ground-intake:
         order: 60
-        name: Algae Pickup
-        description: Which location can you pick up algae from?
+        name: Coral Ground Intake
+        description: Can they pick up coral from the ground?
         collect: pit_only
         metric:
-          type: enum
-          options:
-            - None
-            - Reef
-            - Ground
-            - Reef and Ground
+          type: ability
+      algae-reef-clean:
+        order: 70
+        name: Algae Reef Cleaner
+        description: Can you clean the reef?
+        collect: pit_only
+        metric:
+          type: ability
+      algae-ground-intake:
+        order: 80
+        name: Algae Ground Intake
+        description: Can you pick up algae from the ground?
+        collect: pit_only
+        metric:
+          type: ability
   endgame:
     name: Endgame
     metrics:
@@ -110,6 +136,44 @@ categories:
             - Shallow Cage
             - Deep Cage
             - Either Cage
+statbotics:
+  props:
+    auto-coral:
+      type: number
+      property: auto_coral
+      name: "Auto Coral"
+    telop-coral:
+      type: sum
+      properties:
+        - coral_l1
+        - coral_l2
+        - coral_l3
+        - coral_l4
+      name: "Teleop Coral"
+    telop-coral-l1:
+      type: number
+      property: coral_l1
+      name: "Teleop Coral L1"
+    telop-coral-l2:
+      type: number
+      property: coral_l2
+      name: "Teleop Coral L2"
+    telop-coral-l3:
+      type: number
+      property: coral_l3
+      name: "Teleop Coral L3"
+    telop-coral-l4:
+      type: number
+      property: coral_l4
+      name: "Teleop Coral L4"
+    telop-processor:
+      type: number
+      property: processor_algae
+      name: "Processor"
+    telop-net:
+      type: number
+      property: net_algae
+      name: "Net"
 tba:
   order: 15
   props:
@@ -135,9 +199,9 @@ tba:
       property: coopertitionCriteriaMet
       name: "Did Coopertition"
 ranking_points:
-  - Auto
-  - Coral
-  - Barge
+  - Auto RP
+  - Coral RP
+  - Barge RP
 display:
   team_row:
     - source: single
@@ -149,15 +213,37 @@ display:
     - source: single
       metric: auto-net
     - source: single
+      metric: statbotics-auto-coral
+      display: true
+    - source: single
+      metric: statbotics-telop-coral
+      display: true
+    - source: single
+      metric: statbotics-telop-coral-l1
+    - source: single
+      metric: statbotics-telop-coral-l2
+    - source: single
+      metric: statbotics-telop-coral-l3
+    - source: single
+      metric: statbotics-telop-coral-l4
+    - source: single
+      metric: statbotics-telop-processor
+    - source: single
+      metric: statbotics-telop-net
+    - source: single
       metric: teleop-coral
     - source: single
       metric: teleop-processor
     - source: single
       metric: teleop-net
     - source: single
-      metric: coral-pickup
+      metric: coral-human-intake
     - source: single
-      metric: algae-pickup
+      metric: coral-ground-intake
+    - source: single
+      metric: algae-reef-clean
+    - source: single
+      metric: algae-ground-intake
     - source: single
       metric: tba-coopertition
     - source: single
@@ -178,11 +264,8 @@ display:
     - name: Endgame
       metric: statbotics-endgame-points
     metrics:
-    - auto-coral-best
-    - coral-pickup
-    - teleop-coral
-    - algae-pickup
-    - teleop-processor
-    - teleop-net
+    - tba-auto-line
+    - statbotics-auto-coral
+    - statbotics-coral
     - tba-endgame
     - tba-coopertition

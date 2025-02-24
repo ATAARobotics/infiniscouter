@@ -24,7 +24,9 @@ pub struct GameConfig {
 	pub year: u32,
 	/// Metric categories
 	pub categories: HashMap<String, MetricCategory>,
-	/// Names of stats to get from the blue alliance
+	/// Year-specific stats to get from Statbotics
+	pub statbotics: StatboticsConfig,
+	/// Year-specific stats to get from the blue alliance
 	pub tba: TbaConfig,
 	/// Names of the numbered ranking points, usually 2
 	pub ranking_points: Vec<String>,
@@ -180,6 +182,25 @@ pub struct TeamPropertiesList {
 /// Configuration for The Blue Alliance
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
+pub struct StatboticsConfig {
+	/// The set of TBA match data properties
+	pub props: HashMap<String, StatboticsMatchProp>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct StatboticsMatchProp {
+	#[serde(rename = "type")]
+	#[oai(rename = "type")]
+	pub ty: MatchStatisticsPropType,
+	pub property: Option<String>,
+	pub name: String,
+	pub properties: Option<Vec<String>>,
+}
+
+/// Configuration for The Blue Alliance
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
 pub struct TbaConfig {
 	pub order: u32,
 	/// The set of TBA match data properties
@@ -191,7 +212,7 @@ pub struct TbaConfig {
 pub struct TbaMatchProp {
 	#[serde(rename = "type")]
 	#[oai(rename = "type")]
-	pub ty: TbaMatchPropType,
+	pub ty: MatchStatisticsPropType,
 	pub property: String,
 	pub name: String,
 	pub options: Option<Vec<TbaMatchPropOption>>,
@@ -201,7 +222,7 @@ pub struct TbaMatchProp {
 #[ts(export, export_to = "../client/src/generated/")]
 #[serde(rename_all = "snake_case")]
 #[oai(rename_all = "snake_case")]
-pub enum TbaMatchPropType {
+pub enum MatchStatisticsPropType {
 	Bool,
 	Enum,
 	Number,
@@ -389,7 +410,10 @@ impl From<GameConfig> for GameConfigs {
 									.iter()
 									.flat_map(|prop| {
 										if prop == "rp-all" {
-											value.ranking_points.iter().enumerate()
+											value
+												.ranking_points
+												.iter()
+												.enumerate()
 												.map(|(i, _)| format!("statbotics-rp-{}", i + 1))
 												.collect()
 										} else {

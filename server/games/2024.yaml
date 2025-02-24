@@ -93,6 +93,8 @@ categories:
         collect: pit_only
         metric:
           type: bool
+statbotics:
+  props:
 tba:
   order: 15
   props:

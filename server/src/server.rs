@@ -71,6 +71,11 @@ impl ScoutingServer {
 				StatboticsCache::new(
 					&config.get_server_config().current_event,
 					config.get_server_config().current_year,
+					config
+						.get_current_game_config()
+						.game_config
+						.statbotics
+						.clone(),
 				),
 				config.clone(),
 				database.clone(),

@@ -118,6 +118,8 @@ categories:
         metric:
           type: image
           allow_video: true
+statbotics:
+  props:
 tba:
   order: 15
   props:

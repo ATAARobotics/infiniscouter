@@ -449,7 +449,7 @@ fn custom_entries_for(
 						(
 							format!("{TBA_PREFIX}{prop_name}"),
 							match prop.ty {
-								crate::config::TbaMatchPropType::Bool => {
+								crate::config::MatchStatisticsPropType::Bool => {
 									if let RawTbaScoreBreakdownValue::Boolean(value) = *data {
 										MatchEntryValue::Bool(MatchBoolEntry {
 											value,
@@ -466,7 +466,7 @@ fn custom_entries_for(
 										panic!("Expected TBA data of type bool for prop {name}, but found {data:?}");
 									}
 								}
-								crate::config::TbaMatchPropType::Sum => {
+								crate::config::MatchStatisticsPropType::Sum => {
 									// This is hacky but like I'm really lazy rn
 									MatchEntryValue::Counter(CounterEntry {
 										count: prop
@@ -489,7 +489,7 @@ fn custom_entries_for(
 										timestamp_ms: 0,
 									})
 								}
-								crate::config::TbaMatchPropType::Enum => {
+								crate::config::MatchStatisticsPropType::Enum => {
 									if let RawTbaScoreBreakdownValue::String(string) = data {
 										if let Some(entry) =
 											prop.options.iter().flatten().find(|v| &v.id == string)
@@ -510,7 +510,7 @@ fn custom_entries_for(
 										panic!("Expected TBA data of type string (enum) for prop {name}, but found {data:?}");
 									}
 								}
-								crate::config::TbaMatchPropType::Number => {
+								crate::config::MatchStatisticsPropType::Number => {
 									if let RawTbaScoreBreakdownValue::Number(count) = *data {
 										MatchEntryValue::Counter(CounterEntry {
 											count,

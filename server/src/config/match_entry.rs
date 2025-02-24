@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use ts_rs::TS;
 
-use super::{CounterRange, TbaMatchPropType};
+use super::{CounterRange, MatchStatisticsPropType};
 
 // TODO: Rename the following types
 
@@ -165,18 +165,22 @@ impl MatchEntryFields {
 							description: format!("{} from The Blue Alliance.", prop.name),
 							page: "The Blue Alliance".to_string(),
 							entry: match prop.ty {
-								TbaMatchPropType::Bool => MatchEntryType::Bool(BoolMetric {}),
-								TbaMatchPropType::Sum => MatchEntryType::Counter(CounterMetric {
-									limit_range: Some(CounterRange {
-										start: 0,
-										end_inclusive: prop
-											.options
-											.as_ref()
-											.map(|o| o.len() as i32)
-											.unwrap_or_default(),
-									}),
-								}),
-								TbaMatchPropType::Enum => {
+								MatchStatisticsPropType::Bool => {
+									MatchEntryType::Bool(BoolMetric {})
+								}
+								MatchStatisticsPropType::Sum => {
+									MatchEntryType::Counter(CounterMetric {
+										limit_range: Some(CounterRange {
+											start: 0,
+											end_inclusive: prop
+												.options
+												.as_ref()
+												.map(|o| o.len() as i32)
+												.unwrap_or_default(),
+										}),
+									})
+								}
+								MatchStatisticsPropType::Enum => {
 									let mut options = Vec::new();
 									let mut options_set = HashSet::new();
 									for option in prop
@@ -192,7 +196,7 @@ impl MatchEntryFields {
 									}
 									MatchEntryType::Enum(EnumMetric { options })
 								}
-								TbaMatchPropType::Number => {
+								MatchStatisticsPropType::Number => {
 									MatchEntryType::Counter(CounterMetric { limit_range: None })
 								}
 							},

@@ -543,7 +543,13 @@ fn get_single_metric(
 				"rp-1" => Some(sb.epa.breakdown.rp_1),
 				"rp-2" => Some(sb.epa.breakdown.rp_2),
 				"rp-3" => sb.epa.breakdown.rp_3,
-				_ => None,
+				stat => sb
+					.epa
+					.breakdown
+					.extra
+					.get(stat)
+					.or_else(|| sb.other_details.get(stat))
+					.copied(),
 			} {
 				TeamInfoEntry {
 					text: format!("{value:.2}"),
@@ -837,23 +843,16 @@ fn get_metric_name(config: &GameConfigs, metric: &str) -> NameAndSource {
 				"rps" => "RPs".to_string(),
 				_ => "Unknown Base Stat".to_string(),
 			},
-			page: "Data".to_string(),
+			page: "Record".to_string(),
 			source: DataSource::Tba,
 		}
 	} else if metric.starts_with(SB_PREFIX) {
 		NameAndSource {
 			name: match metric.trim_start_matches(SB_PREFIX) {
-				"wlt-ratio" => "W/L/T".to_string(),
-				"rps-ratio" => "Ranking Points".to_string(),
 				"points" => "Total Points".to_string(),
 				"auto-points" => "Auto Points".to_string(),
 				"teleop-points" => "Teleop Points".to_string(),
 				"endgame-points" => "Endgame Points".to_string(),
-				"wins" => "Wins".to_string(),
-				"losses" => "Losses".to_string(),
-				"ties" => "Ties".to_string(),
-				"rps" => "RPs".to_string(),
-				"games" => "Games".to_string(),
 				"rp-1" => config
 					.game_config
 					.ranking_points
@@ -872,9 +871,15 @@ fn get_metric_name(config: &GameConfigs, metric: &str) -> NameAndSource {
 					.get(2)
 					.cloned()
 					.unwrap_or("RP 3".to_string()),
-				_ => "Unknown Statbotics".to_string(),
+				stat => config
+					.game_config
+					.statbotics
+					.props
+					.get(stat)
+					.map(|p| p.name.clone())
+					.unwrap_or_else(|| "Unknown Statbotics".to_string()),
 			},
-			page: "Data".to_string(),
+			page: "Statbotics".to_string(),
 			source: DataSource::Statbotics,
 		}
 	} else if let Some(metric) = metric.strip_prefix(TBA_PREFIX) {
