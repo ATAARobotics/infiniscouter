@@ -113,7 +113,11 @@ categories:
         description: Can you clean the reef?
         collect: pit_only
         metric:
-          type: ability
+          type: enum
+          options:
+            - No
+            - Yes, clean only
+            - Yes, can also intake
       algae-ground-intake:
         order: 80
         name: Algae Ground Intake
@@ -136,6 +140,16 @@ categories:
             - Shallow Cage
             - Deep Cage
             - Either Cage
+  robot:
+    name: Robot
+    metrics:
+      april-tags:
+        order: 30
+        name: Can read April tags?
+        description: No Description
+        collect: pit_only
+        metric:
+          type: ability
 statbotics:
   props:
     auto-coral:
@@ -266,6 +280,6 @@ display:
     metrics:
     - tba-auto-line
     - statbotics-auto-coral
-    - statbotics-coral
+    - statbotics-telop-coral
     - tba-endgame
     - tba-coopertition
