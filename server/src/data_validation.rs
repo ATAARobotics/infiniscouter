@@ -1,7 +1,7 @@
-use crate::api::data::{MatchEntryData, MatchEntryValue};
+use crate::api::data::{FullEntryData, MatchEntryValue};
 use crate::config::match_entry::{MatchEntryFields, MatchEntryType};
 
-pub fn validate_match(mut data: MatchEntryData, fields: &MatchEntryFields) -> MatchEntryData {
+pub fn validate_match(mut data: FullEntryData, fields: &MatchEntryFields) -> FullEntryData {
 	data.entries.retain(|field_name, data| {
 		if let Some(entry) = fields.entries.get(field_name) {
 			matches!(

@@ -44,7 +44,7 @@ interface TeamCellProps {
 function TeamCell(props: TeamCellProps) {
 	const team_info = props.matchList.team_infos[props.team];
 	const isQuals = props.match.id.match_type === "qualification";
-	const scouts = isQuals ? getMatchScouts(props.match.id.num, props.team) : [];
+	const scouts = isQuals ? getMatchScouts(props.match.id.num, props.team, props.matchList.year, props.matchList.event) : [];
 	return (
 		<Stack direction="row" width="100%">
 			{scouts.length > 0 && (

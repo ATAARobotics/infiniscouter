@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use sled::{Db, Tree};
 use thiserror::Error;
 
-use crate::api::data::{DriverEntryIdData, MatchEntryData, MatchEntryIdData};
+use crate::api::data::{DriverEntryIdData, FullEntryData, MatchEntryIdData, StoredEntryData};
 
 #[derive(Debug, Error)]
 pub enum DbError {
@@ -60,7 +60,7 @@ impl Database {
 				MatchEntryIdData {
 					match_id: match_id.to_string(),
 					team_id: team_id.to_string(),
-					data: Self::tidy_entry_data(serde_json::from_slice(&v).unwrap()),
+					data: Self::fill_entry_data(year, event, serde_json::from_slice(&v).unwrap()),
 				}
 			})
 			.collect()
@@ -76,12 +76,12 @@ impl Database {
 				DriverEntryIdData {
 					match_id: match_id.to_string(),
 					team_id: team_id.to_string(),
-					data: Self::tidy_entry_data(serde_json::from_slice(&v).unwrap()),
+					data: Self::fill_entry_data(year, event, serde_json::from_slice(&v).unwrap()),
 				}
 			})
 			.collect()
 	}
-	pub fn get_all_pit_entries(&self, year: u32, event: &str) -> HashMap<String, MatchEntryData> {
+	pub fn get_all_pit_entries(&self, year: u32, event: &str) -> HashMap<String, FullEntryData> {
 		self.pit_entries
 			.scan_prefix(Self::pit_entry_prefix(year, event))
 			.flatten()
@@ -90,7 +90,7 @@ impl Database {
 				let team_id = String::from_utf8_lossy(key_parts.next().unwrap());
 				(
 					team_id.to_string(),
-					Self::tidy_entry_data(serde_json::from_slice(&v).unwrap()),
+					Self::fill_entry_data(year, event, serde_json::from_slice(&v).unwrap()),
 				)
 			})
 			.collect()
@@ -104,12 +104,16 @@ impl Database {
 		event: &str,
 		match_id: &str,
 		team: &str,
-	) -> Result<Option<MatchEntryData>, DbError> {
+	) -> Result<Option<FullEntryData>, DbError> {
 		let value = self
 			.match_entries
 			.get(Self::match_entry_key(year, event, match_id, team))?;
 		Ok(if let Some(val) = value {
-			Some(Self::tidy_entry_data(serde_json::from_slice(&val)?))
+			Some(Self::fill_entry_data(
+				year,
+				event,
+				serde_json::from_slice(&val)?,
+			))
 		} else {
 			None
 		})
@@ -120,7 +124,7 @@ impl Database {
 		event: &str,
 		match_id: &str,
 		team: &str,
-		data: MatchEntryData,
+		data: FullEntryData,
 	) -> Result<(), DbError> {
 		if let Some(new_data) = Self::get_merged_data(
 			"MATCH",
@@ -143,12 +147,16 @@ impl Database {
 		event: &str,
 		match_id: &str,
 		team: &str,
-	) -> Result<Option<MatchEntryData>, DbError> {
+	) -> Result<Option<FullEntryData>, DbError> {
 		let value = self
 			.driver_entries
 			.get(Self::driver_entry_key(year, event, match_id, team))?;
 		Ok(if let Some(val) = value {
-			Some(Self::tidy_entry_data(serde_json::from_slice(&val)?))
+			Some(Self::fill_entry_data(
+				year,
+				event,
+				serde_json::from_slice(&val)?,
+			))
 		} else {
 			None
 		})
@@ -159,7 +167,7 @@ impl Database {
 		event: &str,
 		match_id: &str,
 		team: &str,
-		data: MatchEntryData,
+		data: FullEntryData,
 	) -> Result<(), DbError> {
 		if let Some(new_data) = Self::get_merged_data(
 			"DRIVER",
@@ -181,12 +189,16 @@ impl Database {
 		year: u32,
 		event: &str,
 		team: &str,
-	) -> Result<Option<MatchEntryData>, DbError> {
+	) -> Result<Option<FullEntryData>, DbError> {
 		let value = self
 			.pit_entries
 			.get(Self::pit_entry_key(year, event, team))?;
 		Ok(if let Some(val) = value {
-			Some(Self::tidy_entry_data(serde_json::from_slice(&val)?))
+			Some(Self::fill_entry_data(
+				year,
+				event,
+				serde_json::from_slice(&val)?,
+			))
 		} else {
 			None
 		})
@@ -196,7 +208,7 @@ impl Database {
 		year: u32,
 		event: &str,
 		team: &str,
-		data: MatchEntryData,
+		data: FullEntryData,
 	) -> Result<(), DbError> {
 		if let Some(new_data) = Self::get_merged_data(
 			"PIT",
@@ -322,9 +334,9 @@ impl Database {
 		data_type: &str,
 		team: &str,
 		match_id: Option<&str>,
-		old_data: Option<MatchEntryData>,
-		new_data: MatchEntryData,
-	) -> Option<MatchEntryData> {
+		old_data: Option<FullEntryData>,
+		new_data: FullEntryData,
+	) -> Option<FullEntryData> {
 		let match_bit = if let Some(match_id) = match_id {
 			format!("match {match_id} and ")
 		} else {
@@ -376,21 +388,13 @@ impl Database {
 		}
 	}
 
-	fn tidy_entry_data(mut data: MatchEntryData) -> MatchEntryData {
-		if let Some(scout) = &data.scout {
-			for entry in data.entries.iter_mut() {
-				entry.1.set_scout_if_blank(scout);
-			}
-			data.scout = None;
+	fn fill_entry_data(year: u32, event: &str, data: StoredEntryData) -> FullEntryData {
+		FullEntryData {
+			year,
+			event: event.to_string(),
+			entries: data.entries,
+			timestamp_ms: data.timestamp_ms,
 		}
-		if let Some(timestamp_ms) = &data.timestamp_ms {
-			for entry in data.entries.iter_mut() {
-				entry.1.set_timestamp_if_blank(*timestamp_ms);
-			}
-			data.timestamp_ms = None;
-		}
-
-		data
 	}
 }
 

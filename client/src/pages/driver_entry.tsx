@@ -24,6 +24,8 @@ export function DriverEntry() {
 
 	const [dataEntries, setEntry] = useEntries<DriverEntryIdData>(
 		scoutName,
+		matchList?.year,
+		matchList?.event,
 		matchId && teamId ? getDriverKey(matchId, teamId) : null,
 		(data) => ({
 			match_id: matchId?.toString() ?? "",

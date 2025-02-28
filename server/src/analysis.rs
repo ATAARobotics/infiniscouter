@@ -10,7 +10,7 @@ use crate::api::data::{ImageEntryItem, MatchBoolEntry};
 use crate::config::FilteredMetric;
 use crate::tba::TeamInfo;
 use crate::{
-	api::data::{DriverEntryIdData, MatchEntryData, MatchEntryIdData, MatchEntryValue},
+	api::data::{DriverEntryIdData, FullEntryData, MatchEntryIdData, MatchEntryValue},
 	config::{
 		match_entry::MatchEntryType, DisplayColumn, GameConfigs, PreMatchDisplay, SingleMetric,
 		TeamConfig, TeamNameMetric,
@@ -293,7 +293,7 @@ fn single_team_impl(
 	config: &GameConfigs,
 	match_entries: &[MatchEntryIdData],
 	driver_entries: &[DriverEntryIdData],
-	pit_entry: Option<&MatchEntryData>,
+	pit_entry: Option<&FullEntryData>,
 	tba_data: &EventInfo,
 	statbotics: Option<&StatboticsTeam>,
 	team: u32,
@@ -353,7 +353,7 @@ fn get_single_metric(
 	config: &GameConfigs,
 	match_entries: &[MatchEntryIdData],
 	driver_entries: &[DriverEntryIdData],
-	pit_entry: Option<&MatchEntryData>,
+	pit_entry: Option<&FullEntryData>,
 	statbotics: Option<&StatboticsTeam>,
 	team_number: u32,
 	team_info: Option<&TeamInfo>,
@@ -956,9 +956,10 @@ fn get_match_entries(
 				match_entries.push(MatchEntryIdData {
 					match_id: num.num.to_string(),
 					team_id: team.to_string(),
-					data: MatchEntryData {
+					data: FullEntryData {
+						year,
+						event: event.to_string(),
 						entries: custom_entries.clone(),
-						scout: None,
 						timestamp_ms: None,
 					},
 				})

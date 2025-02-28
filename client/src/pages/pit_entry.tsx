@@ -26,6 +26,8 @@ export function PitEntry(props: PitEntryProps) {
 
 	const [dataEntries, setEntry] = useEntries<PitEntryIdData>(
 		scoutName,
+		matchList?.year,
+		matchList?.event,
 		teamId ? getPitKey(teamId) : null,
 		(data) => ({
 			team_id: teamId?.toString() ?? "",

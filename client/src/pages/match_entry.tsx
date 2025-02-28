@@ -25,6 +25,8 @@ export function MatchEntry() {
 
 	const [dataEntries, setEntry] = useEntries<MatchEntryIdData>(
 		scoutName,
+		matchList?.year,
+		matchList?.event,
 		matchId && teamId ? getMatchKey(matchId, teamId) : null,
 		(data) => ({
 			match_id: matchId?.toString() ?? "",

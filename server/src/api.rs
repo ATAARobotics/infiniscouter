@@ -6,6 +6,7 @@ use std::sync::Arc;
 
 use image::io::Reader as ImageReader;
 use image::ImageFormat;
+use log::warn;
 use poem::http::StatusCode;
 use poem_openapi::param::Path;
 use poem_openapi::payload::Json;
@@ -13,7 +14,7 @@ use poem_openapi::OpenApi;
 
 use crate::analysis::{self, MatchAnalysisInfo, SingleTeamInfo, TeamInfoList};
 use crate::api::data::{
-	DriverEntryIdData, DriverEntryTimedId, ImageEntryData, MatchEntryData, MatchEntryTimedId,
+	DriverEntryIdData, DriverEntryTimedId, FullEntryData, ImageEntryData, MatchEntryTimedId,
 	PitEntryTimedId,
 };
 use crate::config::match_entry::MatchEntryFields;
@@ -79,7 +80,7 @@ impl Api {
 		&self,
 		match_id: Path<String>,
 		team: Path<String>,
-	) -> poem::Result<Json<Option<MatchEntryData>>> {
+	) -> poem::Result<Json<Option<FullEntryData>>> {
 		let data = self
 			.database
 			.get_match_entry_data(
@@ -125,14 +126,22 @@ impl Api {
 		&self,
 		match_id: &str,
 		team: &str,
-		data: MatchEntryData,
+		data: FullEntryData,
 	) -> poem::Result<()> {
+		let server_config = self.config.get_server_config();
+		if data.year != server_config.current_year || data.event != server_config.current_event {
+			warn!(
+				"Ignoring data for invalid year/event; expected {}:{}, got {}:{}",
+				server_config.current_year, server_config.current_event, data.year, data.event
+			);
+			return Ok(());
+		}
 		let fields = &self.config.get_current_game_config().match_entry_fields;
 		let data = validate_match(data, fields);
 		self.database
 			.set_match_entry_data(
-				self.config.get_server_config().current_year,
-				&self.config.get_server_config().current_event,
+				server_config.current_year,
+				&server_config.current_event,
 				match_id,
 				team,
 				data,
@@ -146,7 +155,7 @@ impl Api {
 		&self,
 		match_id: Path<String>,
 		team: Path<String>,
-		data: Json<MatchEntryData>,
+		data: Json<FullEntryData>,
 	) -> poem::Result<()> {
 		self.match_entry_set_data_inner(&match_id, &team, data.0)
 	}
@@ -177,7 +186,7 @@ impl Api {
 		&self,
 		match_id: Path<String>,
 		team: Path<String>,
-	) -> poem::Result<Json<Option<MatchEntryData>>> {
+	) -> poem::Result<Json<Option<FullEntryData>>> {
 		let data = self
 			.database
 			.get_driver_entry_data(
@@ -223,14 +232,22 @@ impl Api {
 		&self,
 		match_id: &str,
 		team: &str,
-		data: MatchEntryData,
+		data: FullEntryData,
 	) -> poem::Result<()> {
+		let server_config = self.config.get_server_config();
+		if data.year != server_config.current_year || data.event != server_config.current_event {
+			warn!(
+				"Ignoring data for invalid year/event; expected {}:{}, got {}:{}",
+				server_config.current_year, server_config.current_event, data.year, data.event
+			);
+			return Ok(());
+		}
 		let fields = &self.config.get_current_game_config().driver_entry_fields;
 		let data = validate_match(data, fields);
 		self.database
 			.set_driver_entry_data(
-				self.config.get_server_config().current_year,
-				&self.config.get_server_config().current_event,
+				server_config.current_year,
+				&server_config.current_event,
 				match_id,
 				team,
 				data,
@@ -244,7 +261,7 @@ impl Api {
 		&self,
 		match_id: Path<String>,
 		team: Path<String>,
-		data: Json<MatchEntryData>,
+		data: Json<FullEntryData>,
 	) -> poem::Result<()> {
 		self.driver_entry_set_data_inner(&match_id, &team, data.0)
 	}
@@ -274,7 +291,7 @@ impl Api {
 	pub async fn pit_entry_data(
 		&self,
 		team: Path<String>,
-	) -> poem::Result<Json<Option<MatchEntryData>>> {
+	) -> poem::Result<Json<Option<FullEntryData>>> {
 		let data = self
 			.database
 			.get_pit_entry_data(
@@ -322,13 +339,21 @@ impl Api {
 			.collect::<Vec<_>>();
 		Ok(Json(data))
 	}
-	fn pit_entry_set_data_inner(&self, team: &str, data: MatchEntryData) -> poem::Result<()> {
+	fn pit_entry_set_data_inner(&self, team: &str, data: FullEntryData) -> poem::Result<()> {
+		let server_config = self.config.get_server_config();
+		if data.year != server_config.current_year || data.event != server_config.current_event {
+			warn!(
+				"Ignoring data for invalid year/event; expected {}:{}, got {}:{}",
+				server_config.current_year, server_config.current_event, data.year, data.event
+			);
+			return Ok(());
+		}
 		let fields = &self.config.get_current_game_config().pit_entry_fields;
 		let data = validate_match(data, fields);
 		self.database
 			.set_pit_entry_data(
-				self.config.get_server_config().current_year,
-				&self.config.get_server_config().current_event,
+				server_config.current_year,
+				&server_config.current_event,
 				team,
 				data,
 			)
@@ -340,7 +365,7 @@ impl Api {
 	pub async fn pit_entry_set_data(
 		&self,
 		team: Path<String>,
-		data: Json<MatchEntryData>,
+		data: Json<FullEntryData>,
 	) -> poem::Result<()> {
 		self.pit_entry_set_data_inner(&team, data.0)
 	}

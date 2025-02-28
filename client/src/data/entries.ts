@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 
 import { DriverEntryIdData } from "../generated/DriverEntryIdData";
-import { MatchEntryData } from "../generated/MatchEntryData";
+import { FullEntryData } from "../generated/FullEntryData";
 import { MatchEntryIdData } from "../generated/MatchEntryIdData";
 import { MatchEntryValue } from "../generated/MatchEntryValue";
 import { PitEntryIdData } from "../generated/PitEntryIdData";
@@ -12,7 +12,7 @@ export const pitPrefix = "team-";
 export const driverPrefix = "driver-";
 
 export interface AnyEntryId {
-	data: MatchEntryData;
+	data: FullEntryData;
 }
 
 /**
@@ -20,15 +20,18 @@ export interface AnyEntryId {
  */
 export function useEntries<T extends AnyEntryId>(
 	scoutName: string | null,
+	year: number | undefined,
+	eventName: string | undefined,
 	key: string | null,
-	maker: (inner_data: MatchEntryData) => T,
+	maker: (inner_data: FullEntryData) => T,
 ): [
 	Record<string, MatchEntryValue>,
 	(id: string, value: MatchEntryValue | undefined) => void,
 ] {
-	const [data, setData] = useState<MatchEntryData>({
+	const [data, setData] = useState<FullEntryData>({
+		year: year ?? 0,
+		event: eventName ?? "",
 		entries: {},
-		scout: null,
 		timestamp_ms: 0,
 	});
 	const [changed, setChanged] = useState<boolean>(false);
@@ -44,14 +47,15 @@ export function useEntries<T extends AnyEntryId>(
 			const newData: T | null = JSON.parse(
 				localStorage.getItem(key) ?? "null",
 			);
-			if (newData !== null) {
+			if (newData !== null && newData.data.year === year && newData.data.event === eventName) {
 				setChanged(false);
 				setData(newData.data);
 			} else {
 				setChanged(false);
 				setData({
+					year: year ?? 0,
+					event: eventName ?? "",
 					entries: {},
-					scout: null,
 					timestamp_ms: 0,
 				});
 			}
@@ -69,8 +73,9 @@ export function useEntries<T extends AnyEntryId>(
 			}
 			setChanged(true);
 			setData({
+				year: year ?? 0,
+				event: eventName ?? "",
 				entries: newEntries,
-				scout: null,
 				timestamp_ms: 0,
 			});
 		},
@@ -176,10 +181,10 @@ export function getAllDriverEntries(): Array<DriverEntryIdData> {
 /**
  * Get scout that scouted a team in a match (if there is scouting data for that match and team).
  */
-export function getMatchScouts(matchId: number, teamId: number): Array<string> {
+export function getMatchScouts(matchId: number, teamId: number, year: number, eventCode: string): Array<string> {
 	const matchEntry = getMatchEntry(matchId, teamId);
 
-	if (!matchEntry) {
+	if (!matchEntry || matchEntry.data.year !== year || matchEntry.data.event !== eventCode) {
 		return [];
 	}
 
@@ -217,10 +222,10 @@ export function getMatchKey(
 /**
  * Get scout that scouted a team in the pits (if there is scouting data for that team).
  */
-export function getPitScouts(teamId: number): Array<string> {
+export function getPitScouts(teamId: number, year: number, eventCode: string): Array<string> {
 	const pitEntry = getPitEntry(teamId);
 
-	if (!pitEntry) {
+	if (!pitEntry || pitEntry.data.year !== year || pitEntry.data.event !== eventCode) {
 		return [];
 	}
 

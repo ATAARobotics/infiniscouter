@@ -8,7 +8,7 @@ use ts_rs::TS;
 pub struct DriverEntryIdData {
 	pub match_id: String,
 	pub team_id: String,
-	pub data: MatchEntryData,
+	pub data: FullEntryData,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -25,7 +25,7 @@ pub struct DriverEntryTimedId {
 pub struct MatchEntryIdData {
 	pub match_id: String,
 	pub team_id: String,
-	pub data: MatchEntryData,
+	pub data: FullEntryData,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -41,7 +41,7 @@ pub struct MatchEntryTimedId {
 #[ts(export, export_to = "../client/src/generated/")]
 pub struct PitEntryIdData {
 	pub team_id: String,
-	pub data: MatchEntryData,
+	pub data: FullEntryData,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
@@ -54,17 +54,29 @@ pub struct PitEntryTimedId {
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
 #[ts(export, export_to = "../client/src/generated/")]
-pub struct MatchEntryData {
+pub struct StoredEntryData {
 	/// The mapping from entry ids to entry values.
 	pub entries: HashMap<String, MatchEntryValue>,
-	/// The scout for the whole match (for old data)
-	pub scout: Option<String>,
 	/// The timestamp for the whole match (for old data)
 	#[ts(type = "number")]
 	pub timestamp_ms: Option<u64>,
 }
 
-impl MatchEntryData {
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[ts(export, export_to = "../client/src/generated/")]
+pub struct FullEntryData {
+	/// The year for this data.
+	pub year: u32,
+	/// The event for this data.
+	pub event: String,
+	/// The mapping from entry ids to entry values.
+	pub entries: HashMap<String, MatchEntryValue>,
+	/// The timestamp for the whole match (for old data)
+	#[ts(type = "number")]
+	pub timestamp_ms: Option<u64>,
+}
+
+impl FullEntryData {
 	pub fn get_latest_scout(&self) -> Option<String> {
 		self.entries
 			.values()
@@ -131,22 +143,6 @@ impl MatchEntryValue {
 		}
 	}
 
-	pub fn set_scout_if_blank(&mut self, new_scout: &str) {
-		match self {
-			MatchEntryValue::Ability(MatchAbilityEntry { scout, .. })
-			| MatchEntryValue::Enum(MatchEnumEntry { scout, .. })
-			| MatchEntryValue::Bool(MatchBoolEntry { scout, .. })
-			| MatchEntryValue::Counter(CounterEntry { scout, .. })
-			| MatchEntryValue::TextEntry(TextFieldEntry { scout, .. })
-			| MatchEntryValue::Image(ImageEntry { scout, .. })
-			| MatchEntryValue::Timer(MatchTimerEntry { scout, .. }) => {
-				if scout.is_empty() {
-					*scout = new_scout.to_string()
-				}
-			}
-		};
-	}
-
 	pub fn get_timestamp(&self) -> u64 {
 		match self {
 			MatchEntryValue::Ability(MatchAbilityEntry { timestamp_ms, .. })
@@ -157,22 +153,6 @@ impl MatchEntryValue {
 			| MatchEntryValue::Image(ImageEntry { timestamp_ms, .. })
 			| MatchEntryValue::Timer(MatchTimerEntry { timestamp_ms, .. }) => *timestamp_ms,
 		}
-	}
-
-	pub fn set_timestamp_if_blank(&mut self, new_timestamp_ms: u64) {
-		match self {
-			MatchEntryValue::Ability(MatchAbilityEntry { timestamp_ms, .. })
-			| MatchEntryValue::Enum(MatchEnumEntry { timestamp_ms, .. })
-			| MatchEntryValue::Bool(MatchBoolEntry { timestamp_ms, .. })
-			| MatchEntryValue::Counter(CounterEntry { timestamp_ms, .. })
-			| MatchEntryValue::TextEntry(TextFieldEntry { timestamp_ms, .. })
-			| MatchEntryValue::Image(ImageEntry { timestamp_ms, .. })
-			| MatchEntryValue::Timer(MatchTimerEntry { timestamp_ms, .. }) => {
-				if *timestamp_ms == 0 {
-					*timestamp_ms = new_timestamp_ms
-				}
-			}
-		};
 	}
 
 	pub fn is_different(&self, other: &MatchEntryValue) -> bool {
