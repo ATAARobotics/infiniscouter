@@ -1,6 +1,7 @@
 import { Button } from "@mui/joy";
 import { useAtom, useSetAtom } from "jotai/react";
 import { useState } from "preact/hooks";
+import { EventInfo } from "src/generated/EventInfo";
 
 import {
 	driverFieldsAtom,
@@ -152,15 +153,22 @@ export function SyncButton() {
 				setLastDriverSave(driverSaveTime);
 			}
 
-			const knownMatchEntries = matchArray.map<MatchEntryTimedId>((entry) => ({
-				match_id: entry.match_id,
-				team_id: entry.team_id,
-				timestamp_ms: Object.values(entry.data.entries).reduce(
-					(max_timestamp, value) =>
-						Math.max(max_timestamp, value.timestamp_ms ?? 0),
-					0,
-				),
-			}));
+			const matchList = await fetch("/api/event/matches")
+				.then((matchesResponse) => matchesResponse.json() as EventInfo);
+			setMatchList(matchList);
+
+			const knownMatchEntries = matchArray
+				.filter((entry) => entry.data.year === matchList.year
+					&& entry.data.event === matchList.event)
+				.map<MatchEntryTimedId>((entry) => ({
+					match_id: entry.match_id,
+					team_id: entry.team_id,
+					timestamp_ms: Object.values(entry.data.entries).reduce(
+						(max_timestamp, value) =>
+							Math.max(max_timestamp, value.timestamp_ms ?? 0),
+						0,
+					),
+				}));
 			await fetch("/api/match_entry/data/filtered", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -175,14 +183,17 @@ export function SyncButton() {
 					}
 				});
 
-			const knownPitEntries = pitArray.map<PitEntryTimedId>((entry) => ({
-				team_id: entry.team_id,
-				timestamp_ms: Object.values(entry.data.entries).reduce(
-					(max_timestamp, value) =>
-						Math.max(max_timestamp, value.timestamp_ms ?? 0),
-					0,
-				),
-			}));
+			const knownPitEntries = pitArray
+				.filter((entry) => entry.data.year === matchList.year
+					&& entry.data.event === matchList.event)
+                .map<PitEntryTimedId>((entry) => ({
+                    team_id: entry.team_id,
+                    timestamp_ms: Object.values(entry.data.entries).reduce(
+                        (max_timestamp, value) =>
+                            Math.max(max_timestamp, value.timestamp_ms ?? 0),
+                        0,
+                    ),
+                }));
 			await fetch("/api/pit_entry/data/filtered", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -195,15 +206,18 @@ export function SyncButton() {
 					}
 				});
 
-			const knownDriveres = driverArray.map<DriverEntryTimedId>((entry) => ({
-				match_id: entry.match_id,
-				team_id: entry.team_id,
-				timestamp_ms: Object.values(entry.data.entries).reduce(
-					(max_timestamp, value) =>
-						Math.max(max_timestamp, value.timestamp_ms ?? 0),
-					0,
-				),
-			}));
+			const knownDriveres = driverArray
+				.filter((entry) => entry.data.year === matchList.year
+					&& entry.data.event === matchList.event)
+                .map<DriverEntryTimedId>((entry) => ({
+                    match_id: entry.match_id,
+                    team_id: entry.team_id,
+                    timestamp_ms: Object.values(entry.data.entries).reduce(
+                        (max_timestamp, value) =>
+                            Math.max(max_timestamp, value.timestamp_ms ?? 0),
+                        0,
+                    ),
+                }));
 			await fetch("/api/driver_entry/data/filtered", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -216,12 +230,6 @@ export function SyncButton() {
 					for (const driver_entry of newDriveres) {
 						saveDriverEntry(driver_entry);
 					}
-				});
-
-			await fetch("/api/event/matches")
-				.then((matchesResponse) => matchesResponse.json())
-				.then((matchList) => {
-					setMatchList(matchList);
 				});
 		} catch(error) {
 			console.error("Failed to save data.", error);
