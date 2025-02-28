@@ -75,8 +75,12 @@ export function SyncButton() {
 					setPitFields(pitFields);
 				});
 
+			const matchList = await fetch("/api/event/matches")
+				.then((matchesResponse) => matchesResponse.json()) as EventInfo;
+			setMatchList(matchList);
+
 			const matchSaveTime = Date.now();
-			const matchArray = getAllMatchEntries();
+			const matchArray = getAllMatchEntries(matchList.year, matchList.event);
 			const matchesToSave = matchArray.filter(
 				(entry) =>
 					Object.values(entry.data.entries).findIndex(
@@ -102,7 +106,7 @@ export function SyncButton() {
 			}
 
 			const pitSaveTime = Date.now();
-			const pitArray = getAllPitEntries();
+			const pitArray = getAllPitEntries(matchList.year, matchList.event);
 			const pitEntriesToSave = pitArray.filter(
 				(entry) =>
 					Object.values(entry.data.entries).findIndex(
@@ -128,7 +132,7 @@ export function SyncButton() {
 			}
 
 			const driverSaveTime = Date.now();
-			const driverArray = getAllDriverEntries();
+			const driverArray = getAllDriverEntries(matchList.year, matchList.event);
 			const driverEntriesToSave = driverArray.filter(
 				(entry) =>
 					Object.values(entry.data.entries).findIndex(
@@ -153,13 +157,7 @@ export function SyncButton() {
 				setLastDriverSave(driverSaveTime);
 			}
 
-			const matchList = await fetch("/api/event/matches")
-				.then((matchesResponse) => matchesResponse.json() as EventInfo);
-			setMatchList(matchList);
-
 			const knownMatchEntries = matchArray
-				.filter((entry) => entry.data.year === matchList.year
-					&& entry.data.event === matchList.event)
 				.map<MatchEntryTimedId>((entry) => ({
 					match_id: entry.match_id,
 					team_id: entry.team_id,

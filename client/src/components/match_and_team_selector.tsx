@@ -7,6 +7,7 @@ import {
 	Typography,
 } from "@mui/joy";
 import { ChangeEvent } from "preact/compat";
+import { getAllMatchEntries } from "src/data/entries";
 
 import { EventInfo } from "../generated/EventInfo";
 import { MatchInfo } from "../generated/MatchInfo";
@@ -23,6 +24,8 @@ interface MatchAndTeamSelectorProps {
  *
  */
 export function MatchAndTeamSelector(props: MatchAndTeamSelectorProps) {
+	const allMatches = getAllMatchEntries(props.matchList.year, props.matchList.event);
+
 	const teamsForMatch: MatchInfo | undefined | 0 = props.matchId
 		? props.matchList.match_infos.filter(
 				(match) =>
@@ -68,25 +71,35 @@ export function MatchAndTeamSelector(props: MatchAndTeamSelectorProps) {
 							<Typography level="h2" color="danger" marginX="0.5em">
 								RED
 							</Typography>
-							{teamsForMatch?.teams_red.map((team) => (
-								<Button
-									value={team.toString()}
-									color="danger"
-									label={team.toString()}
-								>
-									{team}
-								</Button>
-							))}
+							{teamsForMatch?.teams_red.map((team) => {
+								const scouting_count = allMatches.filter(m => m.team_id === team.toString()).length;
+								return (
+									<Button
+											value={team.toString()}
+											color="danger"
+											label={`${team} (scouted ${scouting_count} times)`}
+									>
+											{team} {scouting_count > 0 ? "" : "*"}
+									</Button>
+								);
+							})}
 						</Stack>
 						<Stack direction="row">
 							<Typography level="h2" color="primary" marginX="0.5em">
 								BLUE
 							</Typography>
-							{teamsForMatch?.teams_blue.map((team) => (
-								<Button value={team.toString()} color="primary">
-									{team}
-								</Button>
-							))}
+							{teamsForMatch?.teams_blue.map((team) => {
+								const scouting_count = allMatches.filter(m => m.team_id === team.toString()).length;
+								return (
+									<Button
+											value={team.toString()}
+											color="primary"
+											label={`${team} (scouted ${scouting_count} times)`}
+									>
+											{team} {scouting_count > 0 ? "" : "*"}
+									</Button>
+								);
+							})}
 						</Stack>
 					</Stack>
 				</ToggleButtonGroup>

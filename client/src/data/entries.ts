@@ -158,24 +158,24 @@ export async function saveImageData<T extends AnyEntryId>(
  * Get all match entires stored in local storage.
  * Note that these will be missing the image data.
  */
-export function getAllMatchEntries(): Array<MatchEntryIdData> {
-	return getEntries(matchPrefix);
+export function getAllMatchEntries(year: number, eventCode: string): Array<MatchEntryIdData> {
+	return getEntries(matchPrefix, year, eventCode);
 }
 
 /**
  * Get all pit entires stored in local storage.
  * Note that these will be missing the image data.
  */
-export function getAllPitEntries(): Array<PitEntryIdData> {
-	return getEntries(pitPrefix);
+export function getAllPitEntries(year: number, eventCode: string): Array<PitEntryIdData> {
+	return getEntries(pitPrefix, year, eventCode);
 }
 
 /**
  * Get all driver entires stored in local storage.
  * Note that these will be missing the image data.
  */
-export function getAllDriverEntries(): Array<DriverEntryIdData> {
-	return getEntries(driverPrefix);
+export function getAllDriverEntries(year: number, eventCode: string): Array<DriverEntryIdData> {
+	return getEntries(driverPrefix, year, eventCode);
 }
 
 /**
@@ -297,14 +297,16 @@ export function saveDriver(driver_entry: DriverEntryIdData): void {
 /**
  * Get all data stored in local storage with the given prefix.
  */
-function getEntries<T>(prefix: string): Array<T> {
-	const entryArray = [];
+function getEntries<T extends AnyEntryId>(prefix: string, year: number, eventCode: string): Array<T> {
+	const entryArray: T[] = [];
 
 	for (let entry = 0; entry < localStorage.length; entry++) {
 		const key: string | null = localStorage.key(entry);
 		if (key !== null && key.startsWith(prefix)) {
 			const match_entry = JSON.parse(localStorage.getItem(key) ?? "") as T;
-			entryArray.push(match_entry);
+			if (match_entry.data.year === year && match_entry.data.event === eventCode) {
+				entryArray.push(match_entry);
+			}
 		}
 	}
 
