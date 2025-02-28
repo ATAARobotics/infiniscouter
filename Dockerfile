@@ -68,7 +68,7 @@ COPY --from=build-rust /client/src/generated /build/src/generated
 
 RUN npm run build
 
-RUN sed -i -e "s/app.js/app.js?$(date "+%m%d%y%H%M%S")/g" /build/assets/index.htm
+RUN sed -i -e "s/app.js/app.js?$(date "+%m%d%y%H%M%S")/g" /build/assets/index.html
 
 # copy passwd and group to get forge user and group
 COPY --from=build-rust /etc/passwd /etc/passwd
