@@ -21,7 +21,7 @@ export interface AnyEntryId {
 export function useEntries<T extends AnyEntryId>(
 	scoutName: string | null,
 	year: number | undefined,
-	eventName: string | undefined,
+	eventCode: string | undefined,
 	key: string | null,
 	maker: (inner_data: FullEntryData) => T,
 ): [
@@ -30,7 +30,7 @@ export function useEntries<T extends AnyEntryId>(
 ] {
 	const [data, setData] = useState<FullEntryData>({
 		year: year ?? 0,
-		event: eventName ?? "",
+		event: eventCode ?? "",
 		entries: {},
 		timestamp_ms: 0,
 	});
@@ -47,14 +47,14 @@ export function useEntries<T extends AnyEntryId>(
 			const newData: T | null = JSON.parse(
 				localStorage.getItem(key) ?? "null",
 			);
-			if (newData !== null && newData.data.year === year && newData.data.event === eventName) {
+			if (newData !== null && newData.data.year === year && newData.data.event === eventCode) {
 				setChanged(false);
 				setData(newData.data);
 			} else {
 				setChanged(false);
 				setData({
 					year: year ?? 0,
-					event: eventName ?? "",
+					event: eventCode ?? "",
 					entries: {},
 					timestamp_ms: 0,
 				});
@@ -74,7 +74,7 @@ export function useEntries<T extends AnyEntryId>(
 			setChanged(true);
 			setData({
 				year: year ?? 0,
-				event: eventName ?? "",
+				event: eventCode ?? "",
 				entries: newEntries,
 				timestamp_ms: 0,
 			});

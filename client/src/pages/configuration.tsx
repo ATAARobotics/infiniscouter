@@ -1,4 +1,4 @@
-import { Box, Checkbox, Input, Typography } from "@mui/joy";
+import { Box, Button, Checkbox, Input, Typography } from "@mui/joy";
 import { useAtom } from "jotai/react";
 
 import { Navbar } from "../components/navbar";
@@ -39,6 +39,14 @@ export function Configuration() {
 						}}
 					/>
 				}
+			</Box>
+			<Navbar title="Debugging Tools" />
+			<Box>
+				<Typography level="h3">Clear Local Data</Typography>
+				<Typography color="danger">Sync before using this!</Typography>
+				<Button onClick={() => {
+					localStorage.clear();
+				}}/>
 			</Box>
 		</Box>
 	);
