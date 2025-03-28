@@ -424,21 +424,28 @@ fn get_single_metric(
 					colour: [255, 255, 255],
 					graphic: Some(TeamInfoGraphic::PieChart(pie_entry)),
 				}
-			} else if let Some(value) = match real_metric {
-				"wins" => Some(team_info.wins as f32),
-				"losses" => Some(team_info.losses as f32),
-				"ties" => Some(team_info.ties as f32),
-				"games" => Some(played_games as f32),
-				"rps" => Some(team_info.ranking_points as f32),
+			} else if let Some((display_value, sort_value)) = match real_metric {
+				"wins" => Some((team_info.wins as f32, team_info.wins as f32)),
+				"losses" => Some((team_info.losses as f32, team_info.losses as f32)),
+				"ties" => Some((team_info.ties as f32, team_info.ties as f32)),
+				"games" => Some((played_games as f32, played_games as f32)),
+				"rps" => Some((
+					team_info.ranking_points as f32,
+					if played_games == 0 {
+						-1f32
+					} else {
+						team_info.ranking_points as f32 / played_games as f32
+					},
+				)),
 				_ => None,
 			} {
 				TeamInfoEntry {
-					text: format!("{value:.2}"),
+					text: format!("{display_value:.2}"),
 					pit_value: None,
 					colour: [255, 255, 255],
-					sort_value: value,
+					sort_value,
 					graphic: Some(TeamInfoGraphic::Numeric(TeamInfoNumericEntry {
-						number: value,
+						number: display_value,
 						collected_std_dev: None,
 						collected_min_max: None,
 						compare_other_numbers: None,
