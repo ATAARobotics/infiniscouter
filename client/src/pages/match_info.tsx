@@ -28,13 +28,21 @@ function TeamPreview(props: TeamPreviewProps) {
 			<Typography
 				level="h3"
 				color={props.alliance === "red" ? "danger" : "primary"}
+				height={40}
+				overflow="hidden"
+				textOverflow="ellipsis"
 			>
 				{props.team_icon_uri && (
-					<img width={40} height={40} src={props.team_icon_uri} />
+					<>
+						<img width={40} height={40} src={props.team_icon_uri} style={{float: "left"}} />
+						{" "}
+					</>
 				)}
 				<a href={`/team/${props.team_number}`} title={props.team_name}>
 					{props.team_number}
 				</a>
+				{" "}
+				{props.team_name}
 			</Typography>
 			<Stack direction="row" flexWrap={"wrap"} gap={"25px"}>
 				{props.other_data.map((data, idx) => {
