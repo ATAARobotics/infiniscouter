@@ -458,7 +458,11 @@ fn custom_entries_for(
 										})
 									} else if let RawTbaScoreBreakdownValue::String(value) = data {
 										MatchEntryValue::Bool(MatchBoolEntry {
-											value: value.starts_with('Y') || value.starts_with('y'),
+											value: if let Some(true_value) = &prop.true_value {
+                                                value == true_value
+                                            } else {
+                                                value.starts_with('Y') || value.starts_with('y')
+                                            },
 											scout: "TBA".to_string(),
 											timestamp_ms: 0,
 										})

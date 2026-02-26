@@ -213,6 +213,7 @@ pub struct TbaMatchProp {
 	#[serde(rename = "type")]
 	#[oai(rename = "type")]
 	pub ty: MatchStatisticsPropType,
+	pub true_value: Option<String>,
 	pub property: String,
 	pub name: String,
 	pub options: Option<Vec<TbaMatchPropOption>>,
