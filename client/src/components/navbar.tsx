@@ -43,7 +43,7 @@ interface NavbarProps {
 }
 
 /**
- * Displays a colapsable nav bar.
+ * Displays a collapsable nav bar.
  */
 export function Navbar(props: NavbarProps) {
 	const [navbarOpen, setNavbarOpen] = React.useState(false);
@@ -112,12 +112,12 @@ export function Navbar(props: NavbarProps) {
 								name: "Match List",
 							},
 							{
-								path: "/config",
-								name: "Configuration",
-							},
-							{
 								path: "/leaderboard",
 								name: "Scout Leaderboard",
+							},
+							{
+								path: "/config",
+								name: "Configuration",
 							},
 						].map((item) => (
 							<NavbarItem {...item}></NavbarItem>
