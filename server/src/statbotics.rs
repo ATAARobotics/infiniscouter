@@ -18,6 +18,13 @@ pub struct StatboticsTeam {
 	pub record: StatboticsRecordQuals,
 	pub other_details: HashMap<String, f32>,
 	pub last_update: Instant,
+	pub query_type: StatboticsQueryType,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum StatboticsQueryType {
+	EventSpecific,
+	YearData,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
@@ -113,7 +120,13 @@ impl StatboticsCache {
 				.await
 			{
 				Ok(team_stats) => {
-					info!("Statbotics ({team}): load complete");
+					info!(
+						"Statbotics ({team}): load complete using {}",
+						match team_stats.query_type {
+							StatboticsQueryType::EventSpecific => "event",
+							StatboticsQueryType::YearData => "YTD",
+						}
+					);
 					self.teams.write().await.insert(team, team_stats.clone());
 					Some(team_stats)
 				}
@@ -189,6 +202,7 @@ impl StatboticsCache {
 					rps: team_event.record.qual.rps,
 				},
 				last_update: Instant::now(),
+				query_type: StatboticsQueryType::EventSpecific,
 			}));
 		}
 
@@ -212,6 +226,7 @@ impl StatboticsCache {
 				rps: 0,
 			},
 			last_update: Instant::now(),
+			query_type: StatboticsQueryType::YearData,
 		}))
 	}
 	fn get_other_details(
