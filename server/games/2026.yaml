@@ -1,0 +1,264 @@
+name: Rebuilt
+year: 2026
+categories:
+  data:
+    name: Statbotics
+    metrics:
+      statbotics-year:
+        order: 20
+        name: Statbotics Year-Specific Data
+        description: This represents all of the statbotics data specific to this year
+        metric:
+          type: statbotics_team
+          props:
+            - auto-fuel
+            - teleop-fuel
+            - teleop-fuel-transition
+            - telop-fuel-first-shift
+            - telop-fuel-second-shift
+            - telop-fuel-endgame
+  auto:
+    name: Auto
+    metrics:
+      auto-score:
+        order: 20
+        name: Auto Score
+        description: Can they score fuel in auto?
+        collect: pit_only
+        metric:
+          type: ability
+      auto-pickup:
+        order: 30
+        name: Auto Floor Pickup
+        description: Can they pick up fuel in auto?
+        collect: pit_only
+        metric:
+          type: ability
+      auto-refill:
+        order: 40
+        name: Auto Outpost Refill
+        description: Can they refill at the outpost in auto?
+        collect: pit_only
+        metric:
+          type: ability
+      auto-climb:
+        order: 50
+        name: Auto Climb
+        description: Can they climb in auto?
+        collect: pit_only
+        metric:
+          type: ability
+      auto-hub:
+        order: 60
+        name: Auto Fuel
+        description: Number of fuel scored in auto period.
+        collect: match_pit
+        metric:
+          type: counter
+          limit_range:
+            start: 0
+            end_inclusive: 100
+      auto-plans:
+        order: 70
+        name: Auto Plans
+        description: Number of auto plans available.
+        collect: pit_only
+        metric:
+          type: counter
+          limit_range:
+            start: 0
+            end_inclusive: 20
+  teleop:
+    name: Teleop
+    metrics:
+      fuel-score-locations:
+        order: 20
+        name: Fuel Score Location
+        description: Where can they score from?
+        collect: pit_only
+        metric:
+          type: enum
+          options:
+            - None
+            - One Place
+            - Multiple Fixed
+            - Anywhere
+      fuel-capacity:
+        order: 30
+        name: Fuel Capacity
+        description: Approximate number of fuel they can hold at once
+        collect: pit_only
+        metric:
+          type: counter
+          limit_range:
+            start: 0
+            end_inclusive: 100
+      fuel-pass:
+        order: 40
+        name: Fuel Passing
+        description: Can they pass fuel from neutral zone into alliance zone?
+        collect: match_pit
+        metric:
+          type: ability
+      fuel-human-intake:
+        order: 50
+        name: Fuel Intake from Outpost
+        description: Can they receive fuel from the outpost?
+        collect: pit_only
+        metric:
+          type: ability
+      fuel-ground-intake:
+        order: 60
+        name: Fuel Ground Intake
+        description: Can they pick up fuel from the ground?
+        collect: pit_only
+        metric:
+          type: ability
+      teleop-hub:
+        order: 60
+        name: Teleop Fuel
+        description: Number of fuel scored in teleop.
+        collect: match_only
+        metric:
+          type: counter
+          limit_range:
+            start: 0
+            end_inclusive: 100
+  endgame:
+    name: Endgame
+    metrics:
+      endgame-climb:
+        order: 20
+        name: Climb
+        description: What level can they reach in endgame?
+        collect: pit_only
+        metric:
+          type: enum
+          options:
+            - None
+            - Level 1
+            - Level 2
+            - Level 3
+  robot:
+    name: Robot
+    metrics:
+      april-tags:
+        order: 30
+        name: Can read April tags?
+        description: No Description
+        collect: pit_only
+        metric:
+          type: ability
+statbotics:
+  props:
+    auto-fuel:
+      type: number
+      property: fuel_auto
+      name: "Auto Fuel"
+    teleop-fuel:
+      type: number
+      property: fuel_teleop
+      name: "Teleop Fuel"
+    teleop-fuel-transition:
+      type: number
+      property: fuel_transition
+      name: "Fuel Transition"
+    telop-fuel-first-shift:
+      type: sum
+      properties:
+        - fuel_shift_1
+        - fuel_shift_2
+      name: "Fuel Shift 1/2"
+    telop-fuel-second-shift:
+      type: sum
+      properties:
+        - fuel_shift_3
+        - fuel_shift_4
+      name: "Fuel Shift 3/4"
+    telop-fuel-endgame:
+      type: number
+      property: fuel_endgame
+      name: "Fuel Endgame"
+tba:
+  order: 15
+  props:
+    auto-climb:
+      type: bool
+      true_value: Level1
+      property: autoTowerRobot{N}
+      name: "Auto Climb"
+    endgame-climb:
+      type: enum
+      options:
+        - id: None
+          name: No
+        - id: Level1
+          name: Level 1
+        - id: Level2
+          name: Level 2
+        - id: Level3
+          name: Level 3
+      property: endGameTowerRobot{N}
+      name: "Endgame Climb"
+ranking_points:
+  - Energized RP
+  - Supercharged RP
+  - Traversal RP
+display:
+  team_row:
+    - source: single
+      metric: tba-auto-climb
+      display: true
+    - source: single
+      metric: auto-climb
+    - source: single
+      metric: auto-plans
+    - source: single
+      metric: auto-hub
+    - source: single
+      metric: statbotics-auto-fuel
+      display: true
+    - source: single
+      metric: fuel-score-locations
+    - source: single
+      metric: fuel-capacity
+    - source: single
+      metric: fuel-pass
+    - source: single
+      metric: fuel-ground-intake
+    - source: single
+      metric: teleop-hub
+    - source: single
+      metric: statbotics-teleop-fuel
+      display: true
+    - source: single
+      metric: statbotics-teleop-fuel-transition
+    - source: single
+      metric: statbotics-telop-fuel-first-shift
+    - source: single
+      metric: statbotics-telop-fuel-second-shift
+    - source: single
+      metric: statbotics-telop-fuel-endgame
+    - source: single
+      metric: endgame-climb
+    - source: single
+      metric: tba-endgame-climb
+      display: true
+    - source: single
+      metric: present
+      display: true
+  pre_match:
+    score: statbotics-points
+    graph:
+    - name: Auto
+      metric: statbotics-auto-points
+    - name: Teleop
+      metric: statbotics-teleop-points
+    - name: Endgame
+      metric: statbotics-endgame-points
+    metrics:
+    - auto-plans
+    - tba-auto-climb
+    - statbotics-auto-fuel
+    - tba-endgame-climb
+    - statbotics-telop-fuel
