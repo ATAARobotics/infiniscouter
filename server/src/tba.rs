@@ -36,7 +36,7 @@ pub struct Tba {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct EventInfo {
 	pub match_infos: Vec<MatchInfo>,
 	pub team_infos: HashMap<u32, TeamInfo>,
@@ -591,7 +591,7 @@ pub struct RawTbaTeamInfo {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct TeamInfo {
 	pub num: u32,
 	pub name: String,
@@ -609,14 +609,14 @@ impl TeamInfo {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct SetMatch {
 	pub set: u32,
 	pub num: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 #[serde(tag = "match_type", rename_all = "snake_case")]
 #[oai(discriminator_name = "match_type", rename_all = "snake_case")]
 pub enum MatchId {
@@ -628,7 +628,7 @@ pub enum MatchId {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Enum, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub enum MatchResult {
 	Tbd,
 	Red,
@@ -637,14 +637,14 @@ pub enum MatchResult {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct CustomEntries {
 	pub blue: [HashMap<String, MatchEntryValue>; 3],
 	pub red: [HashMap<String, MatchEntryValue>; 3],
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct MatchInfo {
 	pub id: MatchId,
 	/// Start time in milliseconds since the unix epoch.

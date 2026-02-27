@@ -7,13 +7,13 @@ use ts_rs::TS;
 use crate::{api::data::MatchEntryIdData, config::TeamConfig, database::Database};
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct LeaderboardInfo {
 	pub leaderboard: HashMap<String, LeaderboardPerson>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct LeaderboardPerson {
 	pub name: String,
 	pub matches_scouted: usize,

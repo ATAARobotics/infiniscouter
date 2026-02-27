@@ -4,8 +4,7 @@ use std::collections::HashMap;
 use std::io::Cursor;
 use std::sync::Arc;
 
-use image::io::Reader as ImageReader;
-use image::ImageFormat;
+use image::{ImageFormat, ImageReader};
 use log::warn;
 use poem::http::StatusCode;
 use poem_openapi::param::Path;

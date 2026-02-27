@@ -16,7 +16,7 @@ use crate::config::match_entry::{EntryType, MatchEntryFields};
 
 /// Global configuration for a "game" e.g. rapid react
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct GameConfig {
 	/// The name of this game
 	pub name: String,
@@ -36,7 +36,7 @@ pub struct GameConfig {
 
 /// A category for metrics to collect
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct MetricCategory {
 	/// The display name for the category
 	pub name: String,
@@ -49,7 +49,7 @@ pub struct MetricCategory {
 
 /// A metric to collect
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct CollectedMetric {
 	/// The name of this metric
 	pub name: String,
@@ -66,7 +66,7 @@ pub struct CollectedMetric {
 
 /// Where to get the data from
 #[derive(Debug, Clone, Copy, PartialEq, Default, Deserialize, Serialize, Enum, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 #[serde(rename_all = "snake_case")]
 #[oai(rename_all = "snake_case")]
 pub enum CollectionOption {
@@ -100,7 +100,7 @@ impl CollectionOption {
 
 /// How to collect the metric
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[oai(discriminator_name = "type", rename_all = "snake_case")]
 pub enum CollectedMetricType {
@@ -125,7 +125,7 @@ pub enum CollectedMetricType {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct AbilityMetric {
 	/// If this implies another ability, or set of abilities
 	#[serde(default)]
@@ -133,47 +133,47 @@ pub struct AbilityMetric {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct EnumMetric {
 	/// Options for the enum
 	pub options: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct BoolMetric {}
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct TimerMetric {}
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct CounterMetric {
 	limit_range: Option<CounterRange>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct CounterRange {
 	start: i32,
 	end_inclusive: i32,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct TextEntryMetric {
 	multiline: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct ImageMetric {
 	allow_video: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct TeamPropertiesList {
 	/// The properties to include
 	pub props: Vec<String>,
@@ -181,14 +181,14 @@ pub struct TeamPropertiesList {
 
 /// Configuration for The Blue Alliance
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct StatboticsConfig {
 	/// The set of TBA match data properties
 	pub props: HashMap<String, StatboticsMatchProp>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct StatboticsMatchProp {
 	#[serde(rename = "type")]
 	#[oai(rename = "type")]
@@ -200,7 +200,7 @@ pub struct StatboticsMatchProp {
 
 /// Configuration for The Blue Alliance
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct TbaConfig {
 	pub order: u32,
 	/// The set of TBA match data properties
@@ -208,7 +208,7 @@ pub struct TbaConfig {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct TbaMatchProp {
 	#[serde(rename = "type")]
 	#[oai(rename = "type")]
@@ -220,7 +220,7 @@ pub struct TbaMatchProp {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Enum, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 #[serde(rename_all = "snake_case")]
 #[oai(rename_all = "snake_case")]
 pub enum MatchStatisticsPropType {
@@ -231,7 +231,7 @@ pub enum MatchStatisticsPropType {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct TbaMatchPropOption {
 	pub id: String,
 	pub name: Option<String>,
@@ -239,7 +239,7 @@ pub struct TbaMatchPropOption {
 
 /// Configure how the data is processed and displayed
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct DisplayConfig {
 	/// Config for the alliance selection team-list table, specifically the data for a single row
 	pub team_row: Vec<DisplayColumn>,
@@ -249,7 +249,7 @@ pub struct DisplayConfig {
 
 /// A column for the alliance selection team-list table
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 #[serde(tag = "source", rename_all = "snake_case")]
 #[oai(discriminator_name = "source", rename_all = "snake_case")]
 pub enum DisplayColumn {
@@ -268,7 +268,7 @@ pub enum DisplayColumn {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct SingleMetric {
 	/// The id of the metric
 	pub metric: String,
@@ -278,7 +278,7 @@ pub struct SingleMetric {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct FilteredMetric {
 	/// The id of the metric
 	pub metric: String,
@@ -290,7 +290,7 @@ pub struct FilteredMetric {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct TeamNameMetric {
 	#[serde(default)]
 	#[oai(default)]
@@ -298,12 +298,12 @@ pub struct TeamNameMetric {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct CommonYearSpecificMetrics {}
 
 /// Configuration for the pre-match display
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct PreMatchDisplay {
 	/// The metric to use for the score
 	pub score: String,
@@ -315,7 +315,7 @@ pub struct PreMatchDisplay {
 
 /// Configuration for the pre-match display
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct PreMatchGraphElement {
 	// The name of the bar graph component
 	pub name: String,
@@ -324,7 +324,7 @@ pub struct PreMatchGraphElement {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct TeamConfig {
 	pub team: u32,
 	pub current_year: u32,

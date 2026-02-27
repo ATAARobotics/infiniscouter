@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use ts_rs::TS;
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct DriverEntryIdData {
 	pub match_id: String,
 	pub team_id: String,
@@ -12,7 +12,7 @@ pub struct DriverEntryIdData {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct DriverEntryTimedId {
 	pub match_id: String,
 	pub team_id: String,
@@ -21,7 +21,7 @@ pub struct DriverEntryTimedId {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct MatchEntryIdData {
 	pub match_id: String,
 	pub team_id: String,
@@ -29,7 +29,7 @@ pub struct MatchEntryIdData {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct MatchEntryTimedId {
 	pub match_id: String,
 	pub team_id: String,
@@ -38,14 +38,14 @@ pub struct MatchEntryTimedId {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct PitEntryIdData {
 	pub team_id: String,
 	pub data: FullEntryData,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct PitEntryTimedId {
 	pub team_id: String,
 	#[ts(type = "number")]
@@ -53,7 +53,7 @@ pub struct PitEntryTimedId {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct StoredEntryData {
 	/// The mapping from entry ids to entry values.
 	pub entries: HashMap<String, MatchEntryValue>,
@@ -63,7 +63,7 @@ pub struct StoredEntryData {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct FullEntryData {
 	/// The year for this data.
 	pub year: u32,
@@ -110,7 +110,7 @@ impl FullEntryData {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[oai(discriminator_name = "type", rename_all = "snake_case")]
 pub enum MatchEntryValue {
@@ -197,7 +197,7 @@ impl MatchEntryValue {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct MatchAbilityEntry {
 	/// The value
 	pub value: MatchAbilityValue,
@@ -213,7 +213,7 @@ pub struct MatchAbilityEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Enum, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 #[serde(rename_all = "snake_case")]
 #[oai(rename_all = "snake_case")]
 pub enum MatchAbilityValue {
@@ -226,7 +226,7 @@ pub enum MatchAbilityValue {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct MatchEnumEntry {
 	/// The value
 	pub value: String,
@@ -242,7 +242,7 @@ pub struct MatchEnumEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct MatchBoolEntry {
 	/// The value
 	pub value: bool,
@@ -258,7 +258,7 @@ pub struct MatchBoolEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct MatchTimerEntry {
 	/// The value, in seconds
 	pub time_seconds: f32,
@@ -274,7 +274,7 @@ pub struct MatchTimerEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct CounterEntry {
 	/// The value
 	pub count: i32,
@@ -290,7 +290,7 @@ pub struct CounterEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct TextFieldEntry {
 	/// The text gathered from the user
 	pub text: String,
@@ -306,7 +306,7 @@ pub struct TextFieldEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct ImageEntry {
 	/// A list of image entries
 	pub images: Vec<ImageEntryItem>,
@@ -322,7 +322,7 @@ pub struct ImageEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct ImageEntryItem {
 	/// The unique ID for this image
 	#[serde(default)]
@@ -332,7 +332,7 @@ pub struct ImageEntryItem {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct ImageEntryData {
 	/// The unique ID for this image
 	pub image_id: String,

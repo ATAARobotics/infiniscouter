@@ -27,7 +27,7 @@ pub enum EntryType {
 
 /// The list of entries to display to the user to collect and then send back to the server
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct MatchEntryFields {
 	/// List of pages to display, pages can be swiped between
 	pub pages: Vec<MatchEntryPage>,
@@ -36,7 +36,7 @@ pub struct MatchEntryFields {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct MatchEntryPage {
 	/// Title of this page
 	pub title: String,
@@ -47,7 +47,7 @@ pub struct MatchEntryPage {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 pub struct MatchEntry {
 	/// Human readable name/title of the entry
 	pub title: String,
@@ -60,7 +60,7 @@ pub struct MatchEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../../client/src/generated/")]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[oai(discriminator_name = "type", rename_all = "snake_case")]
 pub enum MatchEntryType {

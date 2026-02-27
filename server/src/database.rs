@@ -229,7 +229,7 @@ impl Database {
 		let mut image_data_full: Vec<u8> = Vec::new();
 		image.write_to(
 			&mut Cursor::new(&mut image_data_full),
-			image::ImageOutputFormat::Jpeg(90),
+			image::ImageFormat::Jpeg,
 		)?;
 		let full_image_data = ImageData {
 			mime_type: "image/jpeg".to_string(),
@@ -252,7 +252,7 @@ impl Database {
 				image.resize(IMAGE_SIZE_SMALL, IMAGE_SIZE_SMALL, FilterType::Lanczos3);
 			resized_image.write_to(
 				&mut Cursor::new(&mut resized_image_data),
-				image::ImageOutputFormat::Jpeg(80),
+				image::ImageFormat::Jpeg,
 			)?;
 			let image_bytes = bincode::serialize(&ImageData {
 				mime_type: "image/jpeg".to_string(),

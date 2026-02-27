@@ -21,20 +21,20 @@ use crate::{
 };
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct TeamInfoDisplay {
 	pub info: Vec<TeamInfoEntry>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct InfoEntryWithSource {
 	name: NameAndSource,
 	entry: TeamInfoEntry,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct TeamInfoEntry {
 	pub text: String,
 	pub pit_value: Option<String>,
@@ -44,7 +44,7 @@ pub struct TeamInfoEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[oai(discriminator_name = "type", rename_all = "snake_case")]
 pub enum TeamInfoGraphic {
@@ -56,7 +56,7 @@ pub enum TeamInfoGraphic {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Enum, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 #[serde(rename_all = "camelCase")]
 #[oai(rename_all = "camelCase")]
 pub enum DataSource {
@@ -70,7 +70,7 @@ pub enum DataSource {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct TeamNameEntry {
 	pub number: u32,
 	pub name: String,
@@ -78,7 +78,7 @@ pub struct TeamNameEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct TeamInfoNumericEntry {
 	pub number: f32,
 	pub collected_std_dev: Option<f32>,
@@ -88,7 +88,7 @@ pub struct TeamInfoNumericEntry {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct MinMaxAvg {
 	min: f32,
 	max: f32,
@@ -97,33 +97,33 @@ pub struct MinMaxAvg {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct PieChartEntry {
 	options: Vec<PieChartOption>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct PieChartOption {
 	label: String,
 	value: f32,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct MultiTextEntry {
 	strings: Vec<String>,
 	sentiment: f32,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct ImagesEntry {
 	images: Vec<ImageEntryItem>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct SingleTeamInfo {
 	team_number: u32,
 	team_name: String,
@@ -132,7 +132,7 @@ pub struct SingleTeamInfo {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct NameAndSource {
 	name: String,
 	page: String,
@@ -140,7 +140,7 @@ pub struct NameAndSource {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct MatchAnalysisInfo {
 	red_teams: Vec<MatchAnalysisTeamInfo>,
 	blue_teams: Vec<MatchAnalysisTeamInfo>,
@@ -148,7 +148,7 @@ pub struct MatchAnalysisInfo {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct MatchAnalysisTeamInfo {
 	team_number: u32,
 	team_name: String,
@@ -159,14 +159,14 @@ pub struct MatchAnalysisTeamInfo {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct MatchAnalysisScorePart {
 	name: String,
 	score: f32,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
-#[ts(export, export_to = "../client/src/generated/")]
+#[ts(export, export_to = "../../client/src/generated/")]
 pub struct TeamInfoList {
 	heading: Vec<NameAndSource>,
 	list: Vec<TeamInfoDisplay>,
