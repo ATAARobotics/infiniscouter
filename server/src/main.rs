@@ -12,7 +12,6 @@ use std::time::Instant;
 
 use color_eyre::Result;
 use log::info;
-use simplelog::{Config, LevelFilter, SimpleLogger};
 
 use crate::config::ConfigManager;
 use crate::database::Database;
@@ -30,7 +29,7 @@ impl Default for DefaultInstant {
 #[tokio::main]
 async fn main() -> Result<()> {
 	color_eyre::install()?;
-	SimpleLogger::init(LevelFilter::Info, Config::default())?;
+	tracing_subscriber::fmt().init();
 
 	// Shutdown on SIGINT or SIGTERM, or CTRL-C, for docker
 	#[cfg(not(target_os = "windows"))]

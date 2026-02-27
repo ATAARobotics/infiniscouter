@@ -18,9 +18,9 @@ serde = { version = "1", features = ["derive"] }
 serde_yaml = "0.9"
 serde_json = "1"
 signal-hook = "0.4"
-simplelog = "0.12"
 sled = "0.34"
 thiserror = "2"
 tokio = { version = "1", features = ["full"] }
 ts-rs = "12"
 vader_sentiment = "0.1"
+tracing-subscriber = "0.3.22"
