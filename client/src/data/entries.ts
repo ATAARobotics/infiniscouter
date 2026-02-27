@@ -47,7 +47,11 @@ export function useEntries<T extends AnyEntryId>(
 			const newData: T | null = JSON.parse(
 				localStorage.getItem(key) ?? "null",
 			);
-			if (newData !== null && newData.data.year === year && newData.data.event === eventCode) {
+			if (
+				newData !== null &&
+				newData.data.year === year &&
+				newData.data.event === eventCode
+			) {
 				setChanged(false);
 				setData(newData.data);
 			} else {
@@ -158,7 +162,10 @@ export async function saveImageData<T extends AnyEntryId>(
  * Get all match entires stored in local storage.
  * Note that these will be missing the image data.
  */
-export function getAllMatchEntries(year: number, eventCode: string): Array<MatchEntryIdData> {
+export function getAllMatchEntries(
+	year: number,
+	eventCode: string,
+): Array<MatchEntryIdData> {
 	return getEntries(matchPrefix, year, eventCode);
 }
 
@@ -166,7 +173,10 @@ export function getAllMatchEntries(year: number, eventCode: string): Array<Match
  * Get all pit entires stored in local storage.
  * Note that these will be missing the image data.
  */
-export function getAllPitEntries(year: number, eventCode: string): Array<PitEntryIdData> {
+export function getAllPitEntries(
+	year: number,
+	eventCode: string,
+): Array<PitEntryIdData> {
 	return getEntries(pitPrefix, year, eventCode);
 }
 
@@ -174,17 +184,29 @@ export function getAllPitEntries(year: number, eventCode: string): Array<PitEntr
  * Get all driver entires stored in local storage.
  * Note that these will be missing the image data.
  */
-export function getAllDriverEntries(year: number, eventCode: string): Array<DriverEntryIdData> {
+export function getAllDriverEntries(
+	year: number,
+	eventCode: string,
+): Array<DriverEntryIdData> {
 	return getEntries(driverPrefix, year, eventCode);
 }
 
 /**
  * Get scout that scouted a team in a match (if there is scouting data for that match and team).
  */
-export function getMatchScouts(matchId: number, teamId: number, year: number, eventCode: string): Array<string> {
+export function getMatchScouts(
+	matchId: number,
+	teamId: number,
+	year: number,
+	eventCode: string,
+): Array<string> {
 	const matchEntry = getMatchEntry(matchId, teamId);
 
-	if (!matchEntry || matchEntry.data.year !== year || matchEntry.data.event !== eventCode) {
+	if (
+		!matchEntry ||
+		matchEntry.data.year !== year ||
+		matchEntry.data.event !== eventCode
+	) {
 		return [];
 	}
 
@@ -222,10 +244,18 @@ export function getMatchKey(
 /**
  * Get scout that scouted a team in the pits (if there is scouting data for that team).
  */
-export function getPitScouts(teamId: number, year: number, eventCode: string): Array<string> {
+export function getPitScouts(
+	teamId: number,
+	year: number,
+	eventCode: string,
+): Array<string> {
 	const pitEntry = getPitEntry(teamId);
 
-	if (!pitEntry || pitEntry.data.year !== year || pitEntry.data.event !== eventCode) {
+	if (
+		!pitEntry ||
+		pitEntry.data.year !== year ||
+		pitEntry.data.event !== eventCode
+	) {
 		return [];
 	}
 
@@ -297,14 +327,21 @@ export function saveDriver(driver_entry: DriverEntryIdData): void {
 /**
  * Get all data stored in local storage with the given prefix.
  */
-function getEntries<T extends AnyEntryId>(prefix: string, year: number, eventCode: string): Array<T> {
+function getEntries<T extends AnyEntryId>(
+	prefix: string,
+	year: number,
+	eventCode: string,
+): Array<T> {
 	const entryArray: T[] = [];
 
 	for (let entry = 0; entry < localStorage.length; entry++) {
 		const key: string | null = localStorage.key(entry);
 		if (key !== null && key.startsWith(prefix)) {
 			const match_entry = JSON.parse(localStorage.getItem(key) ?? "") as T;
-			if (match_entry.data.year === year && match_entry.data.event === eventCode) {
+			if (
+				match_entry.data.year === year &&
+				match_entry.data.event === eventCode
+			) {
 				entryArray.push(match_entry);
 			}
 		}

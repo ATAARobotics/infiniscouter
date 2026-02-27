@@ -24,7 +24,10 @@ interface MatchAndTeamSelectorProps {
  *
  */
 export function MatchAndTeamSelector(props: MatchAndTeamSelectorProps) {
-	const allMatches = getAllMatchEntries(props.matchList.year, props.matchList.event);
+	const allMatches = getAllMatchEntries(
+		props.matchList.year,
+		props.matchList.event,
+	);
 
 	const teamsForMatch: MatchInfo | undefined | 0 = props.matchId
 		? props.matchList.match_infos.filter(
@@ -72,14 +75,16 @@ export function MatchAndTeamSelector(props: MatchAndTeamSelectorProps) {
 								RED
 							</Typography>
 							{teamsForMatch?.teams_red.map((team) => {
-								const scouting_count = allMatches.filter(m => m.team_id === team.toString()).length;
+								const scouting_count = allMatches.filter(
+									(m) => m.team_id === team.toString(),
+								).length;
 								return (
 									<Button
-											value={team.toString()}
-											color="danger"
-											label={`${team} (scouted ${scouting_count} times)`}
+										value={team.toString()}
+										color="danger"
+										label={`${team} (scouted ${scouting_count} times)`}
 									>
-											{team} {scouting_count > 0 ? "" : "*"}
+										{team} {scouting_count > 0 ? "" : "*"}
 									</Button>
 								);
 							})}
@@ -89,14 +94,16 @@ export function MatchAndTeamSelector(props: MatchAndTeamSelectorProps) {
 								BLUE
 							</Typography>
 							{teamsForMatch?.teams_blue.map((team) => {
-								const scouting_count = allMatches.filter(m => m.team_id === team.toString()).length;
+								const scouting_count = allMatches.filter(
+									(m) => m.team_id === team.toString(),
+								).length;
 								return (
 									<Button
-											value={team.toString()}
-											color="primary"
-											label={`${team} (scouted ${scouting_count} times)`}
+										value={team.toString()}
+										color="primary"
+										label={`${team} (scouted ${scouting_count} times)`}
 									>
-											{team} {scouting_count > 0 ? "" : "*"}
+										{team} {scouting_count > 0 ? "" : "*"}
 									</Button>
 								);
 							})}

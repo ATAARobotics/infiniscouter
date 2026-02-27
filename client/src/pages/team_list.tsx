@@ -30,7 +30,11 @@ export function TeamList() {
 				</thead>
 				<tbody>
 					{teams.map((teamInfo) => {
-						const pitScouts = getPitScouts(teamInfo.num, matchList.year, matchList.event);
+						const pitScouts = getPitScouts(
+							teamInfo.num,
+							matchList.year,
+							matchList.event,
+						);
 						return (
 							<>
 								<tr>

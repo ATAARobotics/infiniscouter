@@ -75,8 +75,9 @@ export function SyncButton() {
 					setPitFields(pitFields);
 				});
 
-			const matchList = await fetch("/api/event/matches")
-				.then((matchesResponse) => matchesResponse.json()) as EventInfo;
+			const matchList = (await fetch("/api/event/matches").then(
+				(matchesResponse) => matchesResponse.json(),
+			)) as EventInfo;
 			setMatchList(matchList);
 
 			const matchSaveTime = Date.now();
@@ -132,7 +133,10 @@ export function SyncButton() {
 			}
 
 			const driverSaveTime = Date.now();
-			const driverArray = getAllDriverEntries(matchList.year, matchList.event);
+			const driverArray = getAllDriverEntries(
+				matchList.year,
+				matchList.event,
+			);
 			const driverEntriesToSave = driverArray.filter(
 				(entry) =>
 					Object.values(entry.data.entries).findIndex(
@@ -157,8 +161,8 @@ export function SyncButton() {
 				setLastDriverSave(driverSaveTime);
 			}
 
-			const knownMatchEntries = matchArray
-				.map<MatchEntryTimedId>((entry) => ({
+			const knownMatchEntries = matchArray.map<MatchEntryTimedId>(
+				(entry) => ({
 					match_id: entry.match_id,
 					team_id: entry.team_id,
 					timestamp_ms: Object.values(entry.data.entries).reduce(
@@ -166,14 +170,16 @@ export function SyncButton() {
 							Math.max(max_timestamp, value.timestamp_ms ?? 0),
 						0,
 					),
-				}));
+				}),
+			);
 			await fetch("/api/match_entry/data/filtered", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(knownMatchEntries),
 			})
 				.then(
-					(response) => response.json() as Promise<Array<MatchEntryIdData>>,
+					(response) =>
+						response.json() as Promise<Array<MatchEntryIdData>>,
 				)
 				.then((newMatches) => {
 					for (const match_entry of newMatches) {
@@ -182,22 +188,27 @@ export function SyncButton() {
 				});
 
 			const knownPitEntries = pitArray
-				.filter((entry) => entry.data.year === matchList.year
-					&& entry.data.event === matchList.event)
-                .map<PitEntryTimedId>((entry) => ({
-                    team_id: entry.team_id,
-                    timestamp_ms: Object.values(entry.data.entries).reduce(
-                        (max_timestamp, value) =>
-                            Math.max(max_timestamp, value.timestamp_ms ?? 0),
-                        0,
-                    ),
-                }));
+				.filter(
+					(entry) =>
+						entry.data.year === matchList.year &&
+						entry.data.event === matchList.event,
+				)
+				.map<PitEntryTimedId>((entry) => ({
+					team_id: entry.team_id,
+					timestamp_ms: Object.values(entry.data.entries).reduce(
+						(max_timestamp, value) =>
+							Math.max(max_timestamp, value.timestamp_ms ?? 0),
+						0,
+					),
+				}));
 			await fetch("/api/pit_entry/data/filtered", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(knownPitEntries),
 			})
-				.then((response) => response.json() as Promise<Array<PitEntryIdData>>)
+				.then(
+					(response) => response.json() as Promise<Array<PitEntryIdData>>,
+				)
 				.then((newPitEntries) => {
 					for (const pit_entry of newPitEntries) {
 						savePitEntry(pit_entry);
@@ -205,31 +216,35 @@ export function SyncButton() {
 				});
 
 			const knownDriveres = driverArray
-				.filter((entry) => entry.data.year === matchList.year
-					&& entry.data.event === matchList.event)
-                .map<DriverEntryTimedId>((entry) => ({
-                    match_id: entry.match_id,
-                    team_id: entry.team_id,
-                    timestamp_ms: Object.values(entry.data.entries).reduce(
-                        (max_timestamp, value) =>
-                            Math.max(max_timestamp, value.timestamp_ms ?? 0),
-                        0,
-                    ),
-                }));
+				.filter(
+					(entry) =>
+						entry.data.year === matchList.year &&
+						entry.data.event === matchList.event,
+				)
+				.map<DriverEntryTimedId>((entry) => ({
+					match_id: entry.match_id,
+					team_id: entry.team_id,
+					timestamp_ms: Object.values(entry.data.entries).reduce(
+						(max_timestamp, value) =>
+							Math.max(max_timestamp, value.timestamp_ms ?? 0),
+						0,
+					),
+				}));
 			await fetch("/api/driver_entry/data/filtered", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(knownDriveres),
 			})
 				.then(
-					(response) => response.json() as Promise<Array<DriverEntryIdData>>,
+					(response) =>
+						response.json() as Promise<Array<DriverEntryIdData>>,
 				)
 				.then((newDriveres) => {
 					for (const driver_entry of newDriveres) {
 						saveDriverEntry(driver_entry);
 					}
 				});
-		} catch(error) {
+		} catch (error) {
 			console.error("Failed to save data.", error);
 		} finally {
 			setLoadingState("saved");
