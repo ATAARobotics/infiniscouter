@@ -1,6 +1,7 @@
 import { Button } from "@mui/joy";
 import { useAtom, useSetAtom } from "jotai/react";
 import { useState } from "preact/hooks";
+import { useEffect } from "react";
 import { EventInfo } from "src/generated/EventInfo";
 
 import {
@@ -42,7 +43,7 @@ export function SyncButton() {
 	const [lastMatchSave, setLastMatchSave] = useAtom(lastMatchSaveAtom);
 	const [lastPitSave, setLastPitSave] = useAtom(lastPitSaveAtom);
 	const [lastDriverSave, setLastDriverSave] = useAtom(lastDriverSaveAtom);
-	const setMatchList = useSetAtom(matchListAtom);
+	const [matchList, setMatchList] = useAtom(matchListAtom);
 	const setMatchFields = useSetAtom(matchFieldsAtom);
 	const setDriverFields = useSetAtom(driverFieldsAtom);
 	const setPitFields = useSetAtom(pitFieldsAtom);
@@ -75,13 +76,16 @@ export function SyncButton() {
 					setPitFields(pitFields);
 				});
 
-			const matchList = (await fetch("/api/event/matches").then(
+			const newMatchList = (await fetch("/api/event/matches").then(
 				(matchesResponse) => matchesResponse.json(),
 			)) as EventInfo;
-			setMatchList(matchList);
+			setMatchList(newMatchList);
 
 			const matchSaveTime = Date.now();
-			const matchArray = getAllMatchEntries(matchList.year, matchList.event);
+			const matchArray = getAllMatchEntries(
+				newMatchList.year,
+				newMatchList.event,
+			);
 			const matchesToSave = matchArray.filter(
 				(entry) =>
 					Object.values(entry.data.entries).findIndex(
@@ -107,7 +111,10 @@ export function SyncButton() {
 			}
 
 			const pitSaveTime = Date.now();
-			const pitArray = getAllPitEntries(matchList.year, matchList.event);
+			const pitArray = getAllPitEntries(
+				newMatchList.year,
+				newMatchList.event,
+			);
 			const pitEntriesToSave = pitArray.filter(
 				(entry) =>
 					Object.values(entry.data.entries).findIndex(
@@ -134,8 +141,8 @@ export function SyncButton() {
 
 			const driverSaveTime = Date.now();
 			const driverArray = getAllDriverEntries(
-				matchList.year,
-				matchList.event,
+				newMatchList.year,
+				newMatchList.event,
 			);
 			const driverEntriesToSave = driverArray.filter(
 				(entry) =>
@@ -190,8 +197,8 @@ export function SyncButton() {
 			const knownPitEntries = pitArray
 				.filter(
 					(entry) =>
-						entry.data.year === matchList.year &&
-						entry.data.event === matchList.event,
+						entry.data.year === newMatchList.year &&
+						entry.data.event === newMatchList.event,
 				)
 				.map<PitEntryTimedId>((entry) => ({
 					team_id: entry.team_id,
@@ -218,8 +225,8 @@ export function SyncButton() {
 			const knownDriveres = driverArray
 				.filter(
 					(entry) =>
-						entry.data.year === matchList.year &&
-						entry.data.event === matchList.event,
+						entry.data.year === newMatchList.year &&
+						entry.data.event === newMatchList.event,
 				)
 				.map<DriverEntryTimedId>((entry) => ({
 					match_id: entry.match_id,
@@ -250,6 +257,12 @@ export function SyncButton() {
 			setLoadingState("saved");
 		}
 	}
+
+	useEffect(() => {
+		if (!matchList && loadingState === "saved") {
+			void doSync();
+		}
+	}, [loadingState, matchList]);
 
 	return (
 		<Button loading={loadingState === "saving"} onClick={doSync}>

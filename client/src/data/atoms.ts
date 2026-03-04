@@ -6,6 +6,10 @@ import { MatchEntryFields } from "../generated/MatchEntryFields";
 export const matchListAtom = atomWithStorage<EventInfo | null>(
 	"matchList",
 	null,
+	undefined,
+	{
+		getOnInit: true,
+	},
 );
 export const matchFieldsAtom = atomWithStorage<MatchEntryFields | null>(
 	"matchFields",
