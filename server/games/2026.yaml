@@ -14,9 +14,9 @@ categories:
             - auto-fuel
             - teleop-fuel
             - teleop-fuel-transition
-            - telop-fuel-first-shift
-            - telop-fuel-second-shift
-            - telop-fuel-endgame
+            - teleop-fuel-first-shift
+            - teleop-fuel-second-shift
+            - teleop-fuel-endgame
   auto:
     name: Auto
     metrics:
@@ -50,7 +50,7 @@ categories:
           type: ability
       auto-hub:
         order: 60
-        name: Auto Fuel
+        name: Auto Fuel (Scouted)
         description: Number of fuel scored in auto period.
         collect: match_pit
         metric:
@@ -104,19 +104,19 @@ categories:
         order: 50
         name: Fuel Intake from Outpost
         description: Can they receive fuel from the outpost?
-        collect: pit_only
+        collect: match_pit
         metric:
           type: ability
       fuel-ground-intake:
         order: 60
         name: Fuel Ground Intake
         description: Can they pick up fuel from the ground?
-        collect: pit_only
+        collect: match_pit
         metric:
           type: ability
       teleop-hub:
         order: 60
-        name: Teleop Fuel
+        name: Teleop Fuel (Scouted)
         description: Number of fuel scored in teleop.
         collect: match_only
         metric:
@@ -129,7 +129,7 @@ categories:
     metrics:
       endgame-climb:
         order: 20
-        name: Climb
+        name: Climb Claim
         description: What level can they reach in endgame?
         collect: pit_only
         metric:
@@ -144,40 +144,52 @@ categories:
     metrics:
       april-tags:
         order: 30
-        name: Can read April tags?
-        description: No Description
+        name: April Tags
+        description: Can read April tags?
         collect: pit_only
+        metric:
+          type: ability
+      under-trench:
+        order: 40
+        name: Under Trench
+        description: Can they drive under the trench?
+        collect: match_pit
+        metric:
+          type: ability
+      over-bump:
+        order: 50
+        name: Over Bump
+        description: Can they drive over the bump?
+        collect: match_pit
         metric:
           type: ability
 statbotics:
   props:
     auto-fuel:
       type: number
-      property: fuel_auto
+      property: auto_fuel
       name: "Auto Fuel"
     teleop-fuel:
-      type: number
-      property: fuel_teleop
+      type: sum
+      properties:
+        - teleop_fuel
+        - endgame_fuel
       name: "Teleop Fuel"
     teleop-fuel-transition:
       type: number
-      property: fuel_transition
+      property: transition_fuel
       name: "Fuel Transition"
-    telop-fuel-first-shift:
-      type: sum
-      properties:
-        - fuel_shift_1
-        - fuel_shift_2
-      name: "Fuel Shift 1/2"
-    telop-fuel-second-shift:
-      type: sum
-      properties:
-        - fuel_shift_3
-        - fuel_shift_4
-      name: "Fuel Shift 3/4"
-    telop-fuel-endgame:
+    teleop-fuel-first-shift:
       type: number
-      property: fuel_endgame
+      property: first_shift_fuel
+      name: "Fuel Shift 1/2"
+    teleop-fuel-second-shift:
+      type: number
+      property: second_shift_fuel
+      name: "Fuel Shift 3/4"
+    teleop-fuel-endgame:
+      type: number
+      property: endgame_fuel
       name: "Fuel Endgame"
 tba:
   order: 15
@@ -234,11 +246,11 @@ display:
     - source: single
       metric: statbotics-teleop-fuel-transition
     - source: single
-      metric: statbotics-telop-fuel-first-shift
+      metric: statbotics-teleop-fuel-first-shift
     - source: single
-      metric: statbotics-telop-fuel-second-shift
+      metric: statbotics-teleop-fuel-second-shift
     - source: single
-      metric: statbotics-telop-fuel-endgame
+      metric: statbotics-teleop-fuel-endgame
     - source: single
       metric: endgame-climb
     - source: single
@@ -247,6 +259,10 @@ display:
     - source: single
       metric: present
       display: true
+    - source: single
+      metric: under-trench
+    - source: single
+      metric: over-bump
   pre_match:
     score: statbotics-points
     graph:
@@ -261,4 +277,4 @@ display:
     - tba-auto-climb
     - statbotics-auto-fuel
     - tba-endgame-climb
-    - statbotics-telop-fuel
+    - statbotics-teleop-fuel

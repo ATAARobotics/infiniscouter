@@ -1,7 +1,7 @@
 name: _
 year: 0
 categories:
-  data:
+  base-data:
     name: Record
     order: 8
     metrics:
