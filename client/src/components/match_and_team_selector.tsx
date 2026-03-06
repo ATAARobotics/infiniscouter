@@ -4,10 +4,12 @@ import {
 	Input,
 	Stack,
 	ToggleButtonGroup,
+	Tooltip,
 	Typography,
 } from "@mui/joy";
 import { ChangeEvent } from "preact/compat";
 import { getAllMatchEntries } from "src/data/entries";
+import { TeamInfo } from "src/generated/TeamInfo";
 
 import { EventInfo } from "../generated/EventInfo";
 import { MatchInfo } from "../generated/MatchInfo";
@@ -15,8 +17,8 @@ import { MatchInfo } from "../generated/MatchInfo";
 interface MatchAndTeamSelectorProps {
 	matchId?: number;
 	setMatchId: (matchId: number | undefined) => void;
-	teamId?: number;
-	setTeamId: (teamId: number | undefined) => void;
+	team?: TeamInfo;
+	setTeam: (teamId: TeamInfo | undefined) => void;
 	matchList: EventInfo;
 }
 
@@ -49,7 +51,7 @@ export function MatchAndTeamSelector(props: MatchAndTeamSelectorProps) {
 							props.setMatchId(
 								parseInt((ev.target as HTMLInputElement).value),
 							);
-							props.setTeamId(undefined);
+							props.setTeam(undefined);
 						}}
 						sx={{
 							width: "20em",
@@ -59,12 +61,13 @@ export function MatchAndTeamSelector(props: MatchAndTeamSelectorProps) {
 			</Box>
 			{teamsForMatch && (
 				<ToggleButtonGroup
-					onChange={(ev: ChangeEvent) =>
-						props.setTeamId(
-							parseInt((ev.target as HTMLInputElement).value),
-						)
-					}
-					value={props.teamId?.toString()}
+					onChange={(ev: ChangeEvent) => {
+						const team = parseInt((ev.target as HTMLInputElement).value);
+						const team_info = props.matchList.team_infos[team];
+
+						props.setTeam(team_info);
+					}}
+					value={props.team?.num.toString()}
 				>
 					<Stack
 						direction={{ xs: "column", md: "row" }}
@@ -75,17 +78,19 @@ export function MatchAndTeamSelector(props: MatchAndTeamSelectorProps) {
 								RED
 							</Typography>
 							{teamsForMatch?.teams_red.map((team) => {
+								const team_info = props.matchList.team_infos[team];
 								const scouting_count = allMatches.filter(
 									(m) => m.team_id === team.toString(),
 								).length;
 								return (
-									<Button
-										value={team.toString()}
-										color="danger"
-										label={`${team} (scouted ${scouting_count} times)`}
+									<Tooltip
+										title={`${team_info.name} (scouted ${scouting_count} times)`}
+										enterDelay={500}
 									>
-										{team} {scouting_count > 0 ? "" : "*"}
-									</Button>
+										<Button value={team.toString()} color="danger">
+											{team} {scouting_count > 0 ? "" : "*"}
+										</Button>
+									</Tooltip>
 								);
 							})}
 						</Stack>
@@ -94,17 +99,19 @@ export function MatchAndTeamSelector(props: MatchAndTeamSelectorProps) {
 								BLUE
 							</Typography>
 							{teamsForMatch?.teams_blue.map((team) => {
+								const team_info = props.matchList.team_infos[team];
 								const scouting_count = allMatches.filter(
 									(m) => m.team_id === team.toString(),
 								).length;
 								return (
-									<Button
-										value={team.toString()}
-										color="primary"
-										label={`${team} (scouted ${scouting_count} times)`}
+									<Tooltip
+										title={`${team_info.name} (scouted ${scouting_count} times)`}
+										enterDelay={500}
 									>
-										{team} {scouting_count > 0 ? "" : "*"}
-									</Button>
+										<Button value={team.toString()} color="primary">
+											{team} {scouting_count > 0 ? "" : "*"}
+										</Button>
+									</Tooltip>
 								);
 							})}
 						</Stack>

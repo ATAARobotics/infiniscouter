@@ -1,6 +1,7 @@
-import { Box } from "@mui/joy";
+import { Box, Typography } from "@mui/joy";
 import { useAtomValue } from "jotai/react";
 import { useState } from "preact/hooks";
+import { TeamInfo } from "src/generated/TeamInfo";
 
 import { MatchPage } from "../components/entry_components";
 import { MatchAndTeamSelector } from "../components/match_and_team_selector";
@@ -17,7 +18,7 @@ import { MatchEntryIdData } from "../generated/MatchEntryIdData";
  */
 export function MatchEntry() {
 	const [matchId, setMatchId] = useState<number>();
-	const [teamId, setTeamId] = useState<number>();
+	const [team, setTeam] = useState<TeamInfo>();
 
 	const scoutName = useAtomValue(scoutNameAtom);
 	const matchList = useAtomValue(matchListAtom);
@@ -27,10 +28,10 @@ export function MatchEntry() {
 		scoutName,
 		matchList?.year,
 		matchList?.event,
-		matchId && teamId ? getMatchKey(matchId, teamId) : null,
+		matchId && team?.num ? getMatchKey(matchId, team?.num) : null,
 		(data) => ({
 			match_id: matchId?.toString() ?? "",
-			team_id: teamId?.toString() ?? "",
+			team_id: team?.num?.toString() ?? "",
 			data,
 		}),
 	);
@@ -49,10 +50,15 @@ export function MatchEntry() {
 				matchList={matchList}
 				matchId={matchId}
 				setMatchId={setMatchId}
-				teamId={teamId}
-				setTeamId={setTeamId}
+				team={team}
+				setTeam={setTeam}
 			></MatchAndTeamSelector>
-			{teamId &&
+			{team && (
+				<Typography level="h2">
+					{team.num} {team.name}
+				</Typography>
+			)}
+			{team &&
 				fields.pages.map((page) => (
 					<MatchPage
 						scout={scoutName}
