@@ -10,6 +10,7 @@ import { getMatchScouts } from "../data/entries";
 import { EventInfo } from "../generated/EventInfo";
 import { MatchId } from "../generated/MatchId";
 import { MatchInfo } from "../generated/MatchInfo";
+import { TeamInfo } from "../generated/TeamInfo";
 
 /**
  * Format a match ID for display.
@@ -33,6 +34,24 @@ export function formatMatchId(matchId: MatchId, year: number): string {
 	return "";
 }
 
+const highlightColor = "#DDDDDD";
+const redColor = "#E47474";
+const blueColor = "#5fabf6";
+
+/**
+ * Determine if the given team matches the given filter value.
+ */
+function teamMatched(
+	teamInfo: TeamInfo,
+	filterValue: string | undefined,
+): boolean {
+	return (
+		!!filterValue &&
+		(teamInfo.num.toString().indexOf(filterValue) >= 0 ||
+			teamInfo.name.toLowerCase().indexOf(filterValue.toLowerCase()) >= 0)
+	);
+}
+
 interface TeamCellProps {
 	team: number;
 	match: MatchInfo;
@@ -44,7 +63,7 @@ interface TeamCellProps {
  * Cell to show a single team's information.
  */
 function TeamCell(props: TeamCellProps) {
-	const team_info = props.matchList.team_infos[props.team];
+	const teamInfo = props.matchList.team_infos[props.team];
 	const isQuals = props.match.id.match_type === "qualification";
 	const isRed = props.match.teams_red.includes(props.team);
 	const scouts = isQuals
@@ -55,10 +74,8 @@ function TeamCell(props: TeamCellProps) {
 				props.matchList.event,
 		  )
 		: [];
-	const highlight =
-		props.filterValue &&
-		props.team.toString().indexOf(props.filterValue) >= 0;
-	const color = highlight ? "#DDDDDD" : isRed ? "#E47474" : "#0B6BCB";
+	const highlight = teamMatched(teamInfo, props.filterValue);
+	const color = highlight ? highlightColor : isRed ? redColor : blueColor;
 
 	return (
 		<Stack direction="row" width="100%">
@@ -70,13 +87,13 @@ function TeamCell(props: TeamCellProps) {
 					<Typography>✅</Typography>
 				</Tooltip>
 			)}
-			{team_info ? (
+			{teamInfo ? (
 				<a
-					href={`/team/${team_info.num}`}
-					title={team_info.name}
+					href={`/team/${teamInfo.num}`}
+					title={teamInfo.name}
 					style={{ color, fontWeight: highlight ? "bold" : "normal" }}
 				>
-					{team_info.num}
+					{teamInfo.num}
 				</a>
 			) : (
 				props.team
@@ -126,13 +143,18 @@ export function MatchList() {
 						{matchList.match_infos
 							.filter(
 								(match) =>
-									match.teams_blue.some(
-										(team) =>
-											team.toString().indexOf(filterValue) >= 0,
+									!filterValue ||
+									match.teams_blue.some((team) =>
+										teamMatched(
+											matchList.team_infos[team],
+											filterValue,
+										),
 									) ||
-									match.teams_red.some(
-										(team) =>
-											team.toString().indexOf(filterValue) >= 0,
+									match.teams_red.some((team) =>
+										teamMatched(
+											matchList.team_infos[team],
+											filterValue,
+										),
 									),
 							)
 							.map((match) => (
@@ -184,14 +206,20 @@ export function MatchList() {
 													marginLeft: "auto",
 													marginTop: "auto",
 													marginBottom: "auto",
+													fontWeight:
+														match.result === "Red"
+															? "bold"
+															: "light",
+													// color: match.result === "Red" ? redColor : undefined,
 												}}
 												gridArea="score"
+												level={
+													match.result === "Red"
+														? "body-lg"
+														: "body-md"
+												}
 											>
-												{match.result === "Red" ? (
-													<b>{match.score_red}</b>
-												) : (
-													match.score_red ?? ""
-												)}
+												{match.score_red}
 											</Typography>
 										</Stack>
 									</td>
@@ -227,14 +255,20 @@ export function MatchList() {
 													marginLeft: "auto",
 													marginTop: "auto",
 													marginBottom: "auto",
+													fontWeight:
+														match.result === "Blue"
+															? "bold"
+															: "light",
+													// color: match.result === "Blue" ? blueColor : undefined,
 												}}
 												gridArea="score"
+												level={
+													match.result === "Blue"
+														? "body-lg"
+														: "body-md"
+												}
 											>
-												{match.result === "Blue" ? (
-													<b>{match.score_blue}</b>
-												) : (
-													match.score_blue ?? ""
-												)}
+												{match.score_blue}
 											</Typography>
 										</Stack>
 									</td>
