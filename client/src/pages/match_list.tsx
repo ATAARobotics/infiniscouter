@@ -119,11 +119,10 @@ export function MatchList() {
 				<Navbar
 					title="Match List"
 					component={
-						// @ts-expect-error Input seems to want a component for some reason?
 						<Input
 							type="text"
 							placeholder="Filter Team #"
-							onChange={(ev: InputEvent) => {
+							onChange={(ev) => {
 								setFilterValue(
 									(ev.target as HTMLInputElement).value ?? "",
 								);

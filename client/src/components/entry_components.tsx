@@ -307,7 +307,6 @@ function CounterEntry(props: CounterEntryProps) {
 				</Button>
 			</Box>
 			{
-				// @ts-expect-error Input seems to want a component for some reason?
 				<Input
 					type="number"
 					sx={{
@@ -319,7 +318,7 @@ function CounterEntry(props: CounterEntryProps) {
 							? `Enter a number from ${rangeStart} to ${rangeEnd}`
 							: "Enter a number"
 					}
-					onChange={(ev: InputEvent) => {
+					onChange={(ev) => {
 						const value = parseInt((ev.target as HTMLInputElement).value);
 						if (
 							!isNaN(value) &&

@@ -7,7 +7,6 @@ import {
 	Tooltip,
 	Typography,
 } from "@mui/joy";
-import { ChangeEvent } from "preact/compat";
 import { getAllMatchEntries } from "src/data/entries";
 import { TeamInfo } from "src/generated/TeamInfo";
 
@@ -43,11 +42,10 @@ export function MatchAndTeamSelector(props: MatchAndTeamSelectorProps) {
 		<Stack direction={{ xs: "column", md: "row" }} gap="1em">
 			<Box>
 				{
-					// @ts-expect-error Input seems to want a component for some reason?
 					<Input
 						type="number"
 						placeholder={"Qualification Match Number"}
-						onChange={(ev: InputEvent) => {
+						onChange={(ev) => {
 							props.setMatchId(
 								parseInt((ev.target as HTMLInputElement).value),
 							);
@@ -61,7 +59,7 @@ export function MatchAndTeamSelector(props: MatchAndTeamSelectorProps) {
 			</Box>
 			{teamsForMatch && (
 				<ToggleButtonGroup
-					onChange={(ev: ChangeEvent) => {
+					onChange={(ev) => {
 						const team = parseInt((ev.target as HTMLInputElement).value);
 						const team_info = props.matchList.team_infos[team];
 
