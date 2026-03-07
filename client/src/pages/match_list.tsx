@@ -1,12 +1,12 @@
 import { Box, Input, Stack, Table, Tooltip, Typography } from "@mui/joy";
 import { useAtomValue } from "jotai/react";
-import { useState } from "preact/hooks";
 
 import { Navbar } from "../components/navbar";
 import { SyncRequired } from "../components/sync_required";
 import { TbaMatchLink } from "../components/tba_links";
 import { matchListAtom } from "../data/atoms";
 import { getMatchScouts } from "../data/entries";
+import { useQueryParamState } from "../data/hooks";
 import { EventInfo } from "../generated/EventInfo";
 import { MatchId } from "../generated/MatchId";
 import { MatchInfo } from "../generated/MatchInfo";
@@ -107,7 +107,7 @@ function TeamCell(props: TeamCellProps) {
  */
 export function MatchList() {
 	const matchList = useAtomValue(matchListAtom);
-	const [filterValue, setFilterValue] = useState("");
+	const [filterValue, setFilterValue] = useQueryParamState("filter", "");
 
 	if (!matchList) {
 		return <SyncRequired></SyncRequired>;

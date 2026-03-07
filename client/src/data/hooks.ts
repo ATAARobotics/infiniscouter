@@ -10,7 +10,8 @@ import {
 } from "chart.js";
 import { WordCloudController, WordElement } from "chartjs-chart-wordcloud";
 import { atom, useAtom } from "jotai";
-import { useEffect, useState } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
+import { useLocation } from "preact-iso";
 
 const chartsReadyAtom = atom(false);
 
@@ -107,4 +108,35 @@ export function useColorSchemes(count: number): Array<Array<string>> {
 	}, [colors, actualColors]);
 
 	return actualColors;
+}
+
+/**
+ * Hook to match a state value to the query string
+ */
+export function useQueryParamState(
+	key: string,
+	defaultValue: string,
+): [string, (newValue: string) => void] {
+	const { url, query, route } = useLocation();
+	const [value, setValue] = useState(query[key] ?? defaultValue);
+
+	const setValueExternal = useCallback(
+		(newValue: string) => {
+			const params = new URLSearchParams(query);
+			params.set(key, newValue);
+			const queryStart = url.indexOf("?");
+			const newUrl = `${queryStart === -1 ? url : url.substring(0, queryStart)}?${params.toString()}`;
+			route(newUrl, true);
+		},
+		[key, url, query, route],
+	);
+
+	useEffect(() => {
+		const urlValue = query[key] ?? defaultValue;
+		if (value !== urlValue) {
+			setValue(urlValue);
+		}
+	}, [query, key, defaultValue, setValue, value]);
+
+	return [value, setValueExternal];
 }
