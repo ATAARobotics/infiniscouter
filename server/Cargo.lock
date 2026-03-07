@@ -1243,6 +1243,7 @@ dependencies = [
  "color-eyre",
  "futures-util",
  "image",
+ "itertools",
  "log",
  "poem",
  "poem-openapi",

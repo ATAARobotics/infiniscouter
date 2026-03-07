@@ -9,6 +9,7 @@ bincode = "1.3"
 color-eyre = "0.6"
 futures-util = "0.3"
 image = "0.25"
+itertools = "0.14"
 log = "0.4"
 poem = { version = "3", default-features = false, features = ["compression", "rustls", "static-files"] }
 poem-openapi = { version = "5", features = ["swagger-ui"] }

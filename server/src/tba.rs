@@ -9,6 +9,7 @@ use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
 use color_eyre::{eyre::bail, Result};
 use futures_util::future;
+use itertools::Itertools;
 use log::{error, info};
 use poem::http::{HeaderMap, HeaderValue};
 use poem_openapi::{Enum, Object, Union};
@@ -59,6 +60,7 @@ impl EventInfo {
 		let mut match_infos: Vec<_> = match_infos
 			.into_iter()
 			.filter_map(|m| m.into_match(game_config).ok())
+			.sorted_by_key(|mi| mi.id)
 			.collect();
 		match_infos.sort_by_key(|m| m.start_time);
 		EventInfo {
@@ -608,14 +610,16 @@ impl TeamInfo {
 	}
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Object, TS)]
+#[derive(
+	Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize, Object, TS,
+)]
 #[ts(export, export_to = "../../client/src/generated/")]
 pub struct SetMatch {
 	pub set: u32,
 	pub num: u32,
 }
 
-#[derive(Debug, Clone, PartialEq, Deserialize, Serialize, Union, TS)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize, Union, TS)]
 #[ts(export, export_to = "../../client/src/generated/")]
 #[serde(tag = "match_type", rename_all = "snake_case")]
 #[oai(discriminator_name = "match_type", rename_all = "snake_case")]
