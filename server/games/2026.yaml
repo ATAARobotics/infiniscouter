@@ -17,6 +17,7 @@ categories:
             - teleop-fuel-first-shift
             - teleop-fuel-second-shift
             - teleop-fuel-endgame
+            - endgame-climb
   auto:
     name: Auto
     metrics:
@@ -191,6 +192,10 @@ statbotics:
       type: number
       property: endgame_fuel
       name: "Fuel Endgame"
+    endgame-climb:
+      type: number
+      property: endgame_tower
+      name: "Endgame Climb"
 tba:
   order: 15
   props:
@@ -268,10 +273,10 @@ display:
     graph:
     - name: Auto
       metric: statbotics-auto-points
-    - name: Teleop
-      metric: statbotics-teleop-points
-    - name: Endgame
-      metric: statbotics-endgame-points
+    - name: Teleop Fuel
+      metric: statbotics-teleop-fuel
+    - name: Endgame Climb
+      metric: statbotics-endgame-climb
     metrics:
     - auto-plans
     - tba-auto-climb
